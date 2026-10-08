@@ -61,8 +61,8 @@ public class StorageFile {
      */
     public void save(RatingsManager ratings, ExpensesManager expenses) throws BudgetBiteException {
         try {
-            ArrayList<String> encodedRatings = encoder.encodeRatings(ratings);
-            ArrayList<String> encodedExpenses = encoder.encodeExpenses(expenses);
+            ArrayList<String> encodedRatings = Encoder.encodeRatings(ratings);
+            ArrayList<String> encodedExpenses = Encoder.encodeExpenses(expenses);
 
             // Files.write(path, encodedAddressBook);
         } catch (IOException ioe) {
@@ -92,8 +92,6 @@ public class StorageFile {
             // other errors
         } catch (IOException ioe) {
             throw new BudgetBiteException("Error writing to file: " + path);
-        } catch (BudgetBiteException ive) {
-            throw new BudgetBiteException("File contains illegal data values; data type constraints not met");
         }
     }
 

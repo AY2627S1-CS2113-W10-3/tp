@@ -77,9 +77,6 @@ public class BudgetBite {
             String userCommandText = ui.getUserCommand();
             command = new Parser().parseCommand(userCommandText);
             String response = executeCommand(command);
-
-            // Delete
-            System.out.println(ratings.toString());
             ui.showResponseToUser(response);
 
         } while (command instanceof ByeCommand);

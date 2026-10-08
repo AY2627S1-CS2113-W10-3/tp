@@ -3,32 +3,38 @@ package seedu.duke.storage;
 import java.util.ArrayList;
 import java.util.List;
 
+import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
 
 public class Encoder {
-    /**
-     * Encodes all the {@code Person} in the {@code toSave} into a list of decodable
-     * and readable string presentation
-     * for storage.
-     */
-    public static List<String> encodeRatings(RatingsManager toSave) {
-        final List<String> encodedRatings = new ArrayList<>();
-        toSave.getAll().forEach(rating -> encodedPersons.add(encodePersonToString(person)));
+
+    public static ArrayList<String> encodeRatings(RatingsManager toSave) {
+        final ArrayList<String> encodedRatings = new ArrayList<>();
+        toSave.getRatings().forEach(rating -> encodedRatings.add(encodeRatingToString(rating)));
         return encodedRatings;
     }
 
-    public static List<String> encodeExpenses(RatingsManager toSave) {
-        final List<String> encodedExpenses = new ArrayList<>();
-        toSave.getAll().forEach(rating -> encodedPersons.add(encodePersonToString(person)));
-        return encodedRatings;
+    public static ArrayList<String> encodeExpenses(ExpensesManager toSave) {
+        final ArrayList<String> encodedExpenses = new ArrayList<>();
+        toSave.getExpenses().forEach(expense -> encodedExpenses.add(encodeExpenseToString(expense)));
+        return encodedExpenses;
     }
 
     /**
-     * Encodes the {@code person} into a decodable and readable string
+     * Encodes the {@code rating} into a decodable and readable string
      * representation.
      */
     private static String encodeRatingToString(String rating) {
-        String finalRating = "flavour" + "|" + "pizza" + "|" + "4" + "|" + "24";
+        String finalRating = rating;
+        return finalRating;
+    }
+
+    /**
+     * Encodes the {@code expense} into a decodable and readable string
+     * representation.
+     */
+    private static String encodeExpenseToString(String expense) {
+        String finalRating = expense;
         return finalRating;
     }
 }

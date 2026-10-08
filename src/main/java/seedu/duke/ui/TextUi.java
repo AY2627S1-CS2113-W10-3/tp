@@ -1,16 +1,18 @@
 package seedu.duke.ui;
 
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.util.Scanner;
+
 /**
  * Text UI of the application.
  */
 public class TextUi {
 
     /**
-     * A decorative prefix added to the beginning of lines printed by AddressBook
+     * A decorative prefix added to the beginning of lines printed by BudgetBite
      */
     private static final String LINE_PREFIX = "|| ";
-
-    /** A platform independent line separator. */
     private static final String LS = System.lineSeparator();
 
     private static final String DIVIDER = "===================================================";
@@ -18,33 +20,53 @@ public class TextUi {
     private static final String MESSAGE_GOODBYE = "I hope you will eat well. Bye!";
     private static final String MESSAGE_INIT_FAILED = "BudgetBite could not be launched";
     private static final String MESSAGE_WELCOME = "Welcome to the best NUS campus guide";
-    private static final String MESSAGE_USING_STORAGE_FILE = "Data loaded from: ";
-    // private static final String MESSAGE_INIT_FAILED = "BudgetBite could not be
-    // launched";
+
+    private final Scanner in;
+    private final PrintStream out;
 
     public TextUi() {
+        this.in = new Scanner(System.in);
+        this.out = System.out;
+    }
 
+    public String getUserCommand() {
+        out.print(LINE_PREFIX + "Enter command: ");
+        String fullInputLine = in.nextLine();
+
+        // silently consume all ignored lines
+        while (shouldIgnore(fullInputLine)) {
+            fullInputLine = in.nextLine();
+        }
+
+        showToUser("[Command entered:" + fullInputLine + "]");
+        return fullInputLine;
+    }
+
+    private boolean shouldIgnore(String rawInputLine) {
+        return rawInputLine.trim().isEmpty();
     }
 
     /**
      * Generates and prints the welcome message upon the start of the application.
      * 
-     * @param version         current version of the application.
-     * @param storageFilePath path to the storage file being used.
+     * @param version current version of the application.
      */
-    public void showWelcomeMessage(String version, String storageFilePath) {
-        String storageFileInfo = String.format(MESSAGE_USING_STORAGE_FILE, storageFilePath);
+    public void showWelcomeMessage(String version) {
+
         showToUser(
                 DIVIDER,
                 DIVIDER,
                 MESSAGE_WELCOME,
                 version,
-                storageFileInfo,
                 DIVIDER);
     }
 
     public void showGoodbyeMessage() {
         showToUser(MESSAGE_GOODBYE, DIVIDER, DIVIDER);
+    }
+
+    public void showResponseToUser(String response) {
+        showToUser(response);
     }
 
     public void showInitFailedMessage() {

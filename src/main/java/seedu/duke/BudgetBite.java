@@ -5,13 +5,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+import seedu.duke.commands.ByeCommand;
+import seedu.duke.commands.Command;
+import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.ExpensesManager;
+import seedu.duke.parser.Parser;
 import seedu.duke.ratings.RatingsManager;
 import seedu.duke.storage.StorageFile;
 import seedu.duke.ui.TextUi;
 
 public class BudgetBite {
 
+    private final String VERSION = "1.0";
     private TextUi ui;
     private StorageFile storage;
     private RatingsManager ratings;
@@ -39,31 +44,25 @@ public class BudgetBite {
         try {
             this.ui = new TextUi();
             this.storage = initializeStorage(launchArgs);
-            this.addressBook = storage.load();
-            ui.showWelcomeMessage(VERSION, storage.getPath());
+            this.ratings = storage.loadRatings();
+            this.expenses = storage.loadExpenses();
+            ui.showWelcomeMessage(VERSION);
 
-        } catch (InvalidStorageFilePathException | StorageOperationException e) {
+        } catch (BudgetBiteException e) {
             ui.showInitFailedMessage();
-            /*
-             * ==============NOTE TO
-             * STUDENTS=====================================================================
-             * ====
-             * We are throwing a RuntimeException which is an 'unchecked' exception.
-             * Unchecked exceptions do not need
-             * to be declared in the method signature.
-             * The reason we are using an unchecked exception here is because the caller
-             * cannot reasonably be expected
-             * to recover from an exception.
-             * Cf https://docs.oracle.com/javase/tutorial/essential/exceptions/runtime.html
-             * =============================================================================
-             * ==========================
-             */
             throw new RuntimeException(e);
         }
     }
 
     /** Prints the Goodbye message and exits. */
     private void exit() {
+
+        // TODO: Improve error handling
+        try {
+            storage.save(ratings, expenses);
+        } catch (BudgetBiteException e) {
+            System.out.println(e);
+        }
         ui.showGoodbyeMessage();
         System.exit(0);
     }
@@ -77,35 +76,26 @@ public class BudgetBite {
         do {
             String userCommandText = ui.getUserCommand();
             command = new Parser().parseCommand(userCommandText);
-            CommandResult result = executeCommand(command);
-            recordResult(result);
-            ui.showResultToUser(result);
+            String response = executeCommand(command);
 
-        } while (!ExitCommand.isExit(command));
+            // Delete
+            System.out.println(ratings.toString());
+            ui.showResponseToUser(response);
+
+        } while (command instanceof ByeCommand);
     }
 
     /**
-     * Updates the {@link #lastShownList} if the result contains a list of Persons.
-     */
-    private void recordResult(CommandResult result) {
-        final Optional<List<? extends ReadOnlyPerson>> personList = result.getRelevantPersons();
-        if (personList.isPresent()) {
-            lastShownList = personList.get();
-        }
-    }
-
-    /**
-     * Executes the command and returns the result.
+     * Executes the command and returns the response.
      *
      * @param command user command
-     * @return result of the command
+     * @return response of the command
      */
-    private CommandResult executeCommand(Command command) {
+    private String executeCommand(Command command) {
         try {
-            command.setData(addressBook, lastShownList);
-            CommandResult result = command.execute();
-            storage.save(addressBook);
-            return result;
+
+            String response = command.execute();
+            return response;
         } catch (Exception e) {
             ui.showToUser(e.getMessage());
             throw new RuntimeException(e);
@@ -115,12 +105,9 @@ public class BudgetBite {
     /**
      * Creates the StorageFile object based on the user specified path (if any) or
      * the default storage path.
-     * 
-     * @param launchArgs arguments supplied by the user at program launch
-     * @throws InvalidStorageFilePathException if the target file path is incorrect.
      */
-    private StorageFile initializeStorage(String[] launchArgs) throws InvalidStorageFilePathException {
-        boolean isStorageFileSpecifiedByUser = launchArgs.length > 0;
-        return isStorageFileSpecifiedByUser ? new StorageFile(launchArgs[0]) : new StorageFile();
+    private StorageFile initializeStorage(String[] launchArgs) throws BudgetBiteException {
+        boolean isStorageFileSpecifiedByUser = launchArgs.length > 1;
+        return isStorageFileSpecifiedByUser ? new StorageFile(launchArgs[0], launchArgs[1]) : new StorageFile();
     }
 }

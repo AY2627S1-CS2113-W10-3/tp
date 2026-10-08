@@ -7,7 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import seedu.duke.exceptions.BudgetBiteException;
@@ -20,10 +19,8 @@ import seedu.duke.ratings.RatingsManager;
 public class StorageFile {
 
     /** Default file path used if the user doesn't provide the file name. */
-    public static final String DEFAULT_EXPENSES_STORAGE_FILEPATH = "expenses.txt";
-    public static final String DEFAULT_RATINGS_STORAGE_FILEPATH = "ratings.txt";
-
-    public final Path path;
+    public static final String DEFAULT_EXPENSES_STORAGE_FILEPATH = "src/main/java/seedu/duke/data/expenses.txt";
+    public static final String DEFAULT_RATINGS_STORAGE_FILEPATH = "src/main/java/seedu/duke/data/ratings.txt";
 
     public Map<String, Path> paths = new HashMap<>();
 
@@ -54,7 +51,7 @@ public class StorageFile {
     }
 
     /**
-     * Saves the {@code addressBook} data to the storage file.
+     * Saves the data to the storage file.
      *
      * @throws StorageOperationException if there were errors converting and/or
      *                                   storing data to file.
@@ -63,40 +60,46 @@ public class StorageFile {
         try {
             ArrayList<String> encodedRatings = Encoder.encodeRatings(ratings);
             ArrayList<String> encodedExpenses = Encoder.encodeExpenses(expenses);
+            Files.write(paths.get("expenses"), encodedExpenses);
+            Files.write(paths.get("ratings"), encodedRatings);
 
-            // Files.write(path, encodedAddressBook);
         } catch (IOException ioe) {
-            throw new BudgetBiteException("Error writing to file: " + path);
+            throw new BudgetBiteException("Error writing to files ");
         }
     }
 
-    /**
-     * Loads the {@code AddressBook} data from this storage file, and then returns
-     * it.
-     * Returns an empty {@code AddressBook} if the file does not exist, or is not a
-     * regular file.
-     *
-     * @throws StorageOperationException if there were errors reading and/or
-     *                                   converting data from file.
-     */
     public RatingsManager loadRatings() throws BudgetBiteException {
 
         if (!Files.exists(paths.get("ratings")) || !Files.isRegularFile(paths.get("ratings"))) {
+
+            System.out.println("no old ratings");
             return new RatingsManager();
         }
 
         try {
-            return Decoder.decodeRatings(Files.readAllLines(path));
+            return Decoder.decodeRatings(Files.readAllLines(paths.get("ratings")));
         } catch (FileNotFoundException fnfe) {
             throw new BudgetBiteException("A non-existent file scenario is already handled earlier.");
             // other errors
         } catch (IOException ioe) {
-            throw new BudgetBiteException("Error writing to file: " + path);
+            throw new BudgetBiteException("Error writing to file: " + paths.get("ratings"));
         }
     }
 
-    public String getPath() {
-        return path.toString();
+    public ExpensesManager loadExpenses() throws BudgetBiteException {
+
+        if (!Files.exists(paths.get("expenses")) || !Files.isRegularFile(paths.get("expenses"))) {
+            return new ExpensesManager();
+        }
+
+        try {
+            return Decoder.decodeExpenses(Files.readAllLines(paths.get("expenses")));
+        } catch (FileNotFoundException fnfe) {
+            throw new BudgetBiteException("A non-existent file scenario is already handled earlier.");
+            // other errors
+        } catch (IOException ioe) {
+            throw new BudgetBiteException("Error writing to file: " + paths.get("expenses"));
+        }
     }
 
 }

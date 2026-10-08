@@ -1,7 +1,6 @@
 package seedu.duke.storage;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;

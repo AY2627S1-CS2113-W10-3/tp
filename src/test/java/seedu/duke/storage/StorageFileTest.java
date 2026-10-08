@@ -3,9 +3,7 @@ package seedu.duke.storage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
-
 import org.junit.jupiter.api.Test;
-
 import seedu.duke.ratings.RatingsManager;
 
 public class StorageFileTest {
@@ -24,11 +22,10 @@ public class StorageFileTest {
         ArrayList<String> ratings = new ArrayList<String>();
         ratings.add("fine foods|korean|3|6.5");
         return new RatingsManager(ratings);
-
     }
 
     private StorageFile getStorage() throws Exception {
-        return new StorageFile("src/test/java/seedu/duke/data/expenses.txt",
-                "src/test/java/seedu/duke/data/expenses.txt");
+        return new StorageFile(
+                "src/test/java/seedu/duke/data/expenses.txt", "src/test/java/seedu/duke/data/expenses.txt");
     }
 }

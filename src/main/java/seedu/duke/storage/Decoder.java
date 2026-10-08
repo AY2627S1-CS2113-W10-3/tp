@@ -2,8 +2,6 @@ package seedu.duke.storage;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.jar.Attributes.Name;
-import java.util.regex.Matcher;
 
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
@@ -21,7 +19,6 @@ public class Decoder {
 
     private static String decodeRatingFromString(String encodedRating) {
         return encodedRating.strip(); // paser
-
     }
 
     public static ExpensesManager decodeExpenses(List<String> encodedExpenses) {
@@ -34,6 +31,5 @@ public class Decoder {
 
     private static String decodeExpensesFromString(String encodedExpense) {
         return encodedExpense.strip(); // paser
-
     }
 }

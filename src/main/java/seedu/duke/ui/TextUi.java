@@ -1,18 +1,14 @@
 package seedu.duke.ui;
 
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-/**
- * Text UI of the application.
- */
+/** Text UI of the application. */
 public class TextUi {
 
-    /**
-     * A decorative prefix added to the beginning of lines printed by BudgetBite
-     */
+    /** A decorative prefix added to the beginning of lines printed by BudgetBite */
     private static final String LINE_PREFIX = "|| ";
+
     private static final String LS = System.lineSeparator();
 
     private static final String DIVIDER = "===================================================";
@@ -48,17 +44,12 @@ public class TextUi {
 
     /**
      * Generates and prints the welcome message upon the start of the application.
-     * 
+     *
      * @param version current version of the application.
      */
     public void showWelcomeMessage(String version) {
 
-        showToUser(
-                DIVIDER,
-                DIVIDER,
-                MESSAGE_WELCOME,
-                version,
-                DIVIDER);
+        showToUser(DIVIDER, DIVIDER, MESSAGE_WELCOME, version, DIVIDER);
     }
 
     public void showGoodbyeMessage() {
@@ -79,5 +70,4 @@ public class TextUi {
             System.out.println(LINE_PREFIX + m.replace("\n", LS + LINE_PREFIX));
         }
     }
-
 }

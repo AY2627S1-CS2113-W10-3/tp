@@ -1,10 +1,5 @@
 package seedu.duke;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
-
 import seedu.duke.commands.ByeCommand;
 import seedu.duke.commands.Command;
 import seedu.duke.exceptions.BudgetBiteException;
@@ -16,7 +11,7 @@ import seedu.duke.ui.TextUi;
 
 public class BudgetBite {
 
-    private final String VERSION = "1.0";
+    private static final String VERSION = "1.0";
     private TextUi ui;
     private StorageFile storage;
     private RatingsManager ratings;
@@ -35,10 +30,10 @@ public class BudgetBite {
 
     /**
      * Sets up the required objects, loads up the data from the storage file, and
-     * prints the welcome message.
+     * prints the welcome
+     * message.
      *
      * @param launchArgs arguments supplied by the user at program launch
-     *
      */
     private void start(String[] launchArgs) {
         try {
@@ -101,10 +96,13 @@ public class BudgetBite {
 
     /**
      * Creates the StorageFile object based on the user specified path (if any) or
-     * the default storage path.
+     * the default storage
+     * path.
      */
     private StorageFile initializeStorage(String[] launchArgs) throws BudgetBiteException {
         boolean isStorageFileSpecifiedByUser = launchArgs.length > 1;
-        return isStorageFileSpecifiedByUser ? new StorageFile(launchArgs[0], launchArgs[1]) : new StorageFile();
+        return isStorageFileSpecifiedByUser
+                ? new StorageFile(launchArgs[0], launchArgs[1])
+                : new StorageFile();
     }
 }

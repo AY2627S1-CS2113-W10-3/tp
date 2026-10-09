@@ -2,6 +2,7 @@ package seedu.duke.storage;
 
 import java.util.ArrayList;
 
+import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
 
@@ -32,8 +33,7 @@ public class Encoder {
      * Encodes the {@code expense} into a decodable and readable string
      * representation.
      */
-    private static String encodeExpenseToString(String expense) {
-        String finalRating = expense;
-        return finalRating;
+    private static String encodeExpenseToString(Expense expense) {
+        return expense.toStorageString();
     }
 }

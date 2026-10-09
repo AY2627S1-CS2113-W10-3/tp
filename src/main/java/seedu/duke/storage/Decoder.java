@@ -6,21 +6,25 @@ import java.util.List;
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
+import seedu.duke.ratings.Rating;
 import seedu.duke.ratings.RatingsManager;
 
 public class Decoder {
 
-    // TODO: make <T> for Rating and Expenses function
-    public static RatingsManager decodeRatings(List<String> encodedRatings) {
-        final ArrayList<String> decodedRatings = new ArrayList<String>();
+    /**
+     * Decodes the lines of the ratings storage file into a {@code RatingsManager}.
+     * Blank lines are skipped.
+     *
+     * @throws BudgetBiteException If any line is not a valid rating.
+     */
+    public static RatingsManager decodeRatings(List<String> encodedRatings) throws BudgetBiteException {
+        final ArrayList<Rating> decodedRatings = new ArrayList<>();
         for (String encodedRating : encodedRatings) {
-            decodedRatings.add(decodeRatingFromString(encodedRating));
+            if (!encodedRating.isBlank()) {
+                decodedRatings.add(Rating.fromStorageString(encodedRating.strip()));
+            }
         }
         return new RatingsManager(decodedRatings);
-    }
-
-    private static String decodeRatingFromString(String encodedRating) {
-        return encodedRating.strip(); // paser
     }
 
     /**

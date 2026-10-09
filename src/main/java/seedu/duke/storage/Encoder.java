@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
+import seedu.duke.ratings.Rating;
 import seedu.duke.ratings.RatingsManager;
 
 public class Encoder {
@@ -24,9 +25,8 @@ public class Encoder {
      * Encodes the {@code rating} into a decodable and readable string
      * representation.
      */
-    private static String encodeRatingToString(String rating) {
-        String finalRating = rating;
-        return finalRating;
+    private static String encodeRatingToString(Rating rating) {
+        return rating.toStorageString();
     }
 
     /**

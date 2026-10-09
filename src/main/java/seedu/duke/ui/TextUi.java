@@ -53,7 +53,7 @@ public class TextUi {
      */
     public void showWelcomeMessage(String version) {
 
-        showToUser(DIVIDER, DIVIDER, MESSAGE_WELCOME, version, DIVIDER);
+        showToUser(DIVIDER, DIVIDER, MESSAGE_WELCOME, "version: ", version, DIVIDER);
     }
 
     public void showGoodbyeMessage() {
@@ -61,7 +61,7 @@ public class TextUi {
     }
 
     public void showResponseToUser(String response) {
-        showToUser(response);
+        showToUser(response, DIVIDER);
     }
 
     public void showInitFailedMessage() {

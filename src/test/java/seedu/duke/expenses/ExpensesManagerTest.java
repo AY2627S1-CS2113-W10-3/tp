@@ -99,4 +99,16 @@ public class ExpensesManagerTest {
     public void fromStorageString_missingCost_exceptionThrown() {
         assertThrows(BudgetBiteException.class, () -> Expense.fromStorageString("Chicken Rice"));
     }
+
+    @Test
+    public void getExpense_indexOutOfRange_exceptionThrown() {
+        assertThrows(BudgetBiteException.class, () -> expensesManager.getExpense(0));
+        assertThrows(BudgetBiteException.class, () -> expensesManager.getExpense(3));
+    }
+
+    @Test
+    public void toString_twoExpenses_numberedList() {
+        String expected = "\n1. Chicken Rice - $4.50\n2. Teh - $1.20";
+        assertEquals(expected, expensesManager.toString());
+    }
 }

@@ -8,32 +8,37 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
 
-/** Represents the file used to store ratings and expenses. */
+/**
+ * Represents the file used to store ratings and expenses.
+ */
 public class StorageFile {
 
-    /** Default file path used if the user doesn't provide the file name. */
+    /**
+     * Default file path used if the user doesn't provide the file name.
+     */
     public static final String DEFAULT_EXPENSES_STORAGE_FILEPATH =
-        "src/main/java/seedu/duke/data/expenses.txt";
+            "src/main/java/seedu/duke/data/expenses.txt";
 
     public static final String DEFAULT_RATINGS_STORAGE_FILEPATH =
-        "src/main/java/seedu/duke/data/ratings.txt";
+            "src/main/java/seedu/duke/data/ratings.txt";
 
     public Map<String, Path> paths = new HashMap<>();
 
     /**
-   * @throws BudgetBiteException if the default path is invalid
-   */
+     * @throws BudgetBiteException if the default path is invalid
+     */
     public StorageFile() throws BudgetBiteException {
         this(DEFAULT_EXPENSES_STORAGE_FILEPATH, DEFAULT_RATINGS_STORAGE_FILEPATH);
     }
 
     /**
-   * @throws BudgetBiteException if the given file path is invalid
-   */
+     * @throws BudgetBiteException if the given file path is invalid
+     */
     public StorageFile(String expensesFilePath, String ratingsFilePath) throws BudgetBiteException {
         paths.put("expenses", Paths.get(expensesFilePath));
         paths.put("ratings", Paths.get(ratingsFilePath));
@@ -43,18 +48,18 @@ public class StorageFile {
     }
 
     /**
-   * Returns true if the given path is acceptable as a storage file. The file path is considered
-   * acceptable if it ends with '.txt'
-   */
+     * Returns true if the given path is acceptable as a storage file. The file path is considered
+     * acceptable if it ends with '.txt'
+     */
     private static boolean isValidPath(Path filePath) {
         return filePath.toString().endsWith(".txt");
     }
 
     /**
-   * Saves the data to the storage file.
-   *
-   * @throws .StorageOperationException if there were errors converting and/or storing data to file.
-   */
+     * Saves the data to the storage file.
+     *
+     * @throws StorageOperationException if there were errors converting and/or storing data to file.
+     */
     public void save(RatingsManager ratings, ExpensesManager expenses) throws BudgetBiteException {
         try {
             ArrayList<String> encodedRatings = Encoder.encodeRatings(ratings);

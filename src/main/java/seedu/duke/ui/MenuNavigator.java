@@ -63,10 +63,10 @@ public class MenuNavigator {
         }
 
         return switch (stage) {
-            case SELECTING_LOCATION -> selectFoodCourt(index);
-            case SELECTING_STALL -> selectStall(index);
-            case SHOWING_MENU -> "Enter 'back' to return to the stall list.";
-            case INACTIVE -> "Please enter 'location' first.";
+        case SELECTING_LOCATION -> selectFoodCourt(index);
+        case SELECTING_STALL -> selectStall(index);
+        case SHOWING_MENU -> "Enter 'back' to return to the stall list.";
+        case INACTIVE -> "Please enter 'location' first.";
         };
     }
 
@@ -106,26 +106,26 @@ public class MenuNavigator {
 
     private String goBack() {
         return switch (stage) {
-            case SHOWING_MENU -> {
-                selectedStall = null;
-                stage = Stage.SELECTING_STALL;
-                yield showStalls();
-            }
-            case SELECTING_STALL -> {
-                selectedFoodCourt = null;
-                stage = Stage.SELECTING_LOCATION;
-                yield showFoodCourts();
-            }
-            case SELECTING_LOCATION -> {
-                selectedFoodCourt = null;
-                selectedStall = null;
-                stage = Stage.INACTIVE;
-                yield "Returned to the main menu.";
-            }
-            case INACTIVE -> "Invalid command. Valid inputs:\n"
-                    + "help\n"
-                    + "location\n"
-                    + "bye";
+        case SHOWING_MENU -> {
+            selectedStall = null;
+            stage = Stage.SELECTING_STALL;
+            yield showStalls();
+        }
+        case SELECTING_STALL -> {
+            selectedFoodCourt = null;
+            stage = Stage.SELECTING_LOCATION;
+            yield showFoodCourts();
+        }
+        case SELECTING_LOCATION -> {
+            selectedFoodCourt = null;
+            selectedStall = null;
+            stage = Stage.INACTIVE;
+            yield "Returned to the main menu.";
+        }
+        case INACTIVE -> "Invalid command. Valid inputs:\n"
+                + "help\n"
+                + "location\n"
+                + "bye";
         };
     }
 

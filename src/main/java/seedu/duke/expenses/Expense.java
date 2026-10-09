@@ -17,7 +17,7 @@ public class Expense {
      * Creates an expense with the given food name and cost.
      *
      * @param foodName Name of the food purchased.
-     * @param cost Amount spent on the food. Must be positive.
+     * @param cost     Amount spent on the food. Must be positive.
      * @throws BudgetBiteException If the food name or the cost is invalid.
      */
     public Expense(String foodName, double cost) throws BudgetBiteException {

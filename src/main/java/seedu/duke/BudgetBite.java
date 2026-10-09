@@ -7,21 +7,25 @@ import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.parser.Parser;
 import seedu.duke.ratings.RatingsManager;
 import seedu.duke.storage.StorageFile;
+import seedu.duke.ui.MenuNavigator;
 import seedu.duke.ui.TextUi;
+import seedu.duke.food.FoodDirectory;
 
 public class BudgetBite {
 
-    private static final String VERSION = "1.0";
+    private static final String VERSION = "1.1";
     private TextUi ui;
     private StorageFile storage;
     private RatingsManager ratings;
     private ExpensesManager expenses;
 
+    private MenuNavigator menuNavigator;
+
     public static void main(String... launchArgs) {
         new BudgetBite().run(launchArgs);
     }
 
-    /** Runs the program until termination. */
+    /** Runs the program until user enters bye */
     public void run(String[] launchArgs) {
         start(launchArgs);
         runCommandLoopUntilExitCommand();
@@ -41,6 +45,10 @@ public class BudgetBite {
             this.storage = initializeStorage(launchArgs);
             this.ratings = storage.loadRatings();
             this.expenses = storage.loadExpenses();
+
+            FoodDirectory foodDirectory = new FoodDirectory();
+            this.menuNavigator = new MenuNavigator(foodDirectory);
+
             ui.showWelcomeMessage(VERSION);
 
         } catch (BudgetBiteException e) {
@@ -67,15 +75,47 @@ public class BudgetBite {
      * command.
      */
     private void runCommandLoopUntilExitCommand() {
-        Command command;
-        do {
-            String userCommandText = ui.getUserCommand();
-            command = new Parser().parseCommand(userCommandText);
-            String response = executeCommand(command);
-            ui.showResponseToUser(response);
 
-        } while (command instanceof ByeCommand);
+        Parser parser = new Parser();
+        boolean isExiting = false;
+
+        while (!isExiting) {
+            String userInput = ui.getUserCommand();
+            String trimmedInput = userInput.trim();
+            String response;
+
+            /*
+             * The location command always starts or restarts food navigation.
+             */
+            if (trimmedInput.equalsIgnoreCase("location")) {
+                response = menuNavigator.start();
+            }
+
+            /*
+             * While the navigator is active, numbers are interpreted as
+             * location or stall selections.
+             *
+             * Help and bye are still handled by the normal parser.
+             */
+            else if (menuNavigator.isActive()
+                    && !trimmedInput.equalsIgnoreCase("help")
+                    && !trimmedInput.equalsIgnoreCase("bye")) {
+                response = menuNavigator.handleInput(trimmedInput);
+            }
+
+            /*
+             * Normal commands such as help and bye are handled here.
+             */
+            else {
+                Command command = parser.parseCommand(trimmedInput);
+                response = executeCommand(command);
+                isExiting = command instanceof ByeCommand;
+            }
+
+            ui.showResponseToUser(response);
+        }
     }
+
 
     /**
      * Executes the command and returns the response.
@@ -85,7 +125,6 @@ public class BudgetBite {
      */
     private String executeCommand(Command command) {
         try {
-
             String response = command.execute();
             return response;
         } catch (Exception e) {

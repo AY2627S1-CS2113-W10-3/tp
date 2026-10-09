@@ -3,10 +3,14 @@ package seedu.duke.ui;
 import java.io.PrintStream;
 import java.util.Scanner;
 
-/** Text UI of the application. */
+/**
+ * Text UI of the application.
+ */
 public class TextUi {
 
-    /** A decorative prefix added to the beginning of lines printed by BudgetBite */
+    /**
+     * A decorative prefix added to the beginning of lines printed by BudgetBite
+     */
     private static final String LINE_PREFIX = "|| ";
 
     private static final String LS = System.lineSeparator();
@@ -64,7 +68,9 @@ public class TextUi {
         showToUser(MESSAGE_INIT_FAILED, DIVIDER, DIVIDER);
     }
 
-    /** Shows message(s) to the user */
+    /**
+     * Shows message(s) to the user
+     */
     public void showToUser(String... message) {
         for (String m : message) {
             System.out.println(LINE_PREFIX + m.replace("\n", LS + LINE_PREFIX));

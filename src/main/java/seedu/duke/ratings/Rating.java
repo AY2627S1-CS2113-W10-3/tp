@@ -1,3 +1,4 @@
 package seedu.duke.ratings;
 
-public class Rating {}
+public class Rating {
+}

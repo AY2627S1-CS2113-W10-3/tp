@@ -9,4 +9,5 @@ public class HelpCommand extends Command {
             "location\n" +
             "bye";
   }
+
 }

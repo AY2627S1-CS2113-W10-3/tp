@@ -25,6 +25,7 @@ public class BudgetBite {
         new BudgetBite().run(launchArgs);
     }
 
+
     /** Runs the program until user enters bye */
     public void run(String[] launchArgs) {
         start(launchArgs);
@@ -57,7 +58,9 @@ public class BudgetBite {
         }
     }
 
-    /** Prints the Goodbye message and exits. */
+    /**
+     * Prints the Goodbye message and exits.
+     */
     private void exit() {
 
         // TODO: Improve error handling

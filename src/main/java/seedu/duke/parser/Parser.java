@@ -12,12 +12,12 @@ public class Parser {
         String commandName = userCommandText.trim().toLowerCase();
 
         switch (commandName) {
-            case "help":
-                return new HelpCommand();
-            case "bye":
-                return new ByeCommand();
-            default:
-                return new UnknownCommand();
+        case "help":
+            return new HelpCommand();
+        case "bye":
+            return new ByeCommand();
+        default:
+            return new UnknownCommand();
         }
     }
 }

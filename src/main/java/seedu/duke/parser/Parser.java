@@ -10,12 +10,12 @@ public class Parser {
         String[] args = userCommandText.split(" ");
 
         switch (args[0].toLowerCase()) {
-            case "help":
-                return new HelpCommand();
-            case "bye":
-                return new ByeCommand();
-            default:
-                return new UnknownCommand();
+        case "help":
+            return new HelpCommand();
+        case "bye":
+            return new ByeCommand();
+        default:
+            return new UnknownCommand();
         }
     }
 }

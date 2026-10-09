@@ -21,7 +21,9 @@ public class BudgetBite {
         new BudgetBite().run(launchArgs);
     }
 
-    /** Runs the program until termination. */
+    /**
+     * Runs the program until termination.
+     */
     public void run(String[] launchArgs) {
         start(launchArgs);
         runCommandLoopUntilExitCommand();
@@ -49,7 +51,9 @@ public class BudgetBite {
         }
     }
 
-    /** Prints the Goodbye message and exits. */
+    /**
+     * Prints the Goodbye message and exits.
+     */
     private void exit() {
 
         // TODO: Improve error handling

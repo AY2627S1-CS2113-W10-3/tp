@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 import seedu.duke.ratings.RatingsManager;
+import seedu.duke.ratings.Rating;
 
 public class StorageFileTest {
     @Test
@@ -20,13 +21,13 @@ public class StorageFileTest {
     }
 
     private RatingsManager getExpectedRatingsManager() {
-        ArrayList<String> ratings = new ArrayList<String>();
-        ratings.add("fine foods|korean|3|6.5");
+        ArrayList<Rating> ratings = new ArrayList<Rating>();
+        ratings.add(new Rating("fine foods","korean", 3));
         return new RatingsManager(ratings);
     }
 
     private StorageFile getStorage() throws Exception {
         return new StorageFile(
-                "src/test/java/seedu/duke/data/expenses.txt", "src/test/java/seedu/duke/data/expenses.txt");
+                "src/test/java/seedu/duke/data/expenses.txt", "src/test/java/seedu/duke/data/ratings.txt");
     }
 }

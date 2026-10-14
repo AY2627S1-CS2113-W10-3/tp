@@ -52,7 +52,7 @@ shadowJar {
     archiveFileName = 'duke.jar'
 }
 
-checkstyle {
+checkstyle { 
     toolVersion = '14.1.0'
 }
 

@@ -6,6 +6,7 @@ public class UnknownCommand extends Command {
         return "Invalid command. Valid inputs:\n"
                 + "help\n"
                 + "location\n"
+                + "rate\n"
                 + "bye";
     }
 }

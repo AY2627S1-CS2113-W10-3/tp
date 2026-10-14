@@ -7,20 +7,36 @@ import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
+import seedu.duke.ratings.Rating;
 
 public class Decoder {
 
     // TODO: make <T> for Rating and Expenses function
     public static RatingsManager decodeRatings(List<String> encodedRatings) {
-        final ArrayList<String> decodedRatings = new ArrayList<String>();
+        final ArrayList<Rating> decodedRatings = new ArrayList<>();
         for (String encodedRating : encodedRatings) {
-            decodedRatings.add(decodeRatingFromString(encodedRating));
+            if (!encodedRating.isBlank()) {
+                decodedRatings.add(decodeRatingFromString(encodedRating));
+            }
         }
         return new RatingsManager(decodedRatings);
     }
 
-    private static String decodeRatingFromString(String encodedRating) {
-        return encodedRating.strip(); // paser
+    private static Rating decodeRatingFromString(String encodedRating) {
+        String[] fields = encodedRating.strip().split("\\|", -1);
+        if (fields.length != 3) {
+            throw new IllegalArgumentException(
+                    "Invalid rating format. Expected: stall|food|score");
+        }
+
+        float score;
+        try {
+            score = Float.parseFloat(fields[2].strip());
+        } catch (NumberFormatException exception) {
+            throw new IllegalArgumentException("Rating score must be a number.", exception);
+        }
+
+        return new Rating(fields[0].strip(), fields[1].strip(), score);
     }
 
     /**

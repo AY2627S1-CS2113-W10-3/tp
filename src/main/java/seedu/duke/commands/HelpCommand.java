@@ -7,6 +7,7 @@ public class HelpCommand extends Command {
         return "Use these commands:\n" +
                 "help\n" +
                 "location\n" +
+                "rate\n" +
                 "bye";
     }
 }

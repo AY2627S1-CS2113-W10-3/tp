@@ -4,27 +4,30 @@ import java.util.ArrayList;
 
 public class RatingsManager {
 
-    private static ArrayList<String> ratings;
+    private static ArrayList<Rating> ratings;
 
     public RatingsManager() {
-        ratings = new ArrayList<String>();
+        ratings = new ArrayList<Rating>();
     }
 
-    public RatingsManager(ArrayList<String> decodedRatings) {
+    public RatingsManager(ArrayList<Rating> decodedRatings) {
         ratings = decodedRatings;
     }
 
     public String toString() {
         String ratingsString = "";
 
-        for (String rating : ratings) {
+        for (Rating rating : ratings) {
             ratingsString = ratingsString + "\n" + rating;
         }
 
         return ratingsString;
     }
 
-    public ArrayList<String> getRatings() {
+    public ArrayList<Rating> getRatings() {
         return ratings;
+    }
+    public void addRating(Rating rating) {
+        ratings.add(rating);
     }
 }

@@ -79,7 +79,7 @@ public class BudgetBite {
      */
     private void runCommandLoopUntilExitCommand() {
 
-        Parser parser = new Parser(ratings);
+        Parser parser = new Parser(ratings, expenses);
         boolean isExiting = false;
 
         while (!isExiting) {

@@ -7,6 +7,8 @@ public class UnknownCommand extends Command {
                 + "help\n"
                 + "location\n"
                 + "rate\n"
+                + "log-expense\n"
+                + "list-expenses\n"
                 + "bye";
     }
 }

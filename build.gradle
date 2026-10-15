@@ -25,6 +25,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
+    enableAssertions = true
 
     testLogging {
         events 'passed', 'skipped', 'failed'
@@ -57,9 +58,12 @@ checkstyle {
 }
 
 run {
+    enableAssertions = true
     standardInput = System.in
     args = [
             'src/main/java/seedu/duke/data/expenses-runtime.txt',
             'src/main/java/seedu/duke/data/ratings-runtime.txt'
     ]
 }
+
+

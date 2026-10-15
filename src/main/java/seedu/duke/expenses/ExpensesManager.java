@@ -1,6 +1,8 @@
 package seedu.duke.expenses;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import seedu.duke.exceptions.BudgetBiteException;
 
@@ -9,6 +11,8 @@ import seedu.duke.exceptions.BudgetBiteException;
  * Indexes given to the public methods start from 1, matching the numbers shown to the user.
  */
 public class ExpensesManager {
+    private static final Logger LOGGER = Logger.getLogger(ExpensesManager.class.getName());
+
     private final ArrayList<Expense> expenses;
 
     /**
@@ -24,6 +28,7 @@ public class ExpensesManager {
      * @param expenses Expenses to manage.
      */
     public ExpensesManager(ArrayList<Expense> expenses) {
+        assert expenses != null : "Expense list should not be null";
         this.expenses = expenses;
     }
 
@@ -33,7 +38,13 @@ public class ExpensesManager {
      * @param expense Expense to add.
      */
     public void addExpense(Expense expense) {
+        assert expense != null : "Expense to add should not be null";
+        int sizeBefore = expenses.size();
+
         expenses.add(expense);
+
+        assert expenses.size() == sizeBefore + 1 : "List should grow by one after adding";
+        LOGGER.log(Level.FINE, "Added expense: " + expense);
     }
 
     /**
@@ -59,6 +70,7 @@ public class ExpensesManager {
     public Expense editExpenseCost(int index, double newCost) throws BudgetBiteException {
         Expense updatedExpense = getExpense(index).withCost(newCost);
         expenses.set(toZeroBased(index), updatedExpense);
+        LOGGER.log(Level.FINE, "Edited expense " + index + " to: " + updatedExpense);
         return updatedExpense;
     }
 
@@ -71,7 +83,13 @@ public class ExpensesManager {
      */
     public Expense deleteExpense(int index) throws BudgetBiteException {
         checkIndex(index);
-        return expenses.remove(toZeroBased(index));
+        int sizeBefore = expenses.size();
+
+        Expense deletedExpense = expenses.remove(toZeroBased(index));
+
+        assert expenses.size() == sizeBefore - 1 : "List should shrink by one after deleting";
+        LOGGER.log(Level.FINE, "Deleted expense: " + deletedExpense);
+        return deletedExpense;
     }
 
     /**
@@ -84,6 +102,7 @@ public class ExpensesManager {
         for (Expense expense : expenses) {
             totalCost += expense.getCost();
         }
+        assert totalCost >= 0 : "Total cost should never be negative";
         return totalCost;
     }
 
@@ -109,8 +128,13 @@ public class ExpensesManager {
     }
 
     private void checkIndex(int index) throws BudgetBiteException {
+        if (expenses.isEmpty()) {
+            LOGGER.log(Level.FINE, "Rejected expense index " + index + " because the list is empty");
+            throw new BudgetBiteException("You have no expenses yet.");
+        }
         boolean isInRange = index >= 1 && index <= expenses.size();
         if (!isInRange) {
+            LOGGER.log(Level.FINE, "Rejected expense index " + index + " (list size " + expenses.size() + ")");
             throw new BudgetBiteException("Expense index must be between 1 and " + expenses.size() + ".");
         }
     }

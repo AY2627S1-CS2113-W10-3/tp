@@ -8,6 +8,9 @@ public class HelpCommand extends Command {
                 "help\n" +
                 "location\n" +
                 "rate\n" +
+                "log-expense FOOD_NAME /" +
+                "cost AMOUNT\n" +
+                "list-expenses\n" +
                 "bye";
     }
 }

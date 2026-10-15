@@ -2,6 +2,8 @@ package seedu.duke.storage;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.Expense;
@@ -10,13 +12,19 @@ import seedu.duke.ratings.RatingsManager;
 import seedu.duke.ratings.Rating;
 
 public class Decoder {
+    private static final Logger LOGGER = Logger.getLogger(Decoder.class.getName());
 
     // TODO: make <T> for Rating and Expenses function
     public static RatingsManager decodeRatings(List<String> encodedRatings) {
         final ArrayList<Rating> decodedRatings = new ArrayList<>();
         for (String encodedRating : encodedRatings) {
-            if (!encodedRating.isBlank()) {
+            if (encodedRating.isBlank()) {
+                continue;
+            }
+            try {
                 decodedRatings.add(decodeRatingFromString(encodedRating));
+            } catch (IllegalArgumentException e) {
+                LOGGER.log(Level.WARNING, "Skipped invalid rating line: " + encodedRating);
             }
         }
         return new RatingsManager(decodedRatings);
@@ -41,15 +49,18 @@ public class Decoder {
 
     /**
      * Decodes the lines of the expenses storage file into an {@code ExpensesManager}.
-     * Blank lines are skipped.
-     *
-     * @throws BudgetBiteException If any line is not a valid expense.
+     * Blank lines and lines that are not valid expenses are skipped.
      */
-    public static ExpensesManager decodeExpenses(List<String> encodedExpenses) throws BudgetBiteException {
+    public static ExpensesManager decodeExpenses(List<String> encodedExpenses) {
         final ArrayList<Expense> decodedExpenses = new ArrayList<>();
         for (String encodedExpense : encodedExpenses) {
-            if (!encodedExpense.isBlank()) {
+            if (encodedExpense.isBlank()) {
+                continue;
+            }
+            try {
                 decodedExpenses.add(Expense.fromStorageString(encodedExpense.strip()));
+            } catch (BudgetBiteException e) {
+                LOGGER.log(Level.WARNING, "Skipped invalid expense line: " + encodedExpense);
             }
         }
         return new ExpensesManager(decodedExpenses);

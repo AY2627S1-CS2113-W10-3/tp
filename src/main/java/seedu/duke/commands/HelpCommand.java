@@ -11,6 +11,8 @@ public class HelpCommand extends Command {
                 "log-expense FOOD_NAME /" +
                 "cost AMOUNT\n" +
                 "list-expenses\n" +
+                 "edit-expense\n" +
+                "delete-expense\n" +
                 "bye";
     }
 }

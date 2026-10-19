@@ -10,7 +10,10 @@ import seedu.duke.commands.UnknownCommand;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
 import seedu.duke.commands.DeleteExpenseCommand;
+import seedu.duke.commands.DeleteRatingCommand;
 import seedu.duke.commands.EditExpenseCommand;
+import seedu.duke.commands.EditRatingsCommand;
+import seedu.duke.commands.ListRatingsCommand;
 
 public class Parser {
     private final RatingsManager ratingsManager;
@@ -35,6 +38,12 @@ public class Parser {
             return new ByeCommand();
         case "rate":
             return new RateCommand(arguments, ratingsManager);
+        case ListRatingsCommand.COMMAND_WORD:
+            return new ListRatingsCommand(ratingsManager);
+        case EditRatingsCommand.COMMAND_WORD:
+            return new EditRatingsCommand(arguments, ratingsManager);
+        case DeleteRatingCommand.COMMAND_WORD:
+            return new DeleteRatingCommand(arguments, ratingsManager);
         case LogExpenseCommand.COMMAND_WORD:
             return new LogExpenseCommand(arguments, expensesManager);
         case ListExpensesCommand.COMMAND_WORD:

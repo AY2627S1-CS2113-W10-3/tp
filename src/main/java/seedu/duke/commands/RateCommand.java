@@ -38,15 +38,15 @@ public class RateCommand extends Command {
             return "Please provide /stall, /food and /score.";
         }
 
-        int score;
+        float score;
         try {
-            score = Integer.parseInt(scoreText);
+            score = Float.parseFloat(scoreText);
         } catch (NumberFormatException exception) {
-            return "Invalid score. Please provide a whole number between 0 and 10.";
+            return "Invalid score. Please provide a number between 0 and 10.";
         }
 
         if (score < 0 || score > 10) {
-            return "Invalid score. Please provide a whole number between 0 and 10.";
+            return "Invalid score. Please provide a number between 0 and 10.";
         }
 
         Rating rating = new Rating(stall, food, score);

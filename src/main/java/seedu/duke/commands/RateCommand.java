@@ -38,9 +38,9 @@ public class RateCommand extends Command {
             return "Please provide /stall, /food and /score.";
         }
 
-        int score;
+        float score;
         try {
-            score = Integer.parseInt(scoreText);
+            score = Float.parseFloat(scoreText);
         } catch (NumberFormatException exception) {
             return "Invalid score. Please provide a whole number between 0 and 10.";
         }

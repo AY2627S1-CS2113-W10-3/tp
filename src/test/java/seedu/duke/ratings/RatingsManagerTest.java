@@ -1,0 +1,74 @@
+package seedu.duke.ratings;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import seedu.duke.exceptions.BudgetBiteException;
+
+public class RatingsManagerTest {
+    private static final float DELTA = 0.001f;
+
+    private RatingsManager ratingsManager;
+
+    @BeforeEach
+    public void setUp() {
+        ratingsManager = new RatingsManager();
+        ratingsManager.addRating(new Rating("Vietnamese", "Beef Pho", 8));
+        ratingsManager.addRating(new Rating("Indian", "Plain Dosai", 6.5f));
+    }
+
+    @Test
+    public void constructor_twoManagers_listsAreIndependent() {
+        RatingsManager otherManager = new RatingsManager();
+
+        assertTrue(otherManager.isEmpty());
+        assertEquals(2, ratingsManager.getSize());
+    }
+
+    @Test
+    public void editRating_validIndex_onlyScoreUpdated() throws BudgetBiteException {
+        ratingsManager.editRating(1, 9.5f);
+
+        Rating editedRating = ratingsManager.getRating(1);
+        assertEquals(9.5f, editedRating.getScore(), DELTA);
+        assertEquals("Vietnamese", editedRating.getStall());
+        assertEquals("Beef Pho", editedRating.getFood());
+    }
+
+    @Test
+    public void editRating_scoreOutOfRange_exceptionThrownAndScoreUnchanged() throws BudgetBiteException {
+        assertThrows(BudgetBiteException.class, () -> ratingsManager.editRating(1, 11));
+        assertEquals(8, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
+    public void deleteRating_validIndex_ratingRemoved() throws BudgetBiteException {
+        Rating deletedRating = ratingsManager.deleteRating(1);
+
+        assertEquals("Beef Pho", deletedRating.getFood());
+        assertEquals(1, ratingsManager.getSize());
+        assertEquals("Plain Dosai", ratingsManager.getRating(1).getFood());
+    }
+
+    @Test
+    public void deleteRating_indexOutOfRange_exceptionThrown() {
+        assertThrows(BudgetBiteException.class, () -> ratingsManager.deleteRating(0));
+        assertThrows(BudgetBiteException.class, () -> ratingsManager.deleteRating(3));
+    }
+
+    @Test
+    public void getRating_emptyList_exceptionThrown() {
+        assertThrows(BudgetBiteException.class, () -> new RatingsManager().getRating(1));
+    }
+
+    @Test
+    public void toString_twoRatings_numberedList() {
+        String expected = "\n1. Stall: Vietnamese, Food: Beef Pho, Score: 8.0"
+                + "\n2. Stall: Indian, Food: Plain Dosai, Score: 6.5";
+        assertEquals(expected, ratingsManager.toString());
+    }
+}

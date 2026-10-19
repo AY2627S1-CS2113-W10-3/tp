@@ -42,11 +42,11 @@ public class RateCommand extends Command {
         try {
             score = Float.parseFloat(scoreText);
         } catch (NumberFormatException exception) {
-            return "Invalid score. Please provide a whole number between 0 and 10.";
+            return "Invalid score. Please provide a number between 0 and 10.";
         }
 
         if (score < 0 || score > 10) {
-            return "Invalid score. Please provide a whole number between 0 and 10.";
+            return "Invalid score. Please provide a number between 0 and 10.";
         }
 
         Rating rating = new Rating(stall, food, score);

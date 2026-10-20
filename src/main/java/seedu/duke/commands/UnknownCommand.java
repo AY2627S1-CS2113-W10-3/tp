@@ -5,6 +5,7 @@ public class UnknownCommand extends Command {
     public String execute() {
         return "Invalid command. Valid inputs:\n"
                 + "help\n"
+                + "home\n"
                 + "location\n"
                 + "rate\n"
                 + "list-ratings\n"

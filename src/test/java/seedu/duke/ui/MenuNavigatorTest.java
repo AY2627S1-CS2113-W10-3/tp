@@ -101,4 +101,90 @@ public class MenuNavigatorTest {
 
         assertTrue(response.contains("valid number"));
     }
+
+    @Test
+    public void directNavigationToStall_displaysFoodMenu() {
+        String response = navigator.navigateDirectly("PGPR / Chicken Rice");
+
+        assertTrue(response.contains("Menu for Chicken Rice:"));
+        assertTrue(response.contains("Char Siew Rice"));
+        assertTrue(response.contains("Roast Chicken Rice"));
+        assertTrue(response.contains("$3.30"));
+        assertTrue(navigator.isActive());
+    }
+
+    @Test
+    public void directNavigation_isCaseInsensitive() {
+        String response = navigator.navigateDirectly("pgpr / chicken rice");
+
+        assertTrue(response.contains("Menu for Chicken Rice:"));
+        assertTrue(response.contains("Roast Chicken Rice"));
+    }
+
+    @Test
+    public void directNavigation_unknownFoodCourt_showsError() {
+        String response = navigator.navigateDirectly("Unknown Court / Chicken Rice");
+
+        assertTrue(response.contains("Unknown food court"));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void directNavigation_unknownStall_showsError() {
+        String response = navigator.navigateDirectly("PGPR / Unknown Stall");
+
+        assertTrue(response.contains("Unknown stall"));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void directNavigation_withMenuItem_showsFormatError() {
+        String response =
+                navigator.navigateDirectly("PGPR / Chicken Rice / Roast Chicken Rice");
+
+        assertTrue(response.contains("Format: FOOD_COURT / STALL"));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void directNavigation_missingStall_showsFormatError() {
+        String response = navigator.navigateDirectly("PGPR /");
+
+        assertTrue(response.contains("Format: FOOD_COURT / STALL"));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void homeFromMenu_returnsToMainMenu() {
+        navigator.start();
+        navigator.handleInput("1");
+        navigator.handleInput("2");
+
+        String response = navigator.goHome();
+
+        assertTrue(response.contains("main menu"));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void homeClearsCurrentNavigation() {
+        navigator.start();
+        navigator.handleInput("1");
+        navigator.handleInput("2");
+
+        navigator.goHome();
+
+        String response = navigator.handleInput("1");
+
+        assertTrue(response.contains("Please enter 'location' first."));
+        assertFalse(navigator.isActive());
+    }
+
+    @Test
+    public void homeWhenAlreadyAtHome_staysAtHome() {
+        String response = navigator.goHome();
+
+        assertTrue(response.contains("main menu"));
+        assertFalse(navigator.isActive());
+    }
 }

@@ -173,4 +173,110 @@ public class MenuNavigator {
 
         return output.toString();
     }
+
+    /**
+     * Checks whether the input looks like a direct food-court path.
+     *
+     * <p>The first path component must be a known food court. This prevents
+     * commands such as "rate /stall ..." from being mistaken for navigation.</p>
+     *
+     * @param input user input
+     * @return true if the input starts with a known food court and contains a slash
+     */
+    public boolean isDirectNavigation(String input) {
+        String[] path = splitPath(input);
+        return path.length >= 2 && findFoodCourt(path[0]) != null;
+    }
+
+    /**
+     * Navigates directly to a stall menu or a specific menu item.
+     *
+     * @param input path in the form FOOD_COURT / STALL
+     * @return the menu or item information, or an error message
+     */
+    public String navigateDirectly(String input) {
+        String[] path = splitPath(input);
+
+        if (path.length != 2 || containsBlankPart(path)) {
+            return "Invalid Format\nValid Format: FOOD_COURT / STALL" ;
+        }
+
+        FoodCourt foodCourt = findFoodCourt(path[0]);
+        if (foodCourt == null) {
+            return "Unknown food court: " + path[0];
+        }
+
+        FoodStall stall = findStall(foodCourt, path[1]);
+        if (stall == null) {
+            return "Unknown stall in " + foodCourt.name() + ": " + path[1];
+        }
+
+        selectedFoodCourt = foodCourt;
+        selectedStall = stall;
+        stage = Stage.SHOWING_MENU;
+        return showMenu();
+    }
+
+    /**
+     * Splits a direct path around slash separators.
+     */
+    private String[] splitPath(String input) {
+        if (input == null || input.isBlank()) {
+            return new String[0];
+        }
+
+        return input.trim().split("\\s*/\\s*", -1);
+    }
+
+    /**
+     * Checks whether any part of the path is empty.
+     */
+    private boolean containsBlankPart(String[] path) {
+        for (String part : path) {
+            if (part.isBlank()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Finds a food court by name, ignoring letter case.
+     */
+    private FoodCourt findFoodCourt(String name) {
+        for (FoodCourt foodCourt : foodDirectory.getLocations()) {
+            if (foodCourt.name().equalsIgnoreCase(name.trim())) {
+                return foodCourt;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Finds a stall inside a food court by name, ignoring letter case.
+     */
+    private FoodStall findStall(FoodCourt foodCourt, String name) {
+        for (FoodStall stall : foodCourt.stalls()) {
+            if (stall.name().equalsIgnoreCase(name.trim())) {
+                return stall;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the user to the main menu from any navigation stage.
+     *
+     * @return confirmation message
+     */
+    public String goHome() {
+        stage = Stage.INACTIVE;
+        selectedFoodCourt = null;
+        selectedStall = null;
+
+        return "Returned to the main menu.";
+    }
 }

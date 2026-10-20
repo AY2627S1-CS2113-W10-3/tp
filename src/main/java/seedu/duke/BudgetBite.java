@@ -88,21 +88,32 @@ public class BudgetBite {
             String response;
 
             /*
+             * The home command always returns to the main menu.
+             */
+            if (trimmedInput.equalsIgnoreCase("home")) {
+                response = menuNavigator.goHome();
+            }
+
+            /*
              * The location command always starts or restarts food navigation.
              */
-            if (trimmedInput.equalsIgnoreCase("location")) {
+            else if (trimmedInput.equalsIgnoreCase("location")) {
                 response = menuNavigator.start();
             }
 
             /*
-             * While the navigator is active, numbers are interpreted as
-             * location or stall selections.
-             *
-             * Help and bye are still handled by the normal parser.
+             * A direct path jumps straight to a stall menu or menu item.
+             */
+            else if (menuNavigator.isDirectNavigation(trimmedInput)) {
+                response = menuNavigator.navigateDirectly(trimmedInput);
+            }
+            /*
+             * While the navigator is active, only numeric selections and
+             * back are handled as navigation input.
              */
             else if (menuNavigator.isActive()
-                    && !trimmedInput.equalsIgnoreCase("help")
-                    && !trimmedInput.equalsIgnoreCase("bye")) {
+                    && (trimmedInput.equalsIgnoreCase("back")
+                    || trimmedInput.matches("\\d+"))) {
                 response = menuNavigator.handleInput(trimmedInput);
             }
 

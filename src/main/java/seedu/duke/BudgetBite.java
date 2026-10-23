@@ -1,5 +1,8 @@
 package seedu.duke;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import seedu.duke.commands.ByeCommand;
 import seedu.duke.commands.Command;
 import seedu.duke.exceptions.BudgetBiteException;
@@ -14,6 +17,9 @@ import seedu.duke.food.FoodDirectory;
 public class BudgetBite {
 
     private static final String VERSION = "1.1";
+    private static final Logger LOGGER = Logger.getLogger(BudgetBite.class.getName());
+    private static final String MESSAGE_UNEXPECTED_ERROR =
+            "Sorry, something went wrong while running that command. Your data is safe; please try again.";
     private TextUi ui;
     private StorageFile storage;
     private RatingsManager ratings;
@@ -60,15 +66,9 @@ public class BudgetBite {
 
     /**
      * Prints the Goodbye message and exits.
+     * Data does not need saving here because it is already saved after every command.
      */
     private void exit() {
-
-        // TODO: Improve error handling
-        try {
-            storage.save(ratings, expenses);
-        } catch (BudgetBiteException e) {
-            System.out.println(e);
-        }
         ui.showGoodbyeMessage();
         System.exit(0);
     }
@@ -124,6 +124,7 @@ public class BudgetBite {
                 Command command = parser.parseCommand(trimmedInput);
                 response = executeCommand(command);
                 isExiting = command instanceof ByeCommand;
+                response = saveData(response);
             }
 
             ui.showResponseToUser(response);
@@ -133,17 +134,34 @@ public class BudgetBite {
 
     /**
      * Executes the command and returns the response.
+     * Any unexpected error is caught here so that one bad command cannot crash the app
+     * and lose the user's data.
      *
      * @param command user command
      * @return response of the command
      */
     private String executeCommand(Command command) {
         try {
-            String response = command.execute();
-            return response;
+            return command.execute();
         } catch (Exception e) {
-            ui.showToUser(e.getMessage());
-            throw new RuntimeException(e);
+            LOGGER.log(Level.WARNING, "Unexpected error while running " + command.getClass().getSimpleName(), e);
+            return MESSAGE_UNEXPECTED_ERROR;
+        }
+    }
+
+    /**
+     * Saves ratings and expenses so that no data is lost if the app is closed suddenly.
+     * Called after every command, as the User Guide promises.
+     *
+     * @param response Response of the command that was just run.
+     * @return The same response, with a warning added if saving failed.
+     */
+    private String saveData(String response) {
+        try {
+            storage.save(ratings, expenses);
+            return response;
+        } catch (BudgetBiteException e) {
+            return response + "\nWarning: " + e.getMessage();
         }
     }
 

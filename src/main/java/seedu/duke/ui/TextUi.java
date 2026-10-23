@@ -31,15 +31,27 @@ public class TextUi {
 
     public String getUserCommand() {
         out.print(LINE_PREFIX + "Enter command: ");
-        String fullInputLine = in.nextLine();
+        String fullInputLine = readLineOrBye();
 
         // silently consume all ignored lines
         while (shouldIgnore(fullInputLine)) {
-            fullInputLine = in.nextLine();
+            fullInputLine = readLineOrBye();
         }
 
         showToUser("[Command entered:" + fullInputLine + "]");
         return fullInputLine;
+    }
+
+    /**
+     * Reads the next line typed by the user.
+     * If the input has ended (e.g. the user pressed Ctrl+D or Ctrl+Z), returns {@code "bye"}
+     * so the app exits normally instead of crashing.
+     */
+    private String readLineOrBye() {
+        if (!in.hasNextLine()) {
+            return "bye";
+        }
+        return in.nextLine();
     }
 
     private boolean shouldIgnore(String rawInputLine) {

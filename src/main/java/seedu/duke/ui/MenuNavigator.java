@@ -10,6 +10,7 @@ import seedu.duke.food.FoodStall;
  */
 public class MenuNavigator {
 
+
     private enum Stage {
         INACTIVE,
         SELECTING_LOCATION,
@@ -23,6 +24,7 @@ public class MenuNavigator {
     private FoodStall selectedStall;
 
     public MenuNavigator(FoodDirectory foodDirectory) {
+        assert foodDirectory != null : "Food directory should not be null";
         this.foodDirectory = foodDirectory;
     }
 
@@ -50,6 +52,7 @@ public class MenuNavigator {
      * @return response for the user
      */
     public String handleInput(String input) {
+        assert input != null : "Navigation input should not be null";
         String trimmedInput = input.trim();
 
         if (trimmedInput.equalsIgnoreCase("back")) {
@@ -83,6 +86,9 @@ public class MenuNavigator {
     }
 
     private String selectFoodCourt(int index) {
+        assert stage == Stage.SELECTING_LOCATION
+                : "Food court can only be selected from the location stage";
+
         if (index < 1 || index > foodDirectory.getLocations().size()) {
             return "Invalid food court number.";
         }
@@ -90,16 +96,22 @@ public class MenuNavigator {
         selectedFoodCourt = foodDirectory.getLocations().get(index - 1);
         stage = Stage.SELECTING_STALL;
 
+        assert selectedFoodCourt != null : "Selected food court should not be null";
+
         return showStalls();
     }
 
     private String selectStall(int index) {
+        assert selectedFoodCourt != null : "A food court must be selected first";
+
         if (index < 1 || index > selectedFoodCourt.stalls().size()) {
             return "Invalid stall number.";
         }
 
         selectedStall = selectedFoodCourt.stalls().get(index - 1);
         stage = Stage.SHOWING_MENU;
+
+        assert selectedStall != null : "Selected stall should not be null";
 
         return showMenu();
     }
@@ -145,6 +157,7 @@ public class MenuNavigator {
     }
 
     private String showStalls() {
+        assert selectedFoodCourt != null : "A food court must be selected before showing stalls";
         StringBuilder output =
                 new StringBuilder("Stalls in " + selectedFoodCourt.name() + ":");
 
@@ -161,6 +174,7 @@ public class MenuNavigator {
     }
 
     private String showMenu() {
+        assert selectedStall != null : "A stall must be selected before showing its menu";
         StringBuilder output =
                 new StringBuilder("Menu for " + selectedStall.name() + ":");
 
@@ -195,6 +209,7 @@ public class MenuNavigator {
      * @return the menu or item information, or an error message
      */
     public String navigateDirectly(String input) {
+
         String[] path = splitPath(input);
 
         if (path.length != 2 || containsBlankPart(path)) {
@@ -214,6 +229,7 @@ public class MenuNavigator {
         selectedFoodCourt = foodCourt;
         selectedStall = stall;
         stage = Stage.SHOWING_MENU;
+
         return showMenu();
     }
 

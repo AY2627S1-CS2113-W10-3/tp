@@ -3,12 +3,16 @@ package seedu.duke.commands;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import seedu.duke.expenses.ExpensesManager;
 
 public class LogExpenseCommandTest {
+    private static final LocalDate TODAY = LocalDate.of(2026, 10, 26);
+
     private ExpensesManager expensesManager;
 
     @BeforeEach
@@ -65,5 +69,43 @@ public class LogExpenseCommandTest {
 
         assertEquals(0, expensesManager.getSize());
         assertTrue(response.contains("Food name cannot be empty."));
+    }
+
+    @Test
+    public void execute_noDate_datedToday() throws Exception {
+        new LogExpenseCommand("Teh /cost 1.20", expensesManager, TODAY).execute();
+        assertEquals(TODAY, expensesManager.getExpense(1).getDate());
+    }
+
+    @Test
+    public void execute_pastDate_expenseHasThatDate() throws Exception {
+        String response = new LogExpenseCommand("Teh /cost 1.20 /date 2026-10-20", expensesManager, TODAY).execute();
+
+        assertEquals(LocalDate.of(2026, 10, 20), expensesManager.getExpense(1).getDate());
+        assertTrue(response.contains("Logged: Teh - $1.20 (2026-10-20)"));
+    }
+
+    @Test
+    public void execute_futureDate_rejected() {
+        String response = new LogExpenseCommand("Teh /cost 1.20 /date 2026-10-27", expensesManager, TODAY).execute();
+
+        assertTrue(response.contains("Date cannot be in the future."));
+        assertEquals(0, expensesManager.getSize());
+    }
+
+    @Test
+    public void execute_impossibleDate_rejected() {
+        String response = new LogExpenseCommand("Teh /cost 1.20 /date 2026-02-30", expensesManager, TODAY).execute();
+
+        assertTrue(response.contains("format YYYY-MM-DD"));
+        assertEquals(0, expensesManager.getSize());
+    }
+
+    @Test
+    public void execute_tooManyDecimalPlaces_rejected() {
+        String response = new LogExpenseCommand("Kopi /cost 0.0001", expensesManager, TODAY).execute();
+
+        assertTrue(response.contains("at most 2 decimal places"));
+        assertEquals(0, expensesManager.getSize());
     }
 }

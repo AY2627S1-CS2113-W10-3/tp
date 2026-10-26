@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -11,14 +13,16 @@ import seedu.duke.exceptions.BudgetBiteException;
 
 public class ExpensesManagerTest {
     private static final double DELTA = 0.001;
+    private static final LocalDate MONDAY = LocalDate.of(2026, 10, 19);
+    private static final LocalDate WEDNESDAY = LocalDate.of(2026, 10, 21);
 
     private ExpensesManager expensesManager;
 
     @BeforeEach
     public void setUp() throws BudgetBiteException {
         expensesManager = new ExpensesManager();
-        expensesManager.addExpense(new Expense("Chicken Rice", 4.50));
-        expensesManager.addExpense(new Expense("Teh", 1.20));
+        expensesManager.addExpense(new Expense("Chicken Rice", 4.50, MONDAY));
+        expensesManager.addExpense(new Expense("Teh", 1.20, WEDNESDAY));
     }
 
     @Test
@@ -108,7 +112,45 @@ public class ExpensesManagerTest {
 
     @Test
     public void toString_twoExpenses_numberedList() {
-        String expected = "\n1. Chicken Rice - $4.50\n2. Teh - $1.20";
+        String expected = "\n1. Chicken Rice - $4.50 (2026-10-19)\n2. Teh - $1.20 (2026-10-21)";
         assertEquals(expected, expensesManager.toString());
+    }
+
+    @Test
+    public void getTotalCostBetween_rangeCoversOneExpense_returnsItsCost() {
+        assertEquals(1.20, expensesManager.getTotalCostBetween(WEDNESDAY, WEDNESDAY.plusDays(3)), DELTA);
+    }
+
+    @Test
+    public void getTotalCostBetween_rangeIncludesBothEnds_returnsSum() {
+        assertEquals(5.70, expensesManager.getTotalCostBetween(MONDAY, WEDNESDAY), DELTA);
+    }
+
+    @Test
+    public void storageString_withDate_restoredWithSameDate() throws BudgetBiteException {
+        Expense original = new Expense("Chicken Rice", 4.50, MONDAY);
+        Expense restored = Expense.fromStorageString(original.toStorageString());
+
+        assertEquals("Chicken Rice|4.50|2026-10-19", original.toStorageString());
+        assertEquals(MONDAY, restored.getDate());
+    }
+
+    @Test
+    public void fromStorageString_oldFormatWithoutDate_datedToday() throws BudgetBiteException {
+        Expense restored = Expense.fromStorageString("Teh|1.20");
+
+        assertEquals(LocalDate.now(), restored.getDate());
+        assertEquals(1.20, restored.getCost(), DELTA);
+    }
+
+    @Test
+    public void fromStorageString_invalidDate_exceptionThrown() {
+        assertThrows(BudgetBiteException.class, () -> Expense.fromStorageString("Teh|1.20|yesterday"));
+    }
+
+    @Test
+    public void withCost_keepsDate() throws BudgetBiteException {
+        Expense edited = new Expense("Teh", 1.20, MONDAY).withCost(2.00);
+        assertEquals(MONDAY, edited.getDate());
     }
 }

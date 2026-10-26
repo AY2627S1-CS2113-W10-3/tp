@@ -6,9 +6,13 @@ import seedu.duke.exceptions.BudgetBiteException;
  * Represents a single food purchase logged by the user.
  */
 public class Expense {
+    /** Largest cost allowed for one expense, to catch typing mistakes such as an extra zero. */
+    public static final double MAX_COST = 1000;
+
     private static final String STORAGE_SEPARATOR = "|";
     private static final String STORAGE_SEPARATOR_REGEX = "\\|";
     private static final int STORAGE_FIELD_COUNT = 2;
+    private static final String COST_LABEL = "Cost";
 
     private final String foodName;
     private final double cost;
@@ -50,11 +54,7 @@ public class Expense {
      * @throws BudgetBiteException If the text is not a number.
      */
     public static double parseCost(String costText) throws BudgetBiteException {
-        try {
-            return Double.parseDouble(costText.trim());
-        } catch (NumberFormatException e) {
-            throw new BudgetBiteException("Cost must be a number, e.g. 4.50");
-        }
+        return Money.parse(costText, COST_LABEL, MAX_COST);
     }
 
     public String getFoodName() {
@@ -100,9 +100,6 @@ public class Expense {
     }
 
     private static void validateCost(double cost) throws BudgetBiteException {
-        boolean isPositiveNumber = cost > 0 && Double.isFinite(cost);
-        if (!isPositiveNumber) {
-            throw new BudgetBiteException("Cost must be a positive number.");
-        }
+        Money.validate(cost, COST_LABEL, MAX_COST);
     }
 }

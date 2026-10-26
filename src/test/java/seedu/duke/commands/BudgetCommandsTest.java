@@ -43,13 +43,11 @@ public class BudgetCommandsTest {
 
     @Test
     public void setBudget_invalidInputs_rejected() {
-        String[] invalidInputs = {
-                "", "weekly", "50", "yearly 50",
-                "weekly abc", "weekly -5", "weekly 0.001", "weekly 50 extra"
-        };        for (String input : invalidInputs) {
-            String response = new SetBudgetCommand(input, budgetManager, expensesManager, TODAY).execute();
-            assertTrue(response.contains(SetBudgetCommand.MESSAGE_USAGE), "No usage shown for: " + input);
+        String[] invalidInputs = {"", "weekly", "50", "yearly 50", "weekly abc", "weekly -5", "weekly 0.001"};
+        for (String input : invalidInputs) {
+            assertRejected(input);
         }
+        assertRejected("weekly 50 extra");
         assertFalse(budgetManager.hasBudget());
     }
 
@@ -65,5 +63,10 @@ public class BudgetCommandsTest {
     public void budget_noBudgetSet_hint() {
         String response = new BudgetCommand(budgetManager, expensesManager, TODAY).execute();
         assertEquals(BudgetCommand.MESSAGE_NO_BUDGET, response);
+    }
+
+    private void assertRejected(String input) {
+        String response = new SetBudgetCommand(input, budgetManager, expensesManager, TODAY).execute();
+        assertTrue(response.contains(SetBudgetCommand.MESSAGE_USAGE), "No usage shown for: " + input);
     }
 }

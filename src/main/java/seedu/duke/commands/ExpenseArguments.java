@@ -1,5 +1,8 @@
 package seedu.duke.commands;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 import seedu.duke.exceptions.BudgetBiteException;
 
 /**
@@ -8,6 +11,7 @@ import seedu.duke.exceptions.BudgetBiteException;
  */
 public final class ExpenseArguments {
     public static final String COST_PREFIX = "/cost";
+    public static final String DATE_PREFIX = "/date";
 
     private static final String WHOLE_NUMBER_REGEX = "\\d+";
 
@@ -59,5 +63,51 @@ public final class ExpenseArguments {
         } catch (NumberFormatException e) {
             throw new BudgetBiteException("Index is too large.");
         }
+    }
+
+    /**
+     * Splits off an optional {@code /date} at the end of the arguments, e.g.
+     * {@code "Chicken Rice /cost 4.50 /date 2026-10-20"} becomes
+     * {@code "Chicken Rice /cost 4.50"} and {@code "2026-10-20"}.
+     *
+     * @param arguments Arguments typed after the command word.
+     * @return A two-element array: the text before {@code /date}, then the date text,
+     *         which is {@code null} if no {@code /date} was given.
+     * @throws BudgetBiteException If {@code /date} is given without a date after it.
+     */
+    public static String[] splitAtDate(String arguments) throws BudgetBiteException {
+        int prefixPosition = arguments.indexOf(DATE_PREFIX);
+        if (prefixPosition < 0) {
+            return new String[] {arguments.trim(), null};
+        }
+
+        String beforeDate = arguments.substring(0, prefixPosition).trim();
+        String dateText = arguments.substring(prefixPosition + DATE_PREFIX.length()).trim();
+        if (dateText.isEmpty()) {
+            throw new BudgetBiteException("Missing date after " + DATE_PREFIX + ".");
+        }
+        return new String[] {beforeDate, dateText};
+    }
+
+    /**
+     * Parses a date in the format {@code YYYY-MM-DD}. The date cannot be in the future.
+     *
+     * @param dateText Text that should hold a date, e.g. {@code "2026-10-20"}.
+     * @param today    Today's date, passed in so that tests can fix it.
+     * @return The date.
+     * @throws BudgetBiteException If the text is not a real date in that format, or is after today.
+     */
+    public static LocalDate parseDate(String dateText, LocalDate today) throws BudgetBiteException {
+        LocalDate date;
+        try {
+            // LocalDate.parse only accepts YYYY-MM-DD and rejects dates that do not exist, e.g. 2026-02-30.
+            date = LocalDate.parse(dateText.trim());
+        } catch (DateTimeParseException e) {
+            throw new BudgetBiteException("Date must be a real date in the format YYYY-MM-DD, e.g. 2026-10-20.");
+        }
+        if (date.isAfter(today)) {
+            throw new BudgetBiteException("Date cannot be in the future.");
+        }
+        return date;
     }
 }

@@ -43,8 +43,10 @@ public class BudgetCommandsTest {
 
     @Test
     public void setBudget_invalidInputs_rejected() {
-        String[] invalidInputs = {"", "weekly", "50", "yearly 50", "weekly abc", "weekly -5", "weekly 0.001", "weekly 50 extra"};
-        for (String input : invalidInputs) {
+        String[] invalidInputs = {
+                "", "weekly", "50", "yearly 50",
+                "weekly abc", "weekly -5", "weekly 0.001", "weekly 50 extra"
+        };        for (String input : invalidInputs) {
             String response = new SetBudgetCommand(input, budgetManager, expensesManager, TODAY).execute();
             assertTrue(response.contains(SetBudgetCommand.MESSAGE_USAGE), "No usage shown for: " + input);
         }

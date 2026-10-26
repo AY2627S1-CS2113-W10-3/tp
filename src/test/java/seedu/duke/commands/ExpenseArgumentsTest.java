@@ -60,4 +60,9 @@ public class ExpenseArgumentsTest {
         LocalDate today = LocalDate.of(2026, 10, 26);
         assertEquals(today, ExpenseArguments.parseDate("2026-10-26", today));
     }
+
+    @Test
+    public void splitAtDate_dateBeforeCost_exceptionThrown() {
+        assertThrows(BudgetBiteException.class, () -> ExpenseArguments.splitAtDate("Teh /date 2026-10-20 /cost 2"));
+    }
 }

@@ -9,7 +9,7 @@ import seedu.duke.expenses.ExpensesManager;
  * Shows the budget, how much was spent in the current period and how much is left.
  */
 public class BudgetCommand extends Command {
-    public static final String COMMAND_WORD = "seedu/duke/budget";
+    public static final String COMMAND_WORD = "budget";
     public static final String MESSAGE_NO_BUDGET = "No budget set yet. Try: set-budget weekly 50";
 
     private final BudgetManager budgetManager;

@@ -1,18 +1,14 @@
 package seedu.duke.commands;
 
+/**
+ * Shown when the user types a command word that does not exist.
+ * Points to {@code help} instead of repeating the command list, so the list only needs updating in one place.
+ */
 public class UnknownCommand extends Command {
+    public static final String MESSAGE_UNKNOWN = "Unknown command. Type 'help' to see all commands and their formats.";
+
     @Override
     public String execute() {
-        return "Invalid command. Valid inputs:\n"
-                + "help\n"
-                + "home\n"
-                + "location\n"
-                + "rate\n"
-                + "list-ratings\n"
-                + "edit-rating\n"
-                + "delete-rating\n"
-                + "log-expense\n"
-                + "list-expenses\n"
-                + "bye";
+        return MESSAGE_UNKNOWN;
     }
 }

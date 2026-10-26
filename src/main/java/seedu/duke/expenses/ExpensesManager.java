@@ -1,5 +1,6 @@
 package seedu.duke.expenses;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -103,6 +104,24 @@ public class ExpensesManager {
             totalCost += expense.getCost();
         }
         assert totalCost >= 0 : "Total cost should never be negative";
+        return totalCost;
+    }
+
+    /**
+     * Returns the total amount spent between two dates, including both of them.
+     *
+     * @param startDate First day to count.
+     * @param endDate   Last day to count.
+     * @return Sum of the costs of the expenses made in that range.
+     */
+    public double getTotalCostBetween(LocalDate startDate, LocalDate endDate) {
+        assert !startDate.isAfter(endDate) : "Start date should not be after end date";
+        double totalCost = 0;
+        for (Expense expense : expenses) {
+            if (expense.isBetween(startDate, endDate)) {
+                totalCost += expense.getCost();
+            }
+        }
         return totalCost;
     }
 

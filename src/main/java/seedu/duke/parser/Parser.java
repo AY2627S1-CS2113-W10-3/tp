@@ -1,11 +1,14 @@
 package seedu.duke.parser;
 
+import seedu.duke.budget.BudgetManager;
+import seedu.duke.commands.BudgetCommand;
 import seedu.duke.commands.ByeCommand;
 import seedu.duke.commands.Command;
 import seedu.duke.commands.HelpCommand;
 import seedu.duke.commands.ListExpensesCommand;
 import seedu.duke.commands.LogExpenseCommand;
 import seedu.duke.commands.RateCommand;
+import seedu.duke.commands.SetBudgetCommand;
 import seedu.duke.commands.UnknownCommand;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
@@ -18,10 +21,19 @@ import seedu.duke.commands.ListRatingsCommand;
 public class Parser {
     private final RatingsManager ratingsManager;
     private final ExpensesManager expensesManager;
+    private final BudgetManager budgetManager;
 
-    public Parser(RatingsManager ratingsManager, ExpensesManager expensesManager) {
+    /**
+     * Creates a parser whose commands work on the given data.
+     *
+     * @param ratingsManager  Ratings used by the rating commands.
+     * @param expensesManager Expenses used by the expense and budget commands.
+     * @param budgetManager   Budget used by the budget commands and {@code log-expense}.
+     */
+    public Parser(RatingsManager ratingsManager, ExpensesManager expensesManager, BudgetManager budgetManager) {
         this.ratingsManager = ratingsManager;
         this.expensesManager = expensesManager;
+        this.budgetManager = budgetManager;
     }
 
     public Command parseCommand(String userCommandText) {
@@ -45,13 +57,17 @@ public class Parser {
         case DeleteRatingCommand.COMMAND_WORD:
             return new DeleteRatingCommand(arguments, ratingsManager);
         case LogExpenseCommand.COMMAND_WORD:
-            return new LogExpenseCommand(arguments, expensesManager);
+            return new LogExpenseCommand(arguments, expensesManager, budgetManager);
         case ListExpensesCommand.COMMAND_WORD:
             return new ListExpensesCommand(expensesManager);
         case EditExpenseCommand.COMMAND_WORD:
             return new EditExpenseCommand(arguments, expensesManager);
         case DeleteExpenseCommand.COMMAND_WORD:
             return new DeleteExpenseCommand(arguments, expensesManager);
+        case SetBudgetCommand.COMMAND_WORD:
+            return new SetBudgetCommand(arguments, budgetManager, expensesManager);
+        case BudgetCommand.COMMAND_WORD:
+            return new BudgetCommand(budgetManager, expensesManager);
         default:
             return new UnknownCommand();
         }

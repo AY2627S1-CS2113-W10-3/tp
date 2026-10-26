@@ -10,6 +10,9 @@ import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
+import seedu.duke.budget.Budget;
+import seedu.duke.budget.BudgetManager;
+import seedu.duke.budget.BudgetPeriod;
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
@@ -56,7 +59,7 @@ public class StorageFileTest {
         Path dataFolder = Files.createTempDirectory("budgetbite-test").resolve("data");
         StorageFile storage = makeStorage(dataFolder);
 
-        storage.save(new RatingsManager(), new ExpensesManager());
+        storage.save(new RatingsManager(), new ExpensesManager(), new BudgetManager());
 
         assertTrue(Files.isDirectory(dataFolder));
         assertTrue(Files.exists(dataFolder.resolve("expenses.txt")));
@@ -71,7 +74,7 @@ public class StorageFileTest {
         RatingsManager ratings = new RatingsManager();
         ratings.addRating(new Rating("Chicken Rice", "Roasted Chicken Rice", 8));
 
-        storage.save(ratings, expenses);
+        storage.save(ratings, expenses, new BudgetManager());
         ExpensesManager loadedExpenses = storage.loadExpenses();
         RatingsManager loadedRatings = storage.loadRatings();
 
@@ -79,6 +82,30 @@ public class StorageFileTest {
         assertEquals("Chicken Rice", loadedExpenses.getExpense(1).getFoodName());
         assertEquals(4.50, loadedExpenses.getExpense(1).getCost(), DELTA);
         assertEquals(ratings.getRatings(), loadedRatings.getRatings());
+    }
+
+    @Test
+    public void saveThenLoad_budget_sameBudget() throws Exception {
+        StorageFile storage = makeStorage(Files.createTempDirectory("budgetbite-test").resolve("data"));
+        BudgetManager budget = new BudgetManager(new Budget(BudgetPeriod.WEEKLY, 50));
+
+        storage.save(new RatingsManager(), new ExpensesManager(), budget);
+        BudgetManager loaded = storage.loadBudget();
+
+        assertTrue(loaded.hasBudget());
+        assertEquals(BudgetPeriod.WEEKLY, loaded.getBudget().getPeriod());
+        assertEquals(50, loaded.getBudget().getAmount(), DELTA);
+        assertEquals("weekly|50.00", Files.readAllLines(storage.getBudgetPath()).get(0));
+    }
+
+    @Test
+    public void loadBudget_corruptedFile_noBudget() throws Exception {
+        Path dataFolder = Files.createTempDirectory("budgetbite-test").resolve("data");
+        StorageFile storage = makeStorage(dataFolder);
+        Files.createDirectories(dataFolder);
+        Files.write(storage.getBudgetPath(), java.util.List.of("yearly|abc"));
+
+        assertTrue(!storage.loadBudget().hasBudget());
     }
 
     private StorageFile makeStorage(Path dataFolder) throws BudgetBiteException {

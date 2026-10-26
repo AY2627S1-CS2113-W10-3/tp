@@ -3,6 +3,7 @@ package seedu.duke;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import seedu.duke.budget.BudgetManager;
 import seedu.duke.commands.ByeCommand;
 import seedu.duke.commands.Command;
 import seedu.duke.exceptions.BudgetBiteException;
@@ -24,6 +25,7 @@ public class BudgetBite {
     private StorageFile storage;
     private RatingsManager ratings;
     private ExpensesManager expenses;
+    private BudgetManager budget;
 
     private MenuNavigator menuNavigator;
 
@@ -52,6 +54,7 @@ public class BudgetBite {
             this.storage = initializeStorage(launchArgs);
             this.ratings = storage.loadRatings();
             this.expenses = storage.loadExpenses();
+            this.budget = storage.loadBudget();
 
             FoodDirectory foodDirectory = new FoodDirectory();
             this.menuNavigator = new MenuNavigator(foodDirectory);
@@ -79,7 +82,7 @@ public class BudgetBite {
      */
     private void runCommandLoopUntilExitCommand() {
 
-        Parser parser = new Parser(ratings, expenses);
+        Parser parser = new Parser(ratings, expenses, budget);
         boolean isExiting = false;
 
         while (!isExiting) {
@@ -150,7 +153,7 @@ public class BudgetBite {
     }
 
     /**
-     * Saves ratings and expenses so that no data is lost if the app is closed suddenly.
+     * Saves ratings, expenses and the budget so that no data is lost if the app is closed suddenly.
      * Called after every command, as the User Guide promises.
      *
      * @param response Response of the command that was just run.
@@ -158,7 +161,7 @@ public class BudgetBite {
      */
     private String saveData(String response) {
         try {
-            storage.save(ratings, expenses);
+            storage.save(ratings, expenses, budget);
             return response;
         } catch (BudgetBiteException e) {
             return response + "\nWarning: " + e.getMessage();

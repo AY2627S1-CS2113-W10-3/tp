@@ -2,6 +2,7 @@ package seedu.duke.commands;
 
 import java.time.LocalDate;
 
+import seedu.duke.budget.BudgetManager;
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.Expense;
 import seedu.duke.expenses.ExpensesManager;
@@ -10,6 +11,7 @@ import seedu.duke.expenses.Money;
 /**
  * Logs a food expense, e.g. {@code log-expense Chicken Rice /cost 4.50 /date 2026-10-20}.
  * The {@code /date} part is optional; without it the expense is dated today.
+ * If a budget is set, the response also says how much of it is left.
  */
 public class LogExpenseCommand extends Command {
     public static final String COMMAND_WORD = "log-expense";
@@ -18,6 +20,7 @@ public class LogExpenseCommand extends Command {
 
     private final String arguments;
     private final ExpensesManager expensesManager;
+    private final BudgetManager budgetManager;
     private final LocalDate today;
 
     /**
@@ -25,9 +28,10 @@ public class LogExpenseCommand extends Command {
      *
      * @param arguments Text after the command word.
      * @param expensesManager Manager the expense is added to.
+     * @param budgetManager Budget to report on after the expense is added.
      */
-    public LogExpenseCommand(String arguments, ExpensesManager expensesManager) {
-        this(arguments, expensesManager, LocalDate.now());
+    public LogExpenseCommand(String arguments, ExpensesManager expensesManager, BudgetManager budgetManager) {
+        this(arguments, expensesManager, budgetManager, LocalDate.now());
     }
 
     /**
@@ -35,13 +39,17 @@ public class LogExpenseCommand extends Command {
      *
      * @param arguments Text after the command word.
      * @param expensesManager Manager the expense is added to.
+     * @param budgetManager Budget to report on after the expense is added.
      * @param today Date to use as today.
      */
-    public LogExpenseCommand(String arguments, ExpensesManager expensesManager, LocalDate today) {
+    public LogExpenseCommand(String arguments, ExpensesManager expensesManager, BudgetManager budgetManager,
+                             LocalDate today) {
         assert expensesManager != null : "Expenses manager should not be null";
+        assert budgetManager != null : "Budget manager should not be null";
         assert today != null : "Today's date should not be null";
         this.arguments = arguments == null ? "" : arguments.trim();
         this.expensesManager = expensesManager;
+        this.budgetManager = budgetManager;
         this.today = today;
     }
 
@@ -50,8 +58,10 @@ public class LogExpenseCommand extends Command {
         try {
             Expense expense = parseExpense();
             expensesManager.addExpense(expense);
-            return "Logged: " + expense + "\n"
+            String response = "Logged: " + expense + "\n"
                     + "Total spent: " + Money.format(expensesManager.getTotalCost());
+            String budgetStatus = budgetManager.getStatusAfterSpending(expensesManager, today);
+            return budgetStatus.isEmpty() ? response : response + "\n" + budgetStatus;
         } catch (BudgetBiteException e) {
             return e.getMessage() + "\n" + MESSAGE_USAGE;
         }

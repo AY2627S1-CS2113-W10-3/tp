@@ -9,12 +9,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import seedu.duke.budget.Budget;
+import seedu.duke.budget.BudgetManager;
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.ratings.RatingsManager;
 
 /**
- * Represents the files used to store ratings and expenses.
+ * Represents the files used to store ratings, expenses and the budget.
  * By default the files are kept in a {@code data} folder next to wherever the app is run from,
  * e.g. next to the JAR file, so the app works on any computer and not just inside the project folder.
  */
@@ -31,8 +33,12 @@ public class StorageFile {
 
     private static final String FILE_EXTENSION = ".txt";
 
+    /** The budget file is kept in the same folder as the expenses file. */
+    private static final String BUDGET_FILE_NAME = "budget.txt";
+
     private final Path expensesPath;
     private final Path ratingsPath;
+    private final Path budgetPath;
 
     /**
      * Creates storage that uses the default file paths inside the {@code data} folder.
@@ -53,6 +59,7 @@ public class StorageFile {
     public StorageFile(String expensesFilePath, String ratingsFilePath) throws BudgetBiteException {
         this.expensesPath = Paths.get(expensesFilePath);
         this.ratingsPath = Paths.get(ratingsFilePath);
+        this.budgetPath = expensesPath.resolveSibling(BUDGET_FILE_NAME);
         if (!isValidPath(expensesPath) || !isValidPath(ratingsPath)) {
             throw new BudgetBiteException("Storage file should end with '" + FILE_EXTENSION + "'");
         }
@@ -67,20 +74,24 @@ public class StorageFile {
     }
 
     /**
-     * Saves all ratings and expenses to their files.
+     * Saves all ratings, expenses and the budget to their files.
      * Creates the {@code data} folder first if it does not exist yet, e.g. on the very first run.
      *
      * @param ratings  Ratings to save.
      * @param expenses Expenses to save.
+     * @param budget   Budget to save. If no budget is set, the budget file is left empty.
      * @throws BudgetBiteException If the files could not be written.
      */
-    public void save(RatingsManager ratings, ExpensesManager expenses) throws BudgetBiteException {
+    public void save(RatingsManager ratings, ExpensesManager expenses, BudgetManager budget)
+            throws BudgetBiteException {
         assert ratings != null : "Ratings to save should not be null";
         assert expenses != null : "Expenses to save should not be null";
+        assert budget != null : "Budget manager to save should not be null";
 
         writeLines(expensesPath, Encoder.encodeExpenses(expenses));
         writeLines(ratingsPath, Encoder.encodeRatings(ratings));
-        LOGGER.log(Level.FINE, "Saved data to " + expensesPath + " and " + ratingsPath);
+        writeLines(budgetPath, encodeBudget(budget));
+        LOGGER.log(Level.FINE, "Saved data to " + expensesPath + ", " + ratingsPath + " and " + budgetPath);
     }
 
     /**
@@ -111,12 +122,52 @@ public class StorageFile {
         return Decoder.decodeExpenses(readLines(expensesPath));
     }
 
+    /**
+     * Loads the saved budget, or returns a manager with no budget if there is no valid budget file.
+     * A corrupted budget file is ignored rather than stopping the app from starting.
+     *
+     * @return The loaded budget.
+     * @throws BudgetBiteException If the file exists but could not be read.
+     */
+    public BudgetManager loadBudget() throws BudgetBiteException {
+        if (!Files.isRegularFile(budgetPath)) {
+            LOGGER.log(Level.FINE, "No budget file at " + budgetPath + ", starting with no budget");
+            return new BudgetManager();
+        }
+        for (String line : readLines(budgetPath)) {
+            if (line.isBlank()) {
+                continue;
+            }
+            try {
+                return new BudgetManager(Budget.fromStorageString(line.strip()));
+            } catch (BudgetBiteException e) {
+                LOGGER.log(Level.WARNING, "Skipped invalid budget line: " + line);
+            }
+        }
+        return new BudgetManager();
+    }
+
     public Path getExpensesPath() {
         return expensesPath;
     }
 
     public Path getRatingsPath() {
         return ratingsPath;
+    }
+
+    public Path getBudgetPath() {
+        return budgetPath;
+    }
+
+    /**
+     * Turns the budget into the lines of the budget file: one line, or none if no budget is set.
+     */
+    private static ArrayList<String> encodeBudget(BudgetManager budget) {
+        ArrayList<String> lines = new ArrayList<>();
+        if (budget.hasBudget()) {
+            lines.add(budget.getBudget().toStorageString());
+        }
+        return lines;
     }
 
     /**

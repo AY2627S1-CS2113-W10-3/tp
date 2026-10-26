@@ -21,6 +21,8 @@ public class HelpCommand extends Command {
                 + "list-expenses\n"
                 + "edit-expense INDEX /cost AMOUNT\n"
                 + "delete-expense INDEX\n"
+                + "set-budget PERIOD AMOUNT (PERIOD is daily, weekly or monthly)\n"
+                + "budget\n"
                 + "bye";
     }
 }

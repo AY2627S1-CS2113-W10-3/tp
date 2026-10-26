@@ -73,7 +73,7 @@ public final class ExpenseArguments {
      * @param arguments Arguments typed after the command word.
      * @return A two-element array: the text before {@code /date}, then the date text,
      *         which is {@code null} if no {@code /date} was given.
-     * @throws BudgetBiteException If {@code /date} is given without a date after it.
+     * @throws BudgetBiteException If {@code /date} is given without a date after it, or before {@code /cost}.
      */
     public static String[] splitAtDate(String arguments) throws BudgetBiteException {
         int prefixPosition = arguments.indexOf(DATE_PREFIX);
@@ -85,6 +85,9 @@ public final class ExpenseArguments {
         String dateText = arguments.substring(prefixPosition + DATE_PREFIX.length()).trim();
         if (dateText.isEmpty()) {
             throw new BudgetBiteException("Missing date after " + DATE_PREFIX + ".");
+        }
+        if (dateText.contains(COST_PREFIX)) {
+            throw new BudgetBiteException(DATE_PREFIX + " must come after " + COST_PREFIX + ".");
         }
         return new String[] {beforeDate, dateText};
     }

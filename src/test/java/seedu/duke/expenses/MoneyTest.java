@@ -44,6 +44,8 @@ public class MoneyTest {
         assertThrows(BudgetBiteException.class, () -> Money.parse("abc", "Budget", 1000));
         assertThrows(BudgetBiteException.class, () -> Money.parse("NaN", "Budget", 1000));
         assertThrows(BudgetBiteException.class, () -> Money.parse("", "Budget", 1000));
+        assertThrows(BudgetBiteException.class, () -> Money.parse("1e2", "Budget", 1000));
+        assertThrows(BudgetBiteException.class, () -> Money.parse("4.", "Budget", 1000));
     }
 
     @Test

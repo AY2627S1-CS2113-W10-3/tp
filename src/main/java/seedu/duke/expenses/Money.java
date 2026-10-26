@@ -11,6 +11,8 @@ import seedu.duke.exceptions.BudgetBiteException;
  */
 public final class Money {
     private static final int MAX_DECIMAL_PLACES = 2;
+    /** Plain decimal numbers only, e.g. 4.50 or -3. Rejects forms such as 1e2 that BigDecimal would accept. */
+    private static final String PLAIN_NUMBER_REGEX = "-?\\d+(\\.\\d+)?";
 
     private Money() {
         // Utility class; not meant to be instantiated.
@@ -62,11 +64,11 @@ public final class Money {
     }
 
     private static BigDecimal toBigDecimal(String amountText, String label) throws BudgetBiteException {
-        try {
-            return new BigDecimal(amountText.trim());
-        } catch (NumberFormatException e) {
+        String trimmedText = amountText.trim();
+        if (!trimmedText.matches(PLAIN_NUMBER_REGEX)) {
             throw new BudgetBiteException(label + " must be a number, e.g. 4.50");
         }
+        return new BigDecimal(trimmedText);
     }
 
     private static void checkNotAboveMax(double amount, String label, double maxAmount) throws BudgetBiteException {

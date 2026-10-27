@@ -1,0 +1,57 @@
+@startuml
+!pragma layout smetana
+hide circle
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+
+class RatingsManager {
+  +addRating(r: Rating)
+  +editRating(index: int, score: float): Rating
+  +deleteRating(index: int): Rating
+}
+class Rating {
+  -stall: String
+  -food: String
+  -score: float
+}
+class ExpensesManager {
+  +addExpense(e: Expense)
+  +editExpenseCost(index: int, cost: double): Expense
+  +deleteExpense(index: int): Expense
+  +getTotalCost(): double
+  +getTotalCostBetween(start: LocalDate, end: LocalDate): double
+}
+class Expense {
+  -foodName: String
+  -cost: double
+  -date: LocalDate
+  +isBetween(start: LocalDate, end: LocalDate): boolean
+}
+class BudgetManager {
+  +setBudget(b: Budget)
+  +getSpent(e: ExpensesManager, today: LocalDate): double
+  +getSummary(e: ExpensesManager, today: LocalDate): String
+  +getStatusAfterSpending(e: ExpensesManager, today: LocalDate): String
+}
+class Budget {
+  -amount: double
+}
+enum BudgetPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  +getStartDate(today: LocalDate): LocalDate
+}
+class Money <<utility>> {
+  +parse(text: String, label: String, max: double): double
+  +format(amount: double): String
+}
+
+RatingsManager *-- "*" Rating
+ExpensesManager *-- "*" Expense
+BudgetManager *-- "0..1" Budget
+Budget --> "1" BudgetPeriod
+BudgetManager ..> ExpensesManager : asks for totals
+Expense ..> Money
+Budget ..> Money
+@enduml

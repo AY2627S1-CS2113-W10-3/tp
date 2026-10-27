@@ -16,7 +16,49 @@ The model holds all user data in memory while the app runs:
 
 * `RatingsManager` holds a list of `Rating`s (stall, food and a score from 0 to 10).
 * `ExpensesManager` holds a list of `Expense`s (food name, cost and date). It can
-  total all expenses, or only those between two dates.
+  total all expenses, or only those betwee@startuml
+!pragma layout smetana
+hide empty description
+skinparam shadowing false
+skinparam state {
+    BackgroundColor #EAF3FF
+    BorderColor #2F5597
+    FontColor #1F1F1F
+    FontSize 14
+    RoundCorner 15
+}
+skinparam ArrowColor #2F5597
+skinparam ArrowFontColor #1F1F1F
+
+state "Inactive" as INACTIVE : main menu, navigator not in use
+state "Selecting food court" as SELECTING_LOCATION : lists the food courts
+state "Selecting stall" as SELECTING_STALL : lists the stalls of the chosen court
+state "Showing menu" as SHOWING_MENU : shows the items and prices of the chosen stall
+
+[*] --> INACTIVE
+
+INACTIVE --> SELECTING_LOCATION : location
+SELECTING_LOCATION --> SELECTING_STALL : valid number
+SELECTING_STALL --> SHOWING_MENU : valid number
+
+SHOWING_MENU --> SELECTING_STALL : back
+SELECTING_STALL --> SELECTING_LOCATION : back
+SELECTING_LOCATION --> INACTIVE : back
+
+SELECTING_LOCATION --> SELECTING_LOCATION : number out of range\n(error shown)
+SELECTING_STALL --> SELECTING_STALL : number out of range\n(error shown)
+
+note right of INACTIVE
+  **From any state:**
+  location: restart at Selecting food court
+  home: return to Inactive
+  FOOD_COURT / STALL: jump to Showing menu
+  (e.g. PGPR / Chicken Rice)
+
+  A number or back is only treated as
+  navigation while the navigator is active.
+end note
+@endumln two dates.
 * `BudgetManager` holds at most one `Budget` (a `BudgetPeriod` and an amount). It
   works out how much of the budget has been spent by asking `ExpensesManager`
   for totals.
@@ -542,3 +584,10 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 
    Expected: An error message with the correct format is shown for each, and the
    budget is unchanged.
+
+
+![Architecture Diagram](images/ArchitectureDiagram.png)
+![Architecture Sequence Diagram](images/ArchitectureSequenceDiagram.png)
+![Storage Class Diagram](images/StorageClassDiagram.png)
+![Navigation State Diagram](images/NavigationStateDiagram.png)
+![Save Sequence Diagram](images/SaveSequenceDiagram.png)

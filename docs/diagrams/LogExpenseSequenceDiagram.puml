@@ -1,0 +1,31 @@
+@startuml
+hide footbox
+participant ":LogExpenseCommand" as L
+participant "ExpenseArguments" as A <<class>>
+participant ":ExpensesManager" as E
+participant ":BudgetManager" as B
+
+[-> L : execute()
+activate L
+L -> A : splitAtDate("Laksa /cost 12")
+A --> L : ["Laksa /cost 12", null]
+L -> A : splitAtCost("Laksa /cost 12")
+A --> L : ["Laksa", "12"]
+opt a date was given
+  L -> A : parseDate(dateText, today)
+  A --> L : date
+end
+create ":Expense" as X
+L -> X : new Expense("Laksa", 12.0, date)
+L -> E : addExpense(expense)
+L -> B : getStatusAfterSpending(expensesManager, today)
+activate B
+opt a budget is set
+  B -> E : getTotalCostBetween(periodStart, today)
+  E --> B : spent
+end
+B --> L : status line
+deactivate B
+[<-- L : "Logged: ... Total spent: ... Remaining this week: ..."
+deactivate L
+@enduml

@@ -309,6 +309,8 @@ user to the main menu from any navigation stage.
 * `SELECTING_STALL`: The user is choosing a stall within the selected food court.
 * `SHOWING_MENU`: The menu of the selected stall is displayed.
 
+![Navigation State Diagram](images/NavigationStateDiagram.png)
+
 The normal browsing flow is as follows:
 
 1. The user enters `location`.

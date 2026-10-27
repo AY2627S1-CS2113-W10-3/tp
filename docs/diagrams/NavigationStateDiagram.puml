@@ -1,0 +1,43 @@
+@startuml
+!pragma layout smetana
+hide empty description
+skinparam shadowing false
+skinparam state {
+    BackgroundColor #EAF3FF
+    BorderColor #2F5597
+    FontColor #1F1F1F
+    FontSize 14
+    RoundCorner 15
+}
+skinparam ArrowColor #2F5597
+skinparam ArrowFontColor #1F1F1F
+
+state "Inactive" as INACTIVE : main menu, navigator not in use
+state "Selecting food court" as SELECTING_LOCATION : lists the food courts
+state "Selecting stall" as SELECTING_STALL : lists the stalls of the chosen court
+state "Showing menu" as SHOWING_MENU : shows the items and prices of the chosen stall
+
+[*] --> INACTIVE
+
+INACTIVE --> SELECTING_LOCATION : location
+SELECTING_LOCATION --> SELECTING_STALL : valid number
+SELECTING_STALL --> SHOWING_MENU : valid number
+
+SHOWING_MENU --> SELECTING_STALL : back
+SELECTING_STALL --> SELECTING_LOCATION : back
+SELECTING_LOCATION --> INACTIVE : back
+
+SELECTING_LOCATION --> SELECTING_LOCATION : number out of range\n(error shown)
+SELECTING_STALL --> SELECTING_STALL : number out of range\n(error shown)
+
+note right of INACTIVE
+  **From any state:**
+  location: restart at Selecting food court
+  home: return to Inactive
+  FOOD_COURT / STALL: jump to Showing menu
+  (e.g. PGPR / Chicken Rice)
+
+  A number or back is only treated as
+  navigation while the navigator is active.
+end note
+@enduml

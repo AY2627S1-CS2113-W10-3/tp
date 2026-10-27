@@ -1,0 +1,46 @@
+@startuml
+skinparam shadowing false
+hide footbox
+
+actor User
+participant ":TextUi" as Ui
+participant ":BudgetBite" as BB
+participant ":Parser" as Parser
+participant "command:AddExpenseCommand" as Cmd
+participant ":ExpensesManager" as Exp
+participant ":StorageFile" as Storage
+
+User -> Ui : types "add expense ..."
+activate Ui
+Ui --> BB : userInput
+deactivate Ui
+activate BB
+
+BB -> Parser : parseCommand(trimmedInput)
+activate Parser
+create Cmd
+Parser -> Cmd
+Parser --> BB : command
+deactivate Parser
+
+BB -> Cmd : execute()
+activate Cmd
+Cmd -> Exp : add expense
+activate Exp
+Exp --> Cmd
+deactivate Exp
+Cmd --> BB : response
+deactivate Cmd
+
+BB -> BB : saveData(response)
+BB -> Storage : save(ratings, expenses, budget)
+activate Storage
+Storage --> BB
+deactivate Storage
+
+BB -> Ui : showResponseToUser(response)
+activate Ui
+Ui --> User : show response
+deactivate Ui
+deactivate BB
+@enduml

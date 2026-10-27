@@ -1,0 +1,45 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+hide footbox
+
+participant ":BudgetBite" as BB
+participant ":StorageFile" as SF
+participant "Encoder" as Enc <<static>>
+participant "Files" as Files <<java.nio>>
+
+BB -> SF : save(ratings, expenses, budget)
+activate SF
+
+SF -> Enc : encodeExpenses(expenses)
+activate Enc
+Enc --> SF : expense lines
+deactivate Enc
+SF -> SF : writeLines(expensesPath, lines)
+activate SF
+SF -> Files : createDirectories(data folder)
+SF -> Files : write(expensesPath, lines)
+deactivate SF
+
+SF -> Enc : encodeRatings(ratings)
+activate Enc
+Enc --> SF : rating lines
+deactivate Enc
+SF -> SF : writeLines(ratingsPath, lines)
+activate SF
+SF -> Files : write(ratingsPath, lines)
+deactivate SF
+
+SF -> SF : encodeBudget(budget)
+note right
+  one line if a budget is set,
+  otherwise an empty list
+end note
+SF -> SF : writeLines(budgetPath, lines)
+activate SF
+SF -> Files : write(budgetPath, lines)
+deactivate SF
+
+SF --> BB
+deactivate SF
+@enduml

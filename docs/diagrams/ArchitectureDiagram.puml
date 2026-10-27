@@ -1,0 +1,50 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+component "BudgetBite\n(Main)" as Main
+
+package "UI" {
+    [TextUi]
+}
+
+package "Navigation" {
+    [MenuNavigator]
+    [FoodDirectory]
+}
+
+package "Parser and Command" {
+    [Parser]
+    [Command]
+}
+
+package "Model" {
+    [ExpensesManager]
+    [RatingsManager]
+    [BudgetManager]
+}
+
+package "Storage" {
+    [StorageFile]
+}
+
+database "data/*.txt" as Files
+
+Main -down-> [TextUi] : reads input,\nshows output
+Main -down-> [MenuNavigator] : navigation input
+Main -down-> [Parser] : parseCommand
+Main -down-> [Command] : execute
+Main -down-> [StorageFile] : load at start,\nsave after each command
+
+[Parser] .right.> [Command] : creates
+[Command] -down-> [ExpensesManager]
+[Command] -down-> [RatingsManager]
+[Command] -down-> [BudgetManager]
+[MenuNavigator] -right-> [FoodDirectory]
+
+[StorageFile] .up.> [ExpensesManager] : encodes/decodes
+[StorageFile] .up.> [RatingsManager] : encodes/decodes
+[StorageFile] .up.> [BudgetManager] : encodes/decodes
+[StorageFile] -down-> Files : reads/writes
+@enduml

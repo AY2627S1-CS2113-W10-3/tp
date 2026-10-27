@@ -208,7 +208,7 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 | v1.0 | frequent user | jump directly to a stall's menu by name | skip the step-by-step browsing process |
 |v2.0|user|find a to-do item by name|locate a to-do without having to go through the entire list|
 
-## Non-Functional Requirements
+## Non-Functional Requirementsß
 
 {Give non-functional requirements}
 

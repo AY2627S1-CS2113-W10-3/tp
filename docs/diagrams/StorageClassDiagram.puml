@@ -1,0 +1,58 @@
+@startuml
+!pragma layout smetana
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+hide circle
+
+package "seedu.duke.storage" {
+    class StorageFile {
+        {static} +DEFAULT_DATA_FOLDER: String
+        {static} +DEFAULT_EXPENSES_STORAGE_FILEPATH: String
+        {static} +DEFAULT_RATINGS_STORAGE_FILEPATH: String
+        -expensesPath: Path
+        -ratingsPath: Path
+        -budgetPath: Path
+        +StorageFile()
+        +StorageFile(expensesFilePath, ratingsFilePath)
+        +save(ratings, expenses, budget)
+        +loadRatings(): RatingsManager
+        +loadExpenses(): ExpensesManager
+        +loadBudget(): BudgetManager
+    }
+
+    class Encoder <<utility>> {
+        {static} +encodeExpenses(expenses): ArrayList<String>
+        {static} +encodeRatings(ratings): ArrayList<String>
+    }
+
+    class Decoder <<utility>> {
+        {static} +decodeExpenses(lines): ExpensesManager
+        {static} +decodeRatings(lines): RatingsManager
+    }
+}
+
+class BudgetBite
+class RatingsManager
+class ExpensesManager
+class BudgetManager
+class Budget
+class BudgetBiteException
+class "data/expenses.txt\ndata/ratings.txt\ndata/budget.txt" as DataFiles <<file>>
+
+BudgetBite .right.> StorageFile : saves and loads data with
+StorageFile .down.> Encoder : encodes with
+StorageFile .down.> Decoder : decodes with
+StorageFile .right.> BudgetBiteException : throws
+
+StorageFile ..> RatingsManager
+StorageFile ..> ExpensesManager
+StorageFile ..> BudgetManager
+BudgetManager --> "0..1" Budget
+
+Encoder ..> RatingsManager
+Encoder ..> ExpensesManager
+Decoder ..> RatingsManager
+Decoder ..> ExpensesManager
+
+StorageFile -down-> DataFiles : reads/writes
+@enduml

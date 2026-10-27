@@ -1,0 +1,91 @@
+@startuml
+!pragma layout smetana
+hide circle
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class BudgetBite
+class Parser {
+  +parseCommand(userCommandText: String): Command
+}
+class Command {
+  +execute(): String
+}
+
+package "Rating commands" {
+  class RateCommand {
+    -arguments: String
+    +execute(): String
+    -parseFields(): Map<String, String>
+  }
+  class ListRatingsCommand {
+    +execute(): String
+  }
+  class EditRatingsCommand {
+    -arguments: String
+    +execute(): String
+  }
+  class DeleteRatingCommand {
+    -arguments: String
+    +execute(): String
+  }
+}
+
+package "Expense and budget commands" {
+  class LogExpenseCommand
+  class ListExpensesCommand
+  class EditExpenseCommand
+  class DeleteExpenseCommand
+  class SetBudgetCommand
+  class BudgetCommand
+}
+
+package "General commands" {
+  class HelpCommand
+  class ByeCommand
+  class UnknownCommand
+}
+
+class RatingArguments <<utility>> {
+  +splitAtScore(arguments: String): String[]
+  +parseScore(scoreText: String): float
+}
+class ExpenseArguments <<utility>> {
+  +parseIndex(indexText: String): int
+}
+
+class RatingsManager
+class ExpensesManager
+class BudgetManager
+
+BudgetBite --> "1" Parser
+BudgetBite ..> Command : executes >
+Parser ..> Command : creates >
+Parser --> "1" RatingsManager
+Parser --> "1" ExpensesManager
+Parser --> "1" BudgetManager
+
+Command <|-- RateCommand
+Command <|-- ListRatingsCommand
+Command <|-- EditRatingsCommand
+Command <|-- DeleteRatingCommand
+Command <|-- LogExpenseCommand
+Command <|-- ListExpensesCommand
+Command <|-- EditExpenseCommand
+Command <|-- DeleteExpenseCommand
+Command <|-- SetBudgetCommand
+Command <|-- BudgetCommand
+Command <|-- HelpCommand
+Command <|-- ByeCommand
+Command <|-- UnknownCommand
+
+RateCommand --> "1" RatingsManager
+ListRatingsCommand --> "1" RatingsManager
+EditRatingsCommand --> "1" RatingsManager
+DeleteRatingCommand --> "1" RatingsManager
+
+EditRatingsCommand ..> RatingArguments
+EditRatingsCommand ..> ExpenseArguments
+DeleteRatingCommand ..> ExpenseArguments
+@enduml

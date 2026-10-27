@@ -177,6 +177,107 @@ pgpr / chicken rice
 The direct-navigation format must contain exactly one food court and one stall.
 Inputs with missing parts or additional path sections are rejected.
 
+### Food Ratings
+
+#### Rate a food item: `rate`
+
+Gives a score from 0 to 10 to a food item from a stall, so you remember what
+you liked.
+
+Format:
+
+```text
+rate /stall STALL /food FOOD /score SCORE
+```
+
+* All three fields are needed, and each can be given only once. They can be in
+  any order.
+* `STALL` and `FOOD` can contain spaces.
+* `SCORE` must be a number from 0 to 10. Decimals are allowed, e.g. `7.5`.
+  Scores are shown and saved to 1 decimal place.
+
+Example:
+
+```text
+rate /stall Chicken Rice /food Roast Chicken Rice /score 8
+```
+
+Expected output:
+
+```text
+Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
+```
+
+#### List all ratings: `list-ratings`
+
+Shows all your ratings, numbered.
+
+Format:
+
+```text
+list-ratings
+```
+
+Expected output:
+
+```text
+Your ratings:
+1. Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
+2. Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+```
+
+If you have no ratings yet, BudgetBite shows
+`No ratings yet. Try: rate /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+
+#### Edit a rating: `edit-rating`
+
+Changes the score of a rating. Its stall and food stay the same.
+
+Format:
+
+```text
+edit-rating INDEX /score SCORE
+```
+
+* `INDEX` is the number shown by `list-ratings`. It must be a positive whole
+  number.
+* `SCORE` follows the same rules as in `rate`.
+
+Example:
+
+```text
+edit-rating 1 /score 9
+```
+
+Expected output:
+
+```text
+Updated rating 1: Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 9.0
+```
+
+#### Delete a rating: `delete-rating`
+
+Deletes a rating.
+
+Format:
+
+```text
+delete-rating INDEX
+```
+
+Example:
+
+```text
+delete-rating 2
+```
+
+Expected output:
+
+```text
+Deleted: Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+Ratings left: 1
+```
+
 ### Expense Tracking
 
 #### Log an expense: `log-expense`
@@ -362,6 +463,14 @@ If no budget is set, BudgetBite shows
 **Q**: How do I transfer my data to another computer? 
 
 **A**: {your answer here}
+
+## Known issues
+
+* **Ratings are not checked against the food menus.** `rate` accepts any stall
+  and food name, even ones that are not in BudgetBite's food courts, e.g.
+  `rate /stall Unknown Stall /food Anything /score 5`. Rating the same food
+  twice also adds a second rating instead of replacing the first. To fix a
+  wrong rating, use `edit-rating` or `delete-rating`.
 
 ## Command Summary
 

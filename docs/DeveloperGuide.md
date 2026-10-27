@@ -8,6 +8,63 @@
 
 {Describe the design and implementation of the product. Use UML diagrams and short code snippets where applicable.}
 
+### Parser and Command component
+
+**API:** `Parser.java`, `Command.java`
+
+![Command Class Diagram](images/CommandClassDiagram.png)
+
+The `Parser` turns what the user typed into a `Command` object, and each
+`Command` does the actual work when it is executed.
+
+1. `BudgetBite` reads a line of input. Navigation input (`home`, `location`,
+   `FOOD_COURT / STALL`, and numbers or `back` while browsing) goes to
+   `MenuNavigator` (see [Navigation component](#navigation-component)).
+   Everything else goes to `Parser#parseCommand`.
+2. `Parser` splits the input into the command word (not case-sensitive) and the
+   rest of the line (the arguments). It creates the matching command, giving it
+   the arguments and only the managers that command needs. For example,
+   `RateCommand` gets the `RatingsManager`. Unknown command words give an
+   `UnknownCommand`, which points the user to `help`.
+3. `BudgetBite` calls `Command#execute()`, which returns the response as a
+   `String`. `TextUi` shows the response, and then all data is saved.
+
+Each command checks its own arguments inside `execute()`. Input rules shared by
+several commands are kept in helper classes: `RatingArguments` for scores and
+`ExpenseArguments` for costs, dates and indexes. When the input is invalid, the
+command returns an error message together with the correct format, instead of
+throwing an exception. As a safety net, `BudgetBite#executeCommand` catches any
+unexpected exception, so a single bad command cannot crash the app and lose the
+user's data.
+
+#### Design considerations
+
+**Aspect: Where the arguments of a command are parsed**
+
+* **Alternative 1 (current choice):** `Parser` only picks the command; each
+  command parses its own arguments.
+    * Pros: `Parser` stays short, and all the rules of a command are in one
+      class, so a new command does not change how the others work.
+    * Cons: Commands with similar input must share helper classes, such as
+      `ExpenseArguments`, to stay consistent.
+* **Alternative 2:** `Parser` parses all arguments and passes ready-made values
+  (e.g. an `int` index) to each command.
+    * Pros: Commands only contain the logic of the feature.
+    * Cons: `Parser` grows with every command and needs to know the input rules
+      of every feature.
+
+**Aspect: How a command shows its result**
+
+* **Alternative 1 (current choice):** `execute()` returns the response as a
+  `String`, and `BudgetBite` passes it to `TextUi`.
+    * Pros: Commands do not depend on the UI, and tests can simply check the
+      returned text.
+    * Cons: A command cannot show output in several steps.
+* **Alternative 2:** Commands print their output directly through `TextUi`.
+    * Pros: More flexible output.
+    * Cons: Every command depends on the UI, and tests have to capture what is
+      printed.
+
 ### Model component
 
 ![Model Class Diagram](images/ModelClassDiagram.png)
@@ -16,49 +73,7 @@ The model holds all user data in memory while the app runs:
 
 * `RatingsManager` holds a list of `Rating`s (stall, food and a score from 0 to 10).
 * `ExpensesManager` holds a list of `Expense`s (food name, cost and date). It can
-  total all expenses, or only those betwee@startuml
-!pragma layout smetana
-hide empty description
-skinparam shadowing false
-skinparam state {
-    BackgroundColor #EAF3FF
-    BorderColor #2F5597
-    FontColor #1F1F1F
-    FontSize 14
-    RoundCorner 15
-}
-skinparam ArrowColor #2F5597
-skinparam ArrowFontColor #1F1F1F
-
-state "Inactive" as INACTIVE : main menu, navigator not in use
-state "Selecting food court" as SELECTING_LOCATION : lists the food courts
-state "Selecting stall" as SELECTING_STALL : lists the stalls of the chosen court
-state "Showing menu" as SHOWING_MENU : shows the items and prices of the chosen stall
-
-[*] --> INACTIVE
-
-INACTIVE --> SELECTING_LOCATION : location
-SELECTING_LOCATION --> SELECTING_STALL : valid number
-SELECTING_STALL --> SHOWING_MENU : valid number
-
-SHOWING_MENU --> SELECTING_STALL : back
-SELECTING_STALL --> SELECTING_LOCATION : back
-SELECTING_LOCATION --> INACTIVE : back
-
-SELECTING_LOCATION --> SELECTING_LOCATION : number out of range\n(error shown)
-SELECTING_STALL --> SELECTING_STALL : number out of range\n(error shown)
-
-note right of INACTIVE
-  **From any state:**
-  location: restart at Selecting food court
-  home: return to Inactive
-  FOOD_COURT / STALL: jump to Showing menu
-  (e.g. PGPR / Chicken Rice)
-
-  A number or back is only treated as
-  navigation while the navigator is active.
-end note
-@endumln two dates.
+  total all expenses, or only those between two dates.
 * `BudgetManager` holds at most one `Budget` (a `BudgetPeriod` and an amount). It
   works out how much of the budget has been spent by asking `ExpensesManager`
   for totals.
@@ -197,6 +212,72 @@ so floating-point errors never count as being over. The budget is saved to
     * Cons: Needs extra commands to choose and delete budgets, and longer
       messages after each expense.
 
+### Rating food
+
+#### Implementation
+
+The rating feature lets users rate, list, edit and delete ratings of the food
+they ate (`rate`, `list-ratings`, `edit-rating`, `delete-rating`). Each `Rating`
+holds a stall name, a food name and a score from 0 to 10, and all ratings are
+kept in a `RatingsManager`.
+
+The sequence diagram below shows how `rate /stall Ah Hock /food Laksa /score 8`
+is executed.
+
+![Rate Sequence Diagram](images/RateSequenceDiagram.png)
+
+1. `Parser` sees the command word `rate` and creates a `RateCommand` with the
+   rest of the line and the `RatingsManager`.
+2. `RateCommand#parseFields` splits the arguments into words. A word starting
+   with `/` starts a new field, and the words after it, up to the next field,
+   are its value. So stall and food names can contain spaces, and the fields
+   can be in any order. The input is rejected if a field is unknown, repeated
+   or empty, or if there is text before the first field.
+3. The score is read with `Float.parseFloat` and must be between 0 and 10.
+   Decimal scores such as `7.5` are allowed.
+4. A new `Rating` is created and added with `RatingsManager#addRating`. The
+   `Rating` constructor checks the stall, food and score again, so an invalid
+   `Rating` can never exist, even when it is created somewhere else, e.g. while
+   loading the data file.
+
+`edit-rating INDEX /score SCORE` uses `RatingArguments#splitAtScore` and
+`RatingArguments#parseScore` to read the new score, and
+`ExpenseArguments#parseIndex` to read the index. `Rating` objects cannot be
+changed after creation, so `RatingsManager#editRating` creates a new `Rating`
+with the same stall and food and the new score, and puts it in place of the old
+one. `delete-rating INDEX` reads the index the same way and calls
+`RatingsManager#deleteRating`.
+
+Ratings are saved to `data/ratings.txt` in the format `STALL|FOOD|SCORE`, with
+the score rounded to 1 decimal place, e.g. `Chicken Rice|Roast Chicken Rice|8.0`.
+Invalid lines are skipped when the file is loaded.
+
+#### Design considerations
+
+**Aspect: Format of the `rate` command**
+
+* **Alternative 1 (current choice):** Named fields: `/stall`, `/food` and
+  `/score`.
+    * Pros: Names can contain spaces, the fields can be typed in any order, and
+      the command is easy to read.
+    * Cons: More to type, and needs its own parsing code.
+* **Alternative 2:** Fixed positions, e.g. `rate STALL FOOD SCORE`.
+    * Pros: Shorter to type.
+    * Cons: Names with spaces, such as `Chicken Rice`, cannot be told apart from
+      the next field.
+
+**Aspect: How a score is edited**
+
+* **Alternative 1 (current choice):** `Rating` cannot be changed; editing
+  replaces it with a new `Rating`.
+    * Pros: All checks are in the `Rating` constructor, and a `Rating` cannot be
+      changed by accident from elsewhere in the code.
+    * Cons: A new object is created for every edit.
+* **Alternative 2:** Add a `setScore` method to `Rating`.
+    * Pros: Simpler edit code.
+    * Cons: The score check must be repeated in the setter, and any code holding
+      a `Rating` could change it.
+
 ### Navigation component
 
 **API:** `MenuNavigator.java`, `FoodDirectory.java`
@@ -310,6 +391,33 @@ navigation using `FOOD_COURT / STALL`.
 
    Use case ends.
 
+**Extensions**
+
+* 1a. User enters a food court and stall directly using
+  `FOOD_COURT / STALL`.
+
+    * 1a1. BudgetBite displays the selected stall's menu.
+
+      Use case ends.
+
+* 1b. The direct-navigation format is invalid, or the stall does not exist.
+
+    * 1b1. BudgetBite displays an error message.
+
+      Use case ends.
+
+* 3a. The selected food court number is invalid.
+
+    * 3a1. BudgetBite displays an error message.
+
+      Use case resumes at step 3.
+
+* 5a. The selected stall number is invalid.
+
+    * 5a1. BudgetBite displays an error message.
+
+      Use case resumes at step 5.
+
 ### Use case: UC02 - Log an expense
 
 **MSS (Main Success Scenario)**
@@ -382,32 +490,40 @@ navigation using `FOOD_COURT / STALL`.
 
       Use case resumes at step 2.
 
+### Use case: UC05 - Rate a food item
+
+**MSS (Main Success Scenario)**
+
+1. User browses food menus (UC01) to find the stall and food to rate.
+2. User enters the stall, the food and a score from 0 to 10.
+3. BudgetBite records the rating and shows it.
+
+   Use case ends.
+
 **Extensions**
 
-* 1a. User enters a food court and stall directly using
-  `FOOD_COURT / STALL`.
+* 1a. User already knows the stall and food names.
 
-    * 1a1. BudgetBite displays the selected stall's menu.
+  Use case resumes at step 2.
+
+* 2a. The stall, food or score is missing, or a field is repeated or unknown.
+
+    * 2a1. BudgetBite shows an error message and the correct format.
 
       Use case ends.
 
-* 3a. The selected food court number is invalid.
+* 2b. The score is not a number, or is not between 0 and 10.
 
-    * 3a1. BudgetBite displays an error message.
+    * 2b1. BudgetBite shows an error message.
+
+      Use case ends.
+
+* 2c. The stall or food is not in BudgetBite's food menus.
+
+    * 2c1. BudgetBite does not check this and accepts the rating (see Known
+      issues in the User Guide).
 
       Use case resumes at step 3.
-
-* 5a. The selected stall number is invalid.
-
-    * 5a1. BudgetBite displays an error message.
-
-      Use case resumes at step 5.
-
-* 1b. The direct-navigation format is invalid, or the stall does not exist.
-
-    * 1b1. BudgetBite displays an error message.
-
-      Use case ends.
 
 ## Product scope
 
@@ -460,21 +576,44 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 | v1.0 | student looking for food | browse the food courts and stalls on campus | decide where to eat |
 | v1.0 | student looking for food | view the dishes and prices at a stall | choose a dish within my budget |
 | v1.0 | frequent user | jump directly to a stall's menu by name | skip the step-by-step browsing process |
-|| v1.0 | student | log what I spend on food | know where my money goes |
+| v1.0 | student | rate a dish I ate from 0 to 10 | remember how much I liked it |
+| v1.0 | student deciding what to eat | see all my ratings | pick a dish I enjoyed before |
+| v2.0 | student who changed their mind | edit the score of a rating | keep my ratings up to date |
+| v2.0 | user who makes mistakes | delete a rating | remove wrong or unwanted ratings |
+| v1.0 | student | log what I spend on food | know where my money goes |
 | v1.0 | student | see all my expenses and the total | know how much I have spent |
 | v1.0 | user who makes mistakes | edit or delete an expense | fix wrong entries |
 | v2.0 | student on a budget | set a daily, weekly or monthly food budget | control my spending |
 | v2.0 | student on a budget | see how much of my budget is left | decide how much I can spend on my next meal |
 | v2.0 | student on a budget | be warned when I am close to or over my budget | cut back before I overspend |
-| v2.0 | student who forgets to log | log an expense with an earlier date | keep my records and budget accurate ||
+| v2.0 | student who forgets to log | log an expense with an earlier date | keep my records and budget accurate |
 
-## Non-Functional Requirementsß
+## Non-Functional Requirements
 
-{Give non-functional requirements}
+1. Should work on any *mainstream OS* with Java 25 installed.
+2. Should work without an internet connection.
+3. Should respond to any command within 1 second with up to 1000 ratings and
+   1000 expenses saved.
+4. Should not lose data if the app is closed suddenly: data is saved after every
+   command.
+5. Data should be stored in human-readable text files, and a damaged line in a
+   file should be skipped instead of stopping the app from starting.
+6. A user who types fast should be able to rate food and log expenses faster
+   than with an app that needs a mouse.
+7. Is meant for a single user on one computer.
 
 ## Glossary
 
-* *glossary item* - Definition
+* *Mainstream OS* - Windows, Linux, Unix and macOS.
+* *Food court* - A place on campus with several food stalls, e.g. `PGPR`.
+* *Stall* - A shop in a food court that sells a menu of food items.
+* *Rating* - A score from 0 to 10 that the user gives a food item from a stall.
+* *Expense* - An amount the user spent on food, with the food name and date.
+* *Budget* - The most the user wants to spend on food in a day, week or month.
+* *Index* - The number shown next to an item in `list-ratings` or
+  `list-expenses`, starting from 1.
+* *Prefix* - A word starting with `/` that marks a field in a command, e.g.
+  `/score`.
 
 ## Instructions for manual testing
 
@@ -521,6 +660,43 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 
    Expected: An appropriate error message is shown and the application
    continues running.
+
+### Rating food
+
+1. Enter `rate /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+
+   Expected: `Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0`
+
+2. Enter `rate /food Beef Pho /score 7.5 /stall Vietnamese`, then
+   `list-ratings`.
+
+   Expected: Both ratings are listed, numbered 1 and 2. This confirms that the
+   fields can be in any order.
+
+3. Enter `edit-rating 1 /score 9`, then `delete-rating 2`, then `list-ratings`.
+
+   Expected: Only `1. Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 9.0`
+   is listed.
+
+4. Close the app, start it again, and enter `list-ratings`.
+
+   Expected: The same rating is listed.
+
+5. Test invalid inputs by entering:
+
+    * `rate`
+    * `rate /stall Chicken Rice /food Roast Chicken Rice`
+    * `rate /stall A /stall B /food C /score 5`
+    * `rate /stall A /food B /price 5`
+    * `rate /stall A /food B /score 11`
+    * `rate /stall A /food B /score good`
+    * `edit-rating 99 /score 5`
+    * `edit-rating 1 /score -1`
+    * `delete-rating 0`
+    * `delete-rating abc`
+
+   Expected: An error message is shown for each, and no rating is added or
+   changed.
 
 ### Tracking expenses
 

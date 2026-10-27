@@ -1,0 +1,38 @@
+@startuml
+hide footbox
+participant ":BudgetBite" as B
+participant ":Parser" as P
+participant ":RateCommand" as C
+participant ":RatingsManager" as M
+
+[-> B : "rate /stall Ah Hock /food Laksa /score 8"
+activate B
+B -> P : parseCommand("rate /stall Ah Hock /food Laksa /score 8")
+activate P
+create C
+P -> C : new RateCommand("/stall Ah Hock /food Laksa /score 8", ratingsManager)
+P --> B : rateCommand
+deactivate P
+
+B -> C : execute()
+activate C
+C -> C : parseFields()
+activate C
+C --> C : {stall: "Ah Hock", food: "Laksa", score: "8"}
+deactivate C
+
+alt a field is missing, repeated or the score is not between 0 and 10
+  C --> B : error message
+else all fields are valid
+  create ":Rating" as R
+  C -> R : new Rating("Ah Hock", "Laksa", 8.0)
+  C -> M : addRating(rating)
+  activate M
+  M --> C
+  deactivate M
+  C --> B : "Stall: Ah Hock, Food: Laksa, Score: 8.0"
+end
+deactivate C
+[<-- B : show response
+deactivate B
+@enduml

@@ -118,7 +118,7 @@ navigation using `FOOD_COURT / STALL`.
 
 ### Use case: UC01 - Browse food menus
 
-**MSS (Main Success Scenario**
+**MSS (Main Success Scenario)**
 
 1. User enters `location`.
 2. BudgetBite displays the available food courts.

@@ -7,14 +7,15 @@ component "BudgetBite\n(Main)" as Main
 
 package "UI" {
     [TextUi]
+}
+
+package "Navigation" {
     [MenuNavigator]
+    [FoodDirectory]
 }
 
-package "Parser" {
+package "Parser and Command" {
     [Parser]
-}
-
-package "Commands" {
     [Command]
 }
 
@@ -22,7 +23,6 @@ package "Model" {
     [ExpensesManager]
     [RatingsManager]
     [BudgetManager]
-    [FoodDirectory]
 }
 
 package "Storage" {
@@ -41,7 +41,7 @@ Main -down-> [StorageFile] : load at start,\nsave after each command
 [Command] -down-> [ExpensesManager]
 [Command] -down-> [RatingsManager]
 [Command] -down-> [BudgetManager]
-[MenuNavigator] -down-> [FoodDirectory]
+[MenuNavigator] -right-> [FoodDirectory]
 
 [StorageFile] .up.> [ExpensesManager] : encodes/decodes
 [StorageFile] .up.> [RatingsManager] : encodes/decodes

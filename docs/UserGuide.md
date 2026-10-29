@@ -22,7 +22,7 @@ java -version
 
 ### Running the application
 
-1. Download the latest `BudgetBite.jar` file [insert link here]
+1. Download the latest `BudgetBite.jar` from [here](https://github.com/AY2627S1-CS2113-W10-3/tp/releases).
 2. Open a command-line terminal in the folder containing the JAR file.
 3. Run the application:
 

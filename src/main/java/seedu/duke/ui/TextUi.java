@@ -38,7 +38,6 @@ public class TextUi {
             fullInputLine = readLineOrBye();
         }
 
-        showToUser("[Command entered:" + fullInputLine + "]");
         return fullInputLine;
     }
 
@@ -65,7 +64,7 @@ public class TextUi {
      */
     public void showWelcomeMessage(String version) {
 
-        showToUser(DIVIDER, DIVIDER, MESSAGE_WELCOME, "version: ", version, DIVIDER);
+        showToUser(DIVIDER, DIVIDER, MESSAGE_WELCOME, "Version " + version, DIVIDER);
     }
 
     public void showGoodbyeMessage() {

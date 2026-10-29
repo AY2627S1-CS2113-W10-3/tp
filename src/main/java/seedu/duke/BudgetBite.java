@@ -17,7 +17,7 @@ import seedu.duke.food.FoodDirectory;
 
 public class BudgetBite {
 
-    private static final String VERSION = "1.1";
+    private static final String VERSION = "2.0";
     private static final Logger LOGGER = Logger.getLogger(BudgetBite.class.getName());
     private static final String MESSAGE_UNEXPECTED_ERROR =
             "Sorry, something went wrong while running that command. Your data is safe; please try again.";

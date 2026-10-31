@@ -274,14 +274,16 @@ Invalid lines are skipped when the file is loaded.
 
 ### Navigation component
 
-**API:** `MenuNavigator.java`, `FoodDirectory.java`
+**API:** `MenuNavigator.java`, `FoodDirectory.java`, `FoodDataLoader.java`
 
 The navigation component allows users to browse food courts, food stalls, and
 menu items.
 
-`FoodDirectory` stores the food data as a list of `FoodCourt` records. Each
-`FoodCourt` contains a list of `FoodStall` records, and each stall contains a
-list of `FoodItem` records. A `FoodItem` stores the dish name and its price.
+`FoodDirectory` loads the food catalogue from `src/main/resources/food.txt` using
+`FoodDataLoader`. Each non-blank line has the format
+FOOD_COURT|STALL|FOOD_ITEM|PRICE. The loader groups these rows into
+`FoodCourt`, `FoodStall`, and `FoodItem` objects. The resulting food data is
+read-only during execution.
 
 `MenuNavigator` controls the user's current browsing position. It stores the
 current navigation stage, the selected food court, and the selected stall.
@@ -617,12 +619,13 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 
 1. Enter `location`.
 
-   Expected: `Available locations:` is shown, followed by `PGPR` and `YIH`.
+   Expected: `Available locations:` is shown, including `PGPR`, `YIH`,
+   `TECHNO EDGE`, `THE TERRACE`, `THE DECK`, `FRONTIER`, `FLAVOURS`, and `FINE FOOD`.
 
 2. Enter `1`.
 
-   Expected: `Stalls in PGPR:` is shown, followed by `Vietnamese` and
-   `Chicken Rice`.
+   Expected: `Stalls in PGPR:` is shown, including `Vietnamese`,
+   `Chicken Rice`, `PGP Western`, and `Chef Wok`.
 
 3. Enter `1`.
 

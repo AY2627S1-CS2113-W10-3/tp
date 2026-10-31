@@ -50,7 +50,7 @@ bye
 
 #### Browse food courts: `location`
 
-The `location` command shows a list of available food stalls.
+The `location` command shows a list of available food courts.
 
 Format:
 
@@ -70,6 +70,12 @@ Expected output:
 Available locations:
 1. PGPR
 2. YIH
+3. TECHNO EDGE
+4. THE TERRACE
+5. THE DECK
+6. FRONTIER
+7. FLAVOURS
+8. FINE FOOD
 ```
 
 Enter the index of the food court to view its corresponding stalls.
@@ -86,6 +92,8 @@ Expected output:
 Stalls in PGPR:
 1. Vietnamese
 2. Chicken Rice
+3. PGP Western
+4. Chef Wok
 ```
 
 Enter the index of a stall to view its corresponding menu items.
@@ -164,6 +172,12 @@ Menu for Chicken Rice:
 Char Siew Rice - $3.30
 Roast Chicken Rice - $3.30
 Toufu Vegetable Rice Set - $2.80
+```
+If the food court exists but the stall does not, BudgetBite shows:
+
+```text
+Unknown stall in PGPR: Unknown Stall
+Please check the stall name and try again.
 ```
 
 Food court and stall names are case-insensitive. For example, the following
@@ -457,12 +471,6 @@ Remaining this week: $5.00
 
 If no budget is set, BudgetBite shows
 `No budget set yet. Try: set-budget weekly 50`.
-
-## FAQ
-
-**Q**: How do I transfer my data to another computer? 
-
-**A**: {your answer here}
 
 ## Known issues
 

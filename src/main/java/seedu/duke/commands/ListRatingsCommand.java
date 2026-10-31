@@ -23,7 +23,7 @@ public class ListRatingsCommand extends Command {
     @Override
     public String execute() {
         if (ratingsManager.isEmpty()) {
-            return "No ratings yet. Try: rate /stall Chicken Rice /food Roast Chicken Rice /score 8";
+            return "No ratings yet. Try: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8";
         }
         return "Your ratings:" + ratingsManager;
     }

@@ -123,17 +123,21 @@ public class MenuNavigatorTest {
 
     @Test
     public void directNavigation_unknownFoodCourt_showsError() {
-        String response = navigator.navigateDirectly("Unknown Court / Chicken Rice");
+        String response =
+                navigator.navigateDirectly("Unknown Court / Chicken Rice");
 
-        assertTrue(response.contains("Unknown food court"));
+        assertTrue(response.contains("Unknown food court: Unknown Court"));
         assertFalse(navigator.isActive());
     }
 
     @Test
     public void directNavigation_unknownStall_showsError() {
-        String response = navigator.navigateDirectly("PGPR / Unknown Stall");
+        String response =
+                navigator.navigateDirectly("PGPR / Unknown Stall");
 
-        assertTrue(response.contains("Unknown stall"));
+        assertTrue(response.contains("Unknown stall in PGPR: Unknown Stall\n"
+                + "Please check the stall name and try again."));
+
         assertFalse(navigator.isActive());
     }
 

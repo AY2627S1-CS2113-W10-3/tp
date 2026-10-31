@@ -223,7 +223,8 @@ public class MenuNavigator {
 
         FoodStall stall = findStall(foodCourt, path[1]);
         if (stall == null) {
-            return "Unknown stall in " + foodCourt.name() + ": " + path[1];
+            return "Unknown stall in " + foodCourt.name() + ": " + path[1]
+                    + "\nPlease check the stall name and try again.";
         }
 
         selectedFoodCourt = foodCourt;

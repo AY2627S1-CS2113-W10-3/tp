@@ -12,6 +12,7 @@ public class HelpCommand extends Command {
                 + "help\n"
                 + "home\n"
                 + "location\n"
+                + "back (while not in home menu)\n"
                 + "FOOD_COURT / STALL\n"
                 + "rate /stall STALL /food FOOD /score SCORE\n"
                 + "list-ratings\n"

@@ -199,7 +199,7 @@ public class MenuNavigator {
      */
     public boolean isDirectNavigation(String input) {
         String[] path = splitPath(input);
-        return path.length >= 2 && findFoodCourt(path[0]) != null;
+        return path.length >= 2 && foodDirectory.findFoodCourt(path[0]) != null;
     }
 
     /**
@@ -216,12 +216,12 @@ public class MenuNavigator {
             return "Invalid Format\nValid Format: FOOD_COURT / STALL" ;
         }
 
-        FoodCourt foodCourt = findFoodCourt(path[0]);
+        FoodCourt foodCourt = foodDirectory.findFoodCourt(path[0]);
         if (foodCourt == null) {
             return "Unknown food court: " + path[0];
         }
 
-        FoodStall stall = findStall(foodCourt, path[1]);
+        FoodStall stall = foodCourt.findStall(path[1]);
         if (stall == null) {
             return "Unknown stall in " + foodCourt.name() + ": " + path[1]
                     + "\nPlease check the stall name and try again.";
@@ -256,32 +256,6 @@ public class MenuNavigator {
         }
 
         return false;
-    }
-
-    /**
-     * Finds a food court by name, ignoring letter case.
-     */
-    private FoodCourt findFoodCourt(String name) {
-        for (FoodCourt foodCourt : foodDirectory.getLocations()) {
-            if (foodCourt.name().equalsIgnoreCase(name.trim())) {
-                return foodCourt;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Finds a stall inside a food court by name, ignoring letter case.
-     */
-    private FoodStall findStall(FoodCourt foodCourt, String name) {
-        for (FoodStall stall : foodCourt.stalls()) {
-            if (stall.name().equalsIgnoreCase(name.trim())) {
-                return stall;
-            }
-        }
-
-        return null;
     }
 
     /**

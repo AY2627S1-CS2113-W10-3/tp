@@ -14,7 +14,7 @@ public class HelpCommand extends Command {
                 + "location\n"
                 + "back (while not in home menu)\n"
                 + "FOOD_COURT / STALL\n"
-                + "rate /stall STALL /food FOOD /score SCORE\n"
+                + "rate /location LOCATION /stall STALL /food FOOD /score SCORE\n"
                 + "list-ratings\n"
                 + "edit-rating INDEX /score SCORE\n"
                 + "delete-rating INDEX\n"

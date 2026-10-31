@@ -23,13 +23,13 @@ public class StorageFileTest {
     private static final double DELTA = 0.001;
 
     @Test
-    public void load_validFormat() throws Exception {
+    public void load_oldFormatWithoutLocation_unknownLocationGiven() throws Exception {
         RatingsManager actualRatingsManager = new StorageFile(
                 "src/test/java/seedu/duke/data/expenses.txt",
                 "src/test/java/seedu/duke/data/ratings.txt").loadRatings();
 
         ArrayList<Rating> expectedRatings = new ArrayList<>();
-        expectedRatings.add(new Rating("fine foods", "korean", 3));
+        expectedRatings.add(new Rating(Rating.UNKNOWN_LOCATION, "fine foods", "korean", 3));
         assertEquals(expectedRatings, actualRatingsManager.getRatings());
     }
 
@@ -72,7 +72,7 @@ public class StorageFileTest {
         ExpensesManager expenses = new ExpensesManager();
         expenses.addExpense(new Expense("Chicken Rice", 4.50));
         RatingsManager ratings = new RatingsManager();
-        ratings.addRating(new Rating("Chicken Rice", "Roasted Chicken Rice", 8));
+        ratings.addRating(new Rating("PGPR", "Chicken Rice", "Roast Chicken Rice", 8));
 
         storage.save(ratings, expenses, new BudgetManager());
         ExpensesManager loadedExpenses = storage.loadExpenses();
@@ -82,6 +82,7 @@ public class StorageFileTest {
         assertEquals("Chicken Rice", loadedExpenses.getExpense(1).getFoodName());
         assertEquals(4.50, loadedExpenses.getExpense(1).getCost(), DELTA);
         assertEquals(ratings.getRatings(), loadedRatings.getRatings());
+        assertEquals("PGPR|Chicken Rice|Roast Chicken Rice|8.0", Files.readAllLines(storage.getRatingsPath()).get(0));
     }
 
     @Test

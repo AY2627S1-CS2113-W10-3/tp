@@ -26,6 +26,7 @@ public class BudgetBite {
     private RatingsManager ratings;
     private ExpensesManager expenses;
     private BudgetManager budget;
+    private FoodDirectory foodDirectory;
 
     private MenuNavigator menuNavigator;
 
@@ -56,7 +57,7 @@ public class BudgetBite {
             this.expenses = storage.loadExpenses();
             this.budget = storage.loadBudget();
 
-            FoodDirectory foodDirectory = new FoodDirectory();
+            this.foodDirectory = new FoodDirectory();
             this.menuNavigator = new MenuNavigator(foodDirectory);
 
             ui.showWelcomeMessage(VERSION);
@@ -82,7 +83,7 @@ public class BudgetBite {
      */
     private void runCommandLoopUntilExitCommand() {
 
-        Parser parser = new Parser(ratings, expenses, budget);
+        Parser parser = new Parser(ratings, expenses, budget, foodDirectory);
         boolean isExiting = false;
 
         while (!isExiting) {

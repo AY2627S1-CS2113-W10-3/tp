@@ -15,10 +15,10 @@ public class RatingsManagerTest {
     private RatingsManager ratingsManager;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws BudgetBiteException {
         ratingsManager = new RatingsManager();
-        ratingsManager.addRating(new Rating("Vietnamese", "Beef Pho", 8));
-        ratingsManager.addRating(new Rating("Indian", "Plain Dosai", 6.5f));
+        ratingsManager.addRating(new Rating("PGPR", "Vietnamese", "Beef Pho", 8));
+        ratingsManager.addRating(new Rating("YIH", "Indian", "Plain Dosai", 6.5f));
     }
 
     @Test
@@ -67,8 +67,8 @@ public class RatingsManagerTest {
 
     @Test
     public void toString_twoRatings_numberedList() {
-        String expected = "\n1. Stall: Vietnamese, Food: Beef Pho, Score: 8.0"
-                + "\n2. Stall: Indian, Food: Plain Dosai, Score: 6.5";
+        String expected = "\n1. Beef Pho (Vietnamese, PGPR) - 8.0/10"
+                + "\n2. Plain Dosai (Indian, YIH) - 6.5/10";
         assertEquals(expected, ratingsManager.toString());
     }
 }

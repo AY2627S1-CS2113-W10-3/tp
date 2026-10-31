@@ -19,12 +19,17 @@ import seedu.duke.ratings.RatingsManager;
  * The location, stall and food must all exist in the catalogue, so the user cannot rate
  * a place BudgetBite does not know about. Names are matched ignoring letter case,
  * and the rating is saved with the names as they appear in the catalogue.
+ *
+ * <p>If the arguments end with {@code ?} (or Tab), the valid names for the field being typed
+ * are shown instead, e.g. {@code rate /location PGPR /stall ?} lists the stalls in PGPR.
+ * See {@link RateSuggestions}.</p>
  */
 public class RateCommand extends Command {
     public static final String COMMAND_WORD = "rate";
     public static final String MESSAGE_USAGE =
             "Format: rate /location LOCATION /stall STALL /food FOOD /score SCORE\n"
-            + "Example: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8";
+            + "Example: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8\n"
+            + "Tip: end with ? (or press Tab) and Enter to see the options, e.g. rate /location PGPR /stall ?";
 
     static final String FIELD_PREFIX = "/";
     /** Fields the command needs, in the order they are reported as missing. */
@@ -52,6 +57,10 @@ public class RateCommand extends Command {
     @Override
     public String execute() {
         try {
+            if (RateSuggestions.isRequest(arguments)) {
+                return RateSuggestions.suggest(arguments, foodDirectory);
+            }
+
             Map<String, String> fields = parseFields();
             FoodCourt foodCourt = findFoodCourt(foodDirectory, fields.get("location"));
             FoodStall stall = findStall(foodCourt, fields.get("stall"));
@@ -95,7 +104,7 @@ public class RateCommand extends Command {
      * Splits the arguments into fields, e.g. {@code "/stall Chicken Rice /score 8"} gives
      * {@code {stall=Chicken Rice, score=8}}. A word starting with '/' starts a new field,
      * and the words after it, up to the next field, are its value. Fields can be in any order.
-     * Values may be empty and fields may be missing; {@link #parseFields()} checks for those.
+     * Used both for rating and for suggestions, so values may be empty and fields may be missing.
      *
      * @param arguments Text after the command word.
      * @return The fields in the order they were typed, mapped to their values.

@@ -129,4 +129,86 @@ public class RateCommandTest {
         assertTrue(response.contains("Please provide /location, /stall, /food and /score."));
     }
 
+    // Suggestions: ending with ? lists the options for the field being typed, and rates nothing.
+
+    @Test
+    public void suggest_nothingTyped_locationsListed() {
+        String response = rate("?");
+
+        assertTrue(response.contains("Start with /location."));
+        assertTrue(response.contains("Locations: PGPR, YIH, TECHNO EDGE"));
+        assertTrue(ratingsManager.isEmpty());
+    }
+
+    @Test
+    public void suggest_emptyLocation_allLocationsListed() {
+        assertTrue(rate("/location ?").startsWith("Locations: PGPR, YIH"));
+        // Also without a space before ?
+        assertTrue(rate("/location?").startsWith("Locations: PGPR, YIH"));
+    }
+
+    @Test
+    public void suggest_partOfStallName_matchingStallsListed() {
+        String response = rate("/location pgpr /stall ch ?");
+
+        assertEquals("Stalls in PGPR matching 'ch': Chicken Rice, Chef Wok", response);
+    }
+
+    @Test
+    public void suggest_food_menuOfStallListed() {
+        String response = rate("/location PGPR /stall Chicken Rice /food ?");
+
+        assertEquals("Menu of Chicken Rice: Char Siew Rice, Roast Chicken Rice, Toufu Vegetable Rice Set",
+                response);
+    }
+
+    @Test
+    public void suggest_foodWordInMiddleOfName_found() {
+        String response = rate("/location PGPR /stall Chicken Rice /food roast ?");
+
+        assertEquals("Menu of Chicken Rice matching 'roast': Roast Chicken Rice", response);
+    }
+
+    @Test
+    public void suggest_noMatch_everythingListed() {
+        String response = rate("/location PGPR /stall pizza ?");
+
+        assertTrue(response.contains("No match for 'pizza'."));
+        assertTrue(response.contains("Stalls in PGPR: Vietnamese, Chicken Rice, PGP Western, Chef Wok"));
+    }
+
+    @Test
+    public void suggest_stallBeforeLocation_askedForLocationFirst() {
+        String response = rate("/stall ?");
+
+        assertTrue(response.contains("Give /location first"));
+    }
+
+    @Test
+    public void suggest_stallWithUnknownLocation_locationsListed() {
+        String response = rate("/location Utown /stall ?");
+
+        assertTrue(response.contains("Unknown location: Utown"));
+        assertTrue(response.contains("Available locations: PGPR"));
+    }
+
+    @Test
+    public void suggest_foodWithoutStall_askedForStallFirst() {
+        String response = rate("/location PGPR /food ?");
+
+        assertTrue(response.contains("Give /stall first, e.g. rate /location PGPR /stall ?"));
+    }
+
+    @Test
+    public void suggest_partOfFieldName_matchingFieldsListed() {
+        assertEquals("Fields matching '/st': /stall", rate("/location PGPR /st?"));
+    }
+
+    @Test
+    public void suggest_score_rulesShown() {
+        String response = rate("/location PGPR /stall Vietnamese /food Beef Pho /score ?");
+
+        assertTrue(response.contains("Score: a number from 0 to 10"));
+        assertTrue(ratingsManager.isEmpty());
+    }
 }

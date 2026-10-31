@@ -1,0 +1,157 @@
+PGPR|Vietnamese|Beef Pho|5.50
+PGPR|Vietnamese|Spring Roll|2.50
+PGPR|Chicken Rice|Char Siew Rice|3.30
+PGPR|Chicken Rice|Roast Chicken Rice|3.30
+PGPR|Chicken Rice|Toufu Vegetable Rice Set|2.80
+PGPR|PGP Western|Grill Chicken Chop|5.50
+PGPR|PGP Western|Fried Chicken Cutlet|5.50
+PGPR|PGP Western|Fried Fish Fillet|6.00
+PGPR|PGP Western|Two Fried Chicken Wing|6.00
+PGPR|Chef Wok|Yangzhou Fried Rice|4.20
+PGPR|Chef Wok|Beef Fried Rice|4.70
+PGPR|Chef Wok|Chicken Fried Rice|4.20
+PGPR|Chef Wok|Sambal Fried Rice|4.20
+PGPR|Chef Wok|Sambal w Rice|4.80
+PGPR|Chef Wok|Black Pepper w Rice|4.80
+PGPR|Chef Wok|Gong Bao w Rice|4.80
+YIH|Tempu Ramen|Chicken Nanban Don|6.50
+YIH|Tempu Ramen|Bonito Beef Donburi|8.90
+YIH|Tempu Ramen|Black Garlic Ramen|7.90
+YIH|Tempu Ramen|Fire Chicken Ramen|8.90
+YIH|Tempu Ramen|Mazesoba|5.80
+YIH|Tempu Ramen|karage Yakisoba|7.50
+YIH|Indian|Plain Dosai|2.90
+YIH|Indian|Bhel Puri|3.00
+YIH|Wok Express|XO Fried Rice Chicken Thigh Prawn|7.20
+YIH|Wok Express|Egg Fried Rice Chicken Thigh Luncheon Meat|7.20
+YIH|Wok Express|Soy Sauce Fried Rice Chicken Thigh Chinese Sausage|7.20
+YIH|Wok Express|Egg Fried Rice Chicken Thigh Chinese Sausage Prawn|7.80
+YIH|Mini Wok|Stir-Fried Egg Noodle|3.50
+YIH|Mini Wok|Stir-Fried Chicken Noodle|5.00
+YIH|Mini Wok|Stir-Fried Pork Noodle|5.00
+YIH|Mini Wok|Stir-Fried Beef Noodle|5.50
+YIH|Mini Wok|Scrambled Egg and Tomato Rice|3.90
+YIH|Mini Wok|Gong Bao Prawn Rice|5.00
+YIH|Mini Wok|Salted Egg Chicken Rice|4.50
+YIH|Mini Wok|Salted Egg Pork Rice|4.50
+TECHNO EDGE|Chicken Rice|Char Siew Hor Fun|3.30
+TECHNO EDGE|Chicken Rice|Roasted Chicken Hor Fun|3.30
+TECHNO EDGE|Chicken Rice|Roasted Pork Hor Fun|3.30
+TECHNO EDGE|Chicken Rice|Steamed Chicken Hor Fun|3.30
+TECHNO EDGE|Bistro Box|Chicken Burger Set|6.30
+TECHNO EDGE|Bistro Box|Double Chicken Burger|9.30
+TECHNO EDGE|Bistro Box|Spicy Chicken Burger|6.30
+TECHNO EDGE|Bistro Box|Double Spicy Chicken Burger|9.30
+TECHNO EDGE|Bistro Box|Ayam Penyet W Butterfly Pea Flower Rice|6.30
+TECHNO EDGE|Bistro Box|Ayam Merah W Butterfly Pea Flower Rice|6.30
+TECHNO EDGE|Bistro Box|Ayam Bakar W Butterfly Pea Flower Rice|6.30
+TECHNO EDGE|Bistro Box|HK Gong Zai Mian|4.80
+TECHNO EDGE|Bistro Box|Spicy Seafood Tom Yum Noodles|6.80
+TECHNO EDGE|Bistro Box|Mushroom Baked Rice|6.50
+TECHNO EDGE|Bistro Box|Chicken Baked Rice|6.50
+THE TERRACE|Local Noodles|Char Siu Mee|4.80
+THE TERRACE|Local Noodles|Fish Ball Bak Chor Mee|4.30
+THE TERRACE|Local Noodles|Fish Ball Mee|3.00
+THE TERRACE|Local Noodles|Fresh Fish Bee Hoon Soup|5.90
+THE TERRACE|Five Grains Noodles|Beef Slice Bee Hoon|6.00
+THE TERRACE|Five Grains Noodles|Braised Chicken Bee Hoon|5.50
+THE TERRACE|Five Grains Noodles|Corn Five Grains Bee Hoon|2.90
+THE TERRACE|Five Grains Noodles|Fragrant Beef Bee Hoon|5.80
+THE TERRACE|Mixed Rice, Mala & Sichuan|Black Pepper Beef Rice Fried Egg|5.80
+THE TERRACE|Mixed Rice, Mala & Sichuan|Black Pepper Chicken Rice Fried Egg|5.00
+THE TERRACE|Mixed Rice, Mala & Sichuan|Economic Fried Bee Hoon|2.80
+THE TERRACE|Mixed Rice, Mala & Sichuan|Ginger n Onion Pork Rice Fried Egg|5.00
+THE TERRACE|Mixed Rice, Mala & Sichuan|Black Pepper Pork Chop Fried Rice|6.00
+THE TERRACE|Mixed Rice, Mala & Sichuan|Egg Fried Rice|4.00
+THE TERRACE|Mixed Rice, Mala & Sichuan|Shrimp Fried Rice|5.00
+THE TERRACE|Mixed Rice, Mala & Sichuan|Chicken Noodles with Chilli Sauce|5.50
+THE TERRACE|Mixed Rice, Mala & Sichuan|MALA Beef Noodle|5.50
+THE TERRACE|Mixed Rice, Mala & Sichuan|Noodle W Fried Sauce|4.50
+THE TERRACE|Mixed Rice, Mala & Sichuan|Pickled Chili Sausage Minced|6.00
+THE TERRACE|Korean & Japanese|Hotplate BBQ Saba Fish Set|5.50
+THE TERRACE|Korean & Japanese|Hotplate Spicy Chicken Set|5.50
+THE TERRACE|Korean & Japanese|Hotplate BBQ Beef Set|6.00
+THE TERRACE|Korean & Japanese|Hotplate BBQ Saba Fish Chicken Set|6.50
+THE TERRACE|Korean & Japanese|Chicken Katsu Ebi Tempura|5.80
+THE TERRACE|Korean & Japanese|Chicken Katsu Saba Fish|5.80
+THE TERRACE|Korean & Japanese|Chicken Katsu Salmon|6.30
+THE TERRACE|Korean & Japanese|Salmon Ebi Tempura|6.30
+THE DECK|Chong Pang Tai Zhi Wei|Braised Beef Bento|5.80
+THE DECK|Chong Pang Tai Zhi Wei|Braised Pork Belly Bento|5.00
+THE DECK|Chong Pang Tai Zhi Wei|Braised Pork Pork Floss Bento|5.00
+THE DECK|Chong Pang Tai Zhi Wei|Braised Beef Noodle Soup|5.50
+THE DECK|Chong Pang Tai Zhi Wei|Fried Instant Noodles|4.50
+THE DECK|Chong Pang Tai Zhi Wei|Nabeyaki Beef Egg Noodles|5.50
+THE DECK|Chong Pang Tai Zhi Wei|Nabeyaki Egg Noodles|5.20
+THE DECK|TD Zi Char|Ginger Onion Chicken Rice|4.50
+THE DECK|TD Zi Char|Gong Bao Prawn Rice|5.50
+THE DECK|TD Zi Char|Salted Egg Chicken Rice|5.00
+THE DECK|TD Zi Char|Salted Egg Pork Rice|5.00
+THE DECK|TD Noodle|Seafood Soup|4.80
+THE DECK|TD Noodle|Fried Fish Bee Hoon Soup|4.80
+THE DECK|TD Noodle|Bitter Gourd Sliced Fish Noodle|4.80
+THE DECK|TD Noodle|Bitter Gourd Sliced Fish Soup with Rice|4.80
+THE DECK|TD Noodle|Ban Mian|3.80
+THE DECK|TD Noodle|Tomato Noodle|4.30
+THE DECK|TD Noodle|Dumpling Noodle Soup|4.80
+THE DECK|TD Noodle|Dry Noodle|4.30
+THE DECK|Roasted Delights|Roasted Chicken Rice|3.30
+THE DECK|Roasted Delights|Steamed Chicken Rice|3.30
+THE DECK|Roasted Delights|Char Siew Rice|3.30
+THE DECK|Roasted Delights|Roasted Pork Rice|3.30
+THE DECK|Japanese|Chicken & Ebi Don|6.00
+THE DECK|Japanese|Chicken & Fish Fillet Don|6.00
+THE DECK|Japanese|Tofu & Curry Don|2.90
+THE DECK|Western|Chicken Chop|5.80
+THE DECK|Western|Grilled Dory Fish|5.80
+THE DECK|Western|Lamb Steak|9.00
+THE DECK|Western|Aus Sirloin Steak|9.00
+FRONTIER|Li Ji Coffee House|Curry Chicken Baked Rice|6.80
+FRONTIER|Li Ji Coffee House|Chicken Baked Rice|6.50
+FRONTIER|Li Ji Coffee House|Mushroom Cheese Baked Rice|6.50
+FRONTIER|Li Ji Coffee House|Egg Fried Rice|5.50
+FRONTIER|Uncle Penyet Fusion|Ayam Penyet Set|6.50
+FRONTIER|Uncle Penyet Fusion|Bebek Penyet|8.80
+FRONTIER|Uncle Penyet Fusion|Lontong|4.00
+FRONTIER|Taiwan Ichiban|Honey Chicken Chop Rice|6.10
+FRONTIER|Taiwan Ichiban|X-Large Chicken Chop Rice|6.10
+FRONTIER|Taiwan Ichiban|Taiwanese Chicken Chop Rice|6.10
+FRONTIER|Taiwan Ichiban|Salted Crispy Chicken Chop Rice|6.10
+FRONTIER|Pasta Express|Creamy Duck|6.60
+FRONTIER|Pasta Express|Bolognese|6.60
+FRONTIER|Pasta Express|Chicken Alfredo|6.60
+FRONTIER|Pasta Express|Smoked Duck Aglio Olio|6.60
+FLAVOURS|Yu Xiang Fang|Roasted Chicken Rice|4.00
+FLAVOURS|Yu Xiang Fang|Roasted Duck Rice|5.00
+FLAVOURS|Yu Xiang Fang|Roasted Duck Noodle|5.50
+FLAVOURS|Yu Xiang Fang|Wanton Noodle|4.50
+FLAVOURS|Yu Xiang Fang|Shredded Chicken Hor Fun|3.50
+FLAVOURS|Haji Karim|Thosai Egg|2.50
+FLAVOURS|Haji Karim|Roti John|5.50
+FLAVOURS|Haji Karim|Nasi Goreng Pataya|7.00
+FLAVOURS|Dan Lao Scrambled Egg Rice|Tomato|5.50
+FLAVOURS|Dan Lao Scrambled Egg Rice|Luncheon|6.00
+FLAVOURS|Dan Lao Scrambled Egg Rice|Chicken|6.80
+FLAVOURS|Dan Lao Scrambled Egg Rice|Char Siew|6.80
+FLAVOURS|Pondok Nasi Lemak|Lontong|4.50
+FLAVOURS|Pondok Nasi Lemak|Mee Rebus|4.50
+FLAVOURS|Pondok Nasi Lemak|Nasi Lemak Set w Beef Rendang|7.80
+FLAVOURS|Pondok Nasi Lemak|Nasi Lemak Set w Curry Chicken|6.80
+FINE FOOD|Scambled Egg Bowl|Original Scrambled Egg Rice with Grilled Chicken|5.20
+FINE FOOD|Scambled Egg Bowl|Korean Spicy Scrambled Egg Rice with Fried Chicken|5.80
+FINE FOOD|Scambled Egg Bowl|Asian Curry Scrambled Egg Rice with Chicken Lunceon Meat|5.20
+FINE FOOD|Scambled Egg Bowl|Scrambled Egg Kimchi Ramen Soup with Grilled Salmon|7.50
+FINE FOOD|Mini Wok|Seafood White Bee Hoon|6.80
+FINE FOOD|Mini Wok|Salted Egg Chicken Cube Rice|6.50
+FINE FOOD|Mini Wok|Beef Fried Rice|5.90
+FINE FOOD|Mini Wok|Hot & Spicy Slice Beef w Rice|7.90
+FINE FOOD|Mini Wok|Fragrant Spicy Beef Brisket Rice|7.90
+FINE FOOD|Thai Cuisine|Mango Salad|5.00
+FINE FOOD|Thai Cuisine|Chicken Pad Thai|6.00
+FINE FOOD|Thai Cuisine|Lemon Grass Chicken w Rice|6.00
+FINE FOOD|Thai Cuisine|Honey Chicken w Rice|6.00
+FINE FOOD|Xiao Long Bao|Tomato Egg La Mian|5.00
+FINE FOOD|Xiao Long Bao|Beijing Minced Meat La Mian|5.00
+FINE FOOD|Xiao Long Bao|Shanghai Dumpling La Mian|5.00
+FINE FOOD|Xiao Long Bao|Scallion Oil La Mian|4.80
+FINE FOOD|Xiao Long Bao|Shanghai Juicy Freash Meat Xiao Long Bao|4.80

@@ -1,16 +1,20 @@
 package seedu.duke.food;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+/**
+ * Tests the food directory loaded from the food catalogue.
+ */
 public class FoodDirectoryTest {
 
     @Test
-    public void getLocations_returnsAllFoodCourts() {
+    public void getLocations_containsExpandedFoodCatalogue() {
         FoodDirectory directory = new FoodDirectory();
 
         List<String> actualNames = directory.getLocations()
@@ -18,53 +22,105 @@ public class FoodDirectoryTest {
                 .map(FoodCourt::name)
                 .toList();
 
-        assertEquals(List.of("PGPR", "YIH"), actualNames);
+        assertTrue(actualNames.containsAll(List.of(
+                "PGPR",
+                "YIH",
+                "TECHNO EDGE",
+                "THE TERRACE",
+                "THE DECK",
+                "FRONTIER",
+                "FLAVOURS",
+                "FINE FOOD"
+        )));
+
+        assertTrue(directory.getLocations()
+                .stream()
+                .allMatch(foodCourt -> !foodCourt.stalls().isEmpty()));
+
+        assertTrue(directory.getLocations()
+                .stream()
+                .flatMap(foodCourt -> foodCourt.stalls().stream())
+                .allMatch(foodStall -> !foodStall.menu().isEmpty()));
     }
 
     @Test
-    public void getLocations_firstFoodCourtContainsExpectedStalls() {
+    public void getLocations_pgprContainsExpectedStalls() {
         FoodDirectory directory = new FoodDirectory();
 
-        FoodCourt pgpr = directory.getLocations().get(0);
+        FoodCourt pgpr = findFoodCourt(directory, "PGPR");
 
-        List<String> actualStallNames = pgpr.stalls()
+        List<String> stallNames = pgpr.stalls()
                 .stream()
                 .map(FoodStall::name)
                 .toList();
 
-        assertEquals(List.of("Vietnamese", "Chicken Rice"), actualStallNames);
+        assertTrue(stallNames.containsAll(List.of(
+                "Vietnamese",
+                "Chicken Rice",
+                "PGP Western",
+                "Chef Wok"
+        )));
     }
 
     @Test
-    public void getLocations_firstStallContainsExpectedFood() {
+    public void getLocations_loadsOriginalMenuItemCorrectly() {
         FoodDirectory directory = new FoodDirectory();
 
-        FoodStall vietnameseStall =
-                directory.getLocations().get(0).stalls().get(0);
+        FoodCourt pgpr = findFoodCourt(directory, "PGPR");
+        FoodStall vietnamese = findStall(pgpr, "Vietnamese");
 
-        List<String> actualFoodNames = vietnameseStall.menu()
+        List<String> foodNames = vietnamese.menu()
                 .stream()
                 .map(FoodItem::name)
                 .toList();
 
         assertEquals(
                 List.of("Beef Pho", "Spring Roll"),
-                actualFoodNames
+                foodNames
+        );
+
+        assertEquals(
+                new BigDecimal("5.50"),
+                vietnamese.menu().get(0).price()
         );
     }
 
     @Test
-    public void getLocations_foodItemHasCorrectPrice() {
+    public void getLocations_loadsExpandedMenuItemCorrectly() {
         FoodDirectory directory = new FoodDirectory();
 
-        FoodItem beefPho = directory.getLocations()
-                .get(0)
-                .stalls()
-                .get(0)
-                .menu()
-                .get(0);
+        FoodCourt technoEdge = findFoodCourt(directory, "TECHNO EDGE");
+        FoodStall bistroBox = findStall(technoEdge, "Bistro Box");
 
-        assertEquals("Beef Pho", beefPho.name());
-        assertEquals(new BigDecimal("5.50"), beefPho.price());
+        FoodItem doubleChickenBurger = bistroBox.menu()
+                .stream()
+                .filter(item -> item.name().equals("Double Chicken Burger"))
+                .findFirst()
+                .orElseThrow();
+
+        assertEquals(
+                new BigDecimal("9.30"),
+                doubleChickenBurger.price()
+        );
+    }
+
+    private FoodCourt findFoodCourt(
+            FoodDirectory directory,
+            String foodCourtName) {
+        return directory.getLocations()
+                .stream()
+                .filter(foodCourt -> foodCourt.name().equals(foodCourtName))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private FoodStall findStall(
+            FoodCourt foodCourt,
+            String stallName) {
+        return foodCourt.stalls()
+                .stream()
+                .filter(stall -> stall.name().equals(stallName))
+                .findFirst()
+                .orElseThrow();
     }
 }

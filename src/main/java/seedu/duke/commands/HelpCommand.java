@@ -15,6 +15,7 @@ public class HelpCommand extends Command {
                 + "back (while not in home menu)\n"
                 + "FOOD_COURT / STALL\n"
                 + "rate /location LOCATION /stall STALL /food FOOD /score SCORE\n"
+                + "  (end with ? or press Tab, then Enter, to see the options, e.g. rate /location ?)\n"
                 + "list-ratings\n"
                 + "edit-rating INDEX /score SCORE\n"
                 + "delete-rating INDEX\n"

@@ -48,6 +48,28 @@ public class RatingsManager {
     }
 
     /**
+     * Adds a rating, or, if the same dish was already rated, replaces that rating with the new one.
+     * The replaced rating keeps its place in the list, so its index does not change.
+     * This is what the user's rating commands use; {@link #addRating(Rating)} always adds.
+     *
+     * @param rating Rating to add.
+     * @return The rating that was replaced, or {@code null} if the dish had not been rated before.
+     */
+    public Rating addOrReplaceRating(Rating rating) {
+        assert rating != null : "Rating should not be null";
+        for (int i = 0; i < ratings.size(); i++) {
+            Rating existingRating = ratings.get(i);
+            if (existingRating.isSameDish(rating)) {
+                ratings.set(i, rating);
+                LOGGER.log(Level.FINE, "Replaced rating " + existingRating + " with " + rating);
+                return existingRating;
+            }
+        }
+        addRating(rating);
+        return null;
+    }
+
+    /**
      * Returns the rating at the given index.
      *
      * @param index Index of the rating, starting from 1.

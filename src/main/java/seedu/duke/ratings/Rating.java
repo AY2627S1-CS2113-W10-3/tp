@@ -100,11 +100,30 @@ public class Rating {
     }
 
     /**
+     * Returns true if both ratings are for the same dish, i.e. the same location, stall and food,
+     * ignoring letter case. The scores do not matter.
+     *
+     * @param other Rating to compare with.
+     */
+    public boolean isSameDish(Rating other) {
+        return location.equalsIgnoreCase(other.location)
+                && stall.equalsIgnoreCase(other.stall)
+                && food.equalsIgnoreCase(other.food);
+    }
+
+    /**
+     * Returns the score as shown to the user, e.g. {@code 8.0/10}.
+     */
+    public String formatScore() {
+        return String.format("%.1f/10", score);
+    }
+
+    /**
      * Returns the rating as shown to the user, e.g. {@code Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10}.
      */
     @Override
     public String toString() {
-        return String.format("%s (%s, %s) - %.1f/10", food, stall, location, score);
+        return food + " (" + stall + ", " + location + ") - " + formatScore();
     }
 
     /**

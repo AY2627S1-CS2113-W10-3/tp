@@ -150,6 +150,8 @@ Enter a food number to rate it, or 'back' to see the stalls.
 ```
 
 * If the score is invalid, BudgetBite shows an error and asks again.
+* If you have already rated the dish, its rating is updated, and BudgetBite
+  shows `Updated: ...` with the old score.
 * Enter `back` to cancel without rating, or `home` to leave browsing.
 * Other commands, such as `list-ratings`, still work while you are asked for a
   score.
@@ -265,6 +267,10 @@ rate /location LOCATION /stall STALL /food FOOD /score SCORE
 * If a name is not found, BudgetBite lists the valid names so you can try
   again.
 * `SCORE` must be a number from 0 to 10 with at most 1 decimal place, e.g. `7.5`.
+* If you have already rated that dish, its rating is updated instead of a
+  second one being added, e.g.
+  `Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10 (was 8.0/10)`.
+  This also applies when rating from a menu.
 
 Example:
 
@@ -568,8 +574,9 @@ If no budget is set, BudgetBite shows
 
 ## Known issues
 
-* **Rating the same food twice adds a second rating** instead of replacing the
-  first. To fix a wrong rating, use `edit-rating` or `delete-rating`.
+* **Ratings saved by older versions of BudgetBite** are shown with
+  `Unknown location`, and any repeated ratings among them are kept. Use
+  `delete-rating` to remove the ones you no longer want.
 
 ## Command Summary
 

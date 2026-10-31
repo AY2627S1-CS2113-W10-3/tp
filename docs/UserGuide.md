@@ -108,13 +108,59 @@ Expected output:
 
 ```text
 Menu for Vietnamese:
-Beef Pho - $5.50
-Spring Roll - $2.50
+1. Beef Pho - $5.50
+2. Spring Roll - $2.50
+Enter a food number to rate it, or 'back' to see the stalls.
 ```
+
+#### Rate a dish while browsing
+
+While a stall's menu is shown, enter the number of a dish to rate it.
+BudgetBite then asks for a score from 0 to 10, with at most 1 decimal place.
+After you rate it, the menu is shown again so you can rate another dish.
+
+For example, after opening the Vietnamese menu above:
+
+```text
+1
+```
+
+Expected output:
+
+```text
+Rate Beef Pho - $5.50 (Vietnamese, PGPR)
+Enter a score from 0 to 10, or 'back' to cancel:
+```
+
+Then enter the score:
+
+```text
+8
+```
+
+Expected output:
+
+```text
+Rated: Beef Pho (Vietnamese, PGPR) - 8.0/10
+
+Menu for Vietnamese:
+1. Beef Pho - $5.50
+2. Spring Roll - $2.50
+Enter a food number to rate it, or 'back' to see the stalls.
+```
+
+* If the score is invalid, BudgetBite shows an error and asks again.
+* Enter `back` to cancel without rating, or `home` to leave browsing.
+* Other commands, such as `list-ratings`, still work while you are asked for a
+  score.
+
+This gives the same result as the `rate` command, without typing the names.
 
 ### Return to the previous level: `back`
 
 The `back` command returns to the previous browsing level.
+
+When asked for a score, `back` cancels the rating and shows the stall menu again.
 
 When viewing a stall menu, `back` returns to the list of stalls.
 
@@ -169,10 +215,15 @@ Expected output:
 
 ```text
 Menu for Chicken Rice:
-Char Siew Rice - $3.30
-Roast Chicken Rice - $3.30
-Toufu Vegetable Rice Set - $2.80
+1. Char Siew Rice - $3.30
+2. Roast Chicken Rice - $3.30
+3. Toufu Vegetable Rice Set - $2.80
+Enter a food number to rate it, or 'back' to see the stalls.
 ```
+
+You can then rate a dish by its number, as in
+[Rate a dish while browsing](#rate-a-dish-while-browsing).
+
 If the food court exists but the stall does not, BudgetBite shows:
 
 ```text
@@ -196,30 +247,70 @@ Inputs with missing parts or additional path sections are rejected.
 #### Rate a food item: `rate`
 
 Gives a score from 0 to 10 to a food item from a stall, so you remember what
-you liked.
+you liked. If you don't know the exact names, browse with `location` and
+[rate the dish from its menu](#rate-a-dish-while-browsing) instead.
 
 Format:
 
 ```text
-rate /stall STALL /food FOOD /score SCORE
+rate /location LOCATION /stall STALL /food FOOD /score SCORE
 ```
 
-* All three fields are needed, and each can be given only once. They can be in
+* All four fields are needed, and each can be given only once. They can be in
   any order.
-* `STALL` and `FOOD` can contain spaces.
-* `SCORE` must be a number from 0 to 10. Decimals are allowed, e.g. `7.5`.
-  Scores are shown and saved to 1 decimal place.
+* `LOCATION`, `STALL` and `FOOD` must be a food court, a stall in that food
+  court, and a dish on that stall's menu, as shown by `location`. You cannot
+  rate places that are not in BudgetBite. Letter case does not matter, e.g.
+  `pgpr` works for `PGPR`.
+* If a name is not found, BudgetBite lists the valid names so you can try
+  again.
+* `SCORE` must be a number from 0 to 10 with at most 1 decimal place, e.g. `7.5`.
 
 Example:
 
 ```text
-rate /stall Chicken Rice /food Roast Chicken Rice /score 8
+rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8
 ```
 
 Expected output:
 
 ```text
-Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
+Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10
+```
+
+**Not sure of a name?** End the command with `?`, or press `Tab`, and then
+press Enter. BudgetBite lists what you can type for the field you are on,
+keeping only names that contain what you have typed so far. Nothing is rated;
+type the full command afterwards.
+
+```text
+rate /location ?
+Locations: PGPR, YIH, TECHNO EDGE, THE TERRACE, THE DECK, FRONTIER, FLAVOURS, FINE FOOD
+
+rate /location PGPR /stall ch ?
+Stalls in PGPR matching 'ch': Chicken Rice, Chef Wok
+
+rate /location PGPR /stall Chicken Rice /food ?
+Menu of Chicken Rice: Char Siew Rice, Roast Chicken Rice, Toufu Vegetable Rice Set
+```
+
+Unlike a terminal, `Tab` does not fill in the name for you; you still need to
+press Enter to see the list.
+
+Example of a name that is not found:
+
+```text
+rate /location YIH /stall Chicken Rice /food Roast Chicken Rice /score 8
+```
+
+Expected output:
+
+```text
+Unknown stall in YIH: Chicken Rice
+Stalls in YIH: Tempu Ramen, Indian, Wok Express, Mini Wok
+Format: rate /location LOCATION /stall STALL /food FOOD /score SCORE
+Example: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8
+Tip: end with ? (or press Tab) and Enter to see the options, e.g. rate /location PGPR /stall ?
 ```
 
 #### List all ratings: `list-ratings`
@@ -236,16 +327,19 @@ Expected output:
 
 ```text
 Your ratings:
-1. Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
-2. Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+1. Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10
+2. Beef Pho (Vietnamese, PGPR) - 7.5/10
 ```
 
 If you have no ratings yet, BudgetBite shows
-`No ratings yet. Try: rate /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+`No ratings yet. Try: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+
+Ratings saved by older versions of BudgetBite did not record the food court.
+They are kept, and shown with `Unknown location`.
 
 #### Edit a rating: `edit-rating`
 
-Changes the score of a rating. Its stall and food stay the same.
+Changes the score of a rating. Its location, stall and food stay the same.
 
 Format:
 
@@ -266,7 +360,7 @@ edit-rating 1 /score 9
 Expected output:
 
 ```text
-Updated rating 1: Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 9.0
+Updated rating 1: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10
 ```
 
 #### Delete a rating: `delete-rating`
@@ -288,7 +382,7 @@ delete-rating 2
 Expected output:
 
 ```text
-Deleted: Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+Deleted: Beef Pho (Vietnamese, PGPR) - 7.5/10
 Ratings left: 1
 ```
 
@@ -474,11 +568,8 @@ If no budget is set, BudgetBite shows
 
 ## Known issues
 
-* **Ratings are not checked against the food menus.** `rate` accepts any stall
-  and food name, even ones that are not in BudgetBite's food courts, e.g.
-  `rate /stall Unknown Stall /food Anything /score 5`. Rating the same food
-  twice also adds a second rating instead of replacing the first. To fix a
-  wrong rating, use `edit-rating` or `delete-rating`.
+* **Rating the same food twice adds a second rating** instead of replacing the
+  first. To fix a wrong rating, use `edit-rating` or `delete-rating`.
 
 ## Command Summary
 
@@ -489,7 +580,7 @@ If no budget is set, BudgetBite shows
 | Direct navigation | `FOOD_COURT / STALL` | Open a stall menu directly |
 | `back` | `back` | Return to the previous navigation level |
 | `home` | `home` | Return to the main menu |
-| `rate` | `rate /stall STALL /food FOOD /score SCORE` | Add a food rating |
+| `rate` | `rate /location LOCATION /stall STALL /food FOOD /score SCORE` | Add a food rating (end with `?` or Tab to see the options) |
 | `list-ratings` | `list-ratings` | Display all ratings |
 | `edit-rating` | `edit-rating INDEX /score SCORE` | Edit a rating |
 | `delete-rating` | `delete-rating INDEX` | Delete a rating |

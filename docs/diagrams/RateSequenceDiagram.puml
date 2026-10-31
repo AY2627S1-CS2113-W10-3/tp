@@ -3,14 +3,15 @@ hide footbox
 participant ":BudgetBite" as B
 participant ":Parser" as P
 participant ":RateCommand" as C
+participant ":FoodDirectory" as D
 participant ":RatingsManager" as M
 
-[-> B : "rate /stall Ah Hock /food Laksa /score 8"
+[-> B : "rate /location PGPR /stall Chicken Rice\n/food Roast Chicken Rice /score 8"
 activate B
-B -> P : parseCommand("rate /stall Ah Hock /food Laksa /score 8")
+B -> P : parseCommand(input)
 activate P
 create C
-P -> C : new RateCommand("/stall Ah Hock /food Laksa /score 8", ratingsManager)
+P -> C : new RateCommand(arguments, ratingsManager, foodDirectory)
 P --> B : rateCommand
 deactivate P
 
@@ -18,19 +19,25 @@ B -> C : execute()
 activate C
 C -> C : parseFields()
 activate C
-C --> C : {stall: "Ah Hock", food: "Laksa", score: "8"}
+C --> C : {location: "PGPR", stall: "Chicken Rice",\nfood: "Roast Chicken Rice", score: "8"}
 deactivate C
 
-alt a field is missing, repeated or the score is not between 0 and 10
-  C --> B : error message
+C -> D : findFoodCourt("PGPR")
+activate D
+D --> C : foodCourt
+deactivate D
+note right of C : then foodCourt.findStall(...)\nand stall.findItem(...)
+
+alt a field is missing or repeated, a name is not in the catalogue, or the score is invalid
+  C --> B : error message (with the valid names) and usage
 else all fields are valid
   create ":Rating" as R
-  C -> R : new Rating("Ah Hock", "Laksa", 8.0)
+  C -> R : new Rating("PGPR", "Chicken Rice", "Roast Chicken Rice", 8.0)
   C -> M : addRating(rating)
   activate M
   M --> C
   deactivate M
-  C --> B : "Stall: Ah Hock, Food: Laksa, Score: 8.0"
+  C --> B : "Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10"
 end
 deactivate C
 [<-- B : show response

@@ -265,6 +265,20 @@ public class MenuNavigatorTest {
     }
 
     @Test
+    public void rateItem_sameDishTwice_ratingUpdated() throws Exception {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+        navigator.handleInput("6");
+        navigator.handleInput("2");
+
+        String response = navigator.handleInput("9");
+
+        assertTrue(response.contains("Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10 (was 6.0/10)"));
+        assertEquals(1, ratingsManager.getSize());
+        assertEquals(9f, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
     public void rateItem_invalidScore_askedAgainAndNothingAdded() {
         openChickenRiceMenu();
         navigator.handleInput("2");

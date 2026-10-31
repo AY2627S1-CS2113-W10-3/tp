@@ -50,6 +50,17 @@ public class RateCommandTest {
     }
 
     @Test
+    public void execute_sameDishAgain_ratingUpdatedNotDuplicated() throws Exception {
+        rate("/location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8");
+
+        String response = rate("/location pgpr /stall chicken rice /food roast chicken rice /score 9.5");
+
+        assertEquals("Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 9.5/10 (was 8.0/10)", response);
+        assertEquals(1, ratingsManager.getSize());
+        assertEquals(9.5f, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
     public void execute_unknownLocation_rejectedWithAvailableLocations() {
         String response = rate("/location Utown /stall Chicken Rice /food Roast Chicken Rice /score 8");
 

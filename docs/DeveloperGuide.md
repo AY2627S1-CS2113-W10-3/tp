@@ -241,9 +241,18 @@ is executed.
    decimal place means the score shown and saved is exactly the one typed.
 5. A new `Rating` is created with the names as they appear in the catalogue,
    e.g. `PGPR` even if the user typed `pgpr`, and added with
-   `RatingsManager#addRating`. The `Rating` constructor checks every field again
-   and throws a `BudgetBiteException` if one is invalid, so an invalid `Rating`
-   can never exist, even when it is created while loading the data file.
+   `RatingsManager#addOrReplaceRating`. The `Rating` constructor checks every
+   field again and throws a `BudgetBiteException` if one is invalid, so an
+   invalid `Rating` can never exist, even when it is created while loading the
+   data file.
+6. `addOrReplaceRating` looks for an earlier rating of the same dish with
+   `Rating#isSameDish`, which compares the location, stall and food. If there
+   is one, the new rating takes its place in the list, so its index does not
+   change, and the old rating is returned. `RateCommand#describeRating` then
+   shows `Updated: ... (was 8.0/10)` instead of `Rated: ...`. Rating from the
+   menu (`MenuNavigator`) uses the same two methods, so both ways behave the
+   same. `RatingsManager#addRating`, which always adds, is still used when
+   loading the data file.
 
 If the arguments end with `?`, `RateCommand` passes them to `RateSuggestions`
 instead of rating. `TextUi#getUserCommand` turns a Tab at the end of a line into
@@ -798,11 +807,17 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
    Expected: Only `1. Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10` is
    listed.
 
-4. Close the app, start it again, and enter `list-ratings`.
+4. Enter `rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 6`,
+   then `list-ratings`.
+
+   Expected: `Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 6.0/10 (was 9.0/10)`
+   is shown, and the list still has only one rating, now with score 6.0.
+
+5. Close the app, start it again, and enter `list-ratings`.
 
    Expected: The same rating is listed.
 
-5. Test invalid inputs by entering:
+6. Test invalid inputs by entering:
 
     * `rate`
     * `rate /stall Chicken Rice /food Roast Chicken Rice /score 8` (no location)
@@ -823,7 +838,7 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
    Expected: An error message is shown for each, and no rating is added or
    changed.
 
-6. Enter `rate /location ?`, then `rate /location pgpr /stall ch` followed by
+7. Enter `rate /location ?`, then `rate /location pgpr /stall ch` followed by
    Tab and Enter, then `rate /location PGPR /stall Chicken Rice /food ?`.
 
    Expected: The food courts, then `Chicken Rice, Chef Wok`, then the Chicken

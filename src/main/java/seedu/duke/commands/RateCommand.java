@@ -68,11 +68,26 @@ public class RateCommand extends Command {
             float score = RatingArguments.parseScore(fields.get("score"));
 
             Rating rating = new Rating(foodCourt.name(), stall.name(), item.name(), score);
-            ratingsManager.addRating(rating);
-            return "Rated: " + rating;
+            Rating replacedRating = ratingsManager.addOrReplaceRating(rating);
+            return describeRating(rating, replacedRating);
         } catch (BudgetBiteException e) {
             return e.getMessage() + "\n" + MESSAGE_USAGE;
         }
+    }
+
+    /**
+     * Describes a rating that was just made, e.g. {@code Rated: Beef Pho (Vietnamese, PGPR) - 8.0/10}.
+     * Also used when rating from the menu, so both ways give the same message.
+     *
+     * @param rating         The new rating.
+     * @param replacedRating The earlier rating of the same dish that it replaced, or {@code null} if none.
+     * @return The message to show.
+     */
+    public static String describeRating(Rating rating, Rating replacedRating) {
+        if (replacedRating == null) {
+            return "Rated: " + rating;
+        }
+        return "Updated: " + rating + " (was " + replacedRating.formatScore() + ")";
     }
 
     /**

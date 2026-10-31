@@ -1,5 +1,6 @@
 package seedu.duke.ui;
 
+import seedu.duke.commands.RateCommand;
 import seedu.duke.commands.RatingArguments;
 import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.food.FoodCourt;
@@ -12,7 +13,7 @@ import seedu.duke.ratings.RatingsManager;
 /**
  * Controls the user's location, stall, and menu selection flow.
  * After choosing a dish from a stall's menu, the user is asked for a score,
- * and the rating is added to the {@code RatingsManager}.
+ * and the rating is added to the {@code RatingsManager}, replacing any earlier rating of that dish.
  */
 public class MenuNavigator {
 
@@ -196,11 +197,11 @@ public class MenuNavigator {
         try {
             float score = RatingArguments.parseScore(scoreText);
             Rating rating = new Rating(selectedFoodCourt.name(), selectedStall.name(), selectedItem.name(), score);
-            ratingsManager.addRating(rating);
+            Rating replacedRating = ratingsManager.addOrReplaceRating(rating);
 
             selectedItem = null;
             stage = Stage.SHOWING_MENU;
-            return "Rated: " + rating + "\n\n" + showMenu();
+            return RateCommand.describeRating(rating, replacedRating) + "\n\n" + showMenu();
         } catch (BudgetBiteException e) {
             return e.getMessage() + "\n" + MESSAGE_SCORE_PROMPT;
         }

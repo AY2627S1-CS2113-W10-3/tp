@@ -1,6 +1,7 @@
 package seedu.duke.ratings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -63,6 +64,41 @@ public class RatingsManagerTest {
     @Test
     public void getRating_emptyList_exceptionThrown() {
         assertThrows(BudgetBiteException.class, () -> new RatingsManager().getRating(1));
+    }
+
+    @Test
+    public void addOrReplaceRating_newDish_addedAtEnd() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("PGPR", "Vietnamese", "Spring Roll", 7));
+
+        assertNull(replaced);
+        assertEquals(3, ratingsManager.getSize());
+        assertEquals("Spring Roll", ratingsManager.getRating(3).getFood());
+    }
+
+    @Test
+    public void addOrReplaceRating_sameDish_replacedInPlace() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("PGPR", "Vietnamese", "Beef Pho", 3));
+
+        assertEquals(8, replaced.getScore(), DELTA);
+        assertEquals(2, ratingsManager.getSize());
+        assertEquals("Beef Pho", ratingsManager.getRating(1).getFood());
+        assertEquals(3, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
+    public void addOrReplaceRating_sameDishDifferentCase_replaced() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("pgpr", "VIETNAMESE", "beef pho", 3));
+
+        assertEquals(8, replaced.getScore(), DELTA);
+        assertEquals(2, ratingsManager.getSize());
+    }
+
+    @Test
+    public void addOrReplaceRating_sameStallAndFoodInOtherLocation_added() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("YIH", "Vietnamese", "Beef Pho", 3));
+
+        assertNull(replaced);
+        assertEquals(3, ratingsManager.getSize());
     }
 
     @Test

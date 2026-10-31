@@ -1,7 +1,11 @@
 package seedu.duke.food;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -10,22 +14,62 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Loads food court, stall, and menu data from text file.
+ * Loads food court, stall, and menu data from a text file or bundled resource.
  *
- * <p> Each non-blank line must follow this format:
- * {@code food court|stall|food item|price}</p>
+ * <p>Each non-blank line must follow this format:
+ * {@code food court|stall|food item|price}.</p>
  */
 public final class FoodDataLoader {
 
     private static final String FIELD_SEPARATOR = "\\|";
     private static final int EXPECTED_FIELD_COUNT = 4;
 
+    /**
+     * Location of the bundled food file inside the JAR.
+     */
+    private static final String FOOD_RESOURCE = "/food.txt";
+
     private FoodDataLoader() {
         // Prevent instantiation of this utility class.
     }
 
     /**
-     * Loads food data from the given file.
+     * Loads the default food catalogue bundled inside the JAR.
+     *
+     * @return food courts in the same order as they appear in the file
+     * @throws IllegalStateException if the bundled file cannot be found or read
+     */
+    public static List<FoodCourt> loadFoodData() {
+        InputStream inputStream =
+                FoodDataLoader.class.getResourceAsStream(FOOD_RESOURCE);
+
+        if (inputStream == null) {
+            throw new IllegalStateException(
+                    "Food data resource was not found: "
+                            + FOOD_RESOURCE
+            );
+        }
+
+        try (InputStream resourceStream = inputStream;
+             BufferedReader reader = new BufferedReader(
+                     new InputStreamReader(
+                             resourceStream,
+                             StandardCharsets.UTF_8))) {
+
+            return loadLines(reader.lines().toList());
+
+        } catch (IOException exception) {
+            throw new IllegalStateException(
+                    "Could not read bundled food data.",
+                    exception
+            );
+        }
+    }
+
+    /**
+     * Loads food data from an external file.
+     *
+     * <p>This method is useful for testing.</p>
      *
      * @param filePath path to the food data file
      * @return food courts in the same order as they appear in the file
@@ -59,8 +103,10 @@ public final class FoodDataLoader {
             String[] fields = line.split(FIELD_SEPARATOR, -1);
 
             if (fields.length != EXPECTED_FIELD_COUNT) {
-                throw invalidLine(index + 1,
-                        "expected food court|stall|item|price");
+                throw invalidLine(
+                        index + 1,
+                        "expected food court|stall|item|price"
+                );
             }
 
             String foodCourtName = fields[0].strip();
@@ -72,7 +118,10 @@ public final class FoodDataLoader {
                     || stallName.isBlank()
                     || foodItemName.isBlank()
                     || priceText.isBlank()) {
-                throw invalidLine(index + 1, "no field may be blank");
+                throw invalidLine(
+                        index + 1,
+                        "no field may be blank"
+                );
             }
 
             BigDecimal price;
@@ -80,20 +129,30 @@ public final class FoodDataLoader {
             try {
                 price = new BigDecimal(priceText);
             } catch (NumberFormatException exception) {
-                throw invalidLine(index + 1,
-                        "price must be a valid number");
+                throw invalidLine(
+                        index + 1,
+                        "price must be a valid number"
+                );
             }
 
             if (price.signum() < 0) {
-                throw invalidLine(index + 1,
-                        "price cannot be negative");
+                throw invalidLine(
+                        index + 1,
+                        "price cannot be negative"
+                );
             }
 
             FoodItem foodItem = new FoodItem(foodItemName, price);
 
             foodData
-                    .computeIfAbsent(foodCourtName, name -> new LinkedHashMap<>())
-                    .computeIfAbsent(stallName, name -> new ArrayList<>())
+                    .computeIfAbsent(
+                            foodCourtName,
+                            name -> new LinkedHashMap<>()
+                    )
+                    .computeIfAbsent(
+                            stallName,
+                            name -> new ArrayList<>()
+                    )
                     .add(foodItem);
         }
 
@@ -124,6 +183,10 @@ public final class FoodDataLoader {
 
     /**
      * Creates an informative exception for an invalid data line.
+     *
+     * @param lineNumber line number containing the error
+     * @param reason explanation of the error
+     * @return exception describing the invalid line
      */
     private static IllegalStateException invalidLine(
             int lineNumber,

@@ -50,7 +50,7 @@ bye
 
 #### Browse food courts: `location`
 
-The `location` command shows a list of available food stalls.
+The `location` command shows a list of available food courts.
 
 Format:
 
@@ -70,6 +70,12 @@ Expected output:
 Available locations:
 1. PGPR
 2. YIH
+3. TECHNO EDGE
+4. THE TERRACE
+5. THE DECK
+6. FRONTIER
+7. FLAVOURS
+8. FINE FOOD
 ```
 
 Enter the index of the food court to view its corresponding stalls.
@@ -86,6 +92,8 @@ Expected output:
 Stalls in PGPR:
 1. Vietnamese
 2. Chicken Rice
+3. PGP Western
+4. Chef Wok
 ```
 
 Enter the index of a stall to view its corresponding menu items.

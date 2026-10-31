@@ -129,4 +129,16 @@ public class FoodDataLoaderTest {
         Files.write(foodFile, lines);
         return foodFile;
     }
+
+    @Test
+    public void load_missingFile_throwsException() {
+        Path missingFile = temporaryDirectory.resolve("missing-food.txt");
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> FoodDataLoader.load(missingFile)
+        );
+
+        assertTrue(exception.getMessage().contains("Could not read food data"));
+    }
 }

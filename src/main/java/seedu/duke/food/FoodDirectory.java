@@ -1,24 +1,19 @@
 package seedu.duke.food;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Stores all hardcoded food court, stall, and food item from a text file
+ * Stores food court, stall, and food item data loaded from a text file.
  */
 public class FoodDirectory {
-
-    private static final Path DEFAULT_FOOD_FILE =
-            Paths.get("data", "food.txt");
 
     private final List<FoodCourt> foodCourts;
 
     /**
-     * Creates a food directory using the default food data file.
+     * Creates a food directory using the food data resource.
      */
     public FoodDirectory() {
-        this.foodCourts = FoodDataLoader.load(DEFAULT_FOOD_FILE);
+        this.foodCourts = FoodDataLoader.loadFoodData();
     }
 
     /**

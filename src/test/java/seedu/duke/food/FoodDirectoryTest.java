@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -122,5 +124,26 @@ public class FoodDirectoryTest {
                 .filter(stall -> stall.name().equals(stallName))
                 .findFirst()
                 .orElseThrow();
+    }
+
+    @Test
+    public void getLocations_containsNoDuplicateMenuItems() {
+        FoodDirectory directory = new FoodDirectory();
+        Set<String> itemKeys = new HashSet<>();
+
+        for (FoodCourt foodCourt : directory.getLocations()) {
+            for (FoodStall foodStall : foodCourt.stalls()) {
+                for (FoodItem foodItem : foodStall.menu()) {
+                    String itemKey = foodCourt.name()
+                            + "|"
+                            + foodStall.name()
+                            + "|"
+                            + foodItem.name();
+
+                    assertTrue(itemKeys.add(itemKey),
+                            "Duplicate menu item: " + itemKey);
+                }
+            }
+        }
     }
 }

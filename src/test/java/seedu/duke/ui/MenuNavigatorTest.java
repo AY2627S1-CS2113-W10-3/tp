@@ -187,4 +187,13 @@ public class MenuNavigatorTest {
         assertTrue(response.contains("main menu"));
         assertFalse(navigator.isActive());
     }
+
+    @Test
+    public void directNavigationToExpandedStall_displaysMenu() {
+        String response =
+                navigator.navigateDirectly("TECHNO EDGE / Bistro Box");
+
+        assertTrue(response.contains("Menu for Bistro Box:"));
+        assertTrue(response.contains("Double Chicken Burger - $9.30"));
+    }
 }

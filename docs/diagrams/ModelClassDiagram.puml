@@ -10,6 +10,7 @@ class RatingsManager {
   +deleteRating(index: int): Rating
 }
 class Rating {
+  -location: String
   -stall: String
   -food: String
   -score: float

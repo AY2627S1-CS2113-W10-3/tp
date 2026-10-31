@@ -1,35 +1,81 @@
 package seedu.duke.ui;
 
+import seedu.duke.commands.RateCommand;
+import seedu.duke.commands.RatingArguments;
+import seedu.duke.exceptions.BudgetBiteException;
 import seedu.duke.food.FoodCourt;
 import seedu.duke.food.FoodDirectory;
 import seedu.duke.food.FoodItem;
 import seedu.duke.food.FoodStall;
+import seedu.duke.ratings.Rating;
+import seedu.duke.ratings.RatingsManager;
 
 /**
  * Controls the user's location, stall, and menu selection flow.
+ * After choosing a dish from a stall's menu, the user is asked for a score,
+ * and the rating is added to the {@code RatingsManager}, replacing any earlier rating of that dish.
  */
 public class MenuNavigator {
 
+    private static final String MESSAGE_SCORE_PROMPT = "Enter a score from 0 to 10, or 'back' to cancel:";
+    /**
+     * Input that looks like a score, e.g. 8, 7.5, -1 or 7.25. Invalid ones such as -1 are still
+     * sent to the navigator, so the user gets a score error instead of "Unknown command".
+     */
+    private static final String SCORE_LIKE_REGEX = "-?[\\d.]+";
 
     private enum Stage {
         INACTIVE,
         SELECTING_LOCATION,
         SELECTING_STALL,
-        SHOWING_MENU
+        SHOWING_MENU,
+        RATING_ITEM
     }
 
     private final FoodDirectory foodDirectory;
+    private final RatingsManager ratingsManager;
     private Stage stage = Stage.INACTIVE;
     private FoodCourt selectedFoodCourt;
     private FoodStall selectedStall;
+    private FoodItem selectedItem;
 
-    public MenuNavigator(FoodDirectory foodDirectory) {
+    /**
+     * Creates a navigator over the given food catalogue.
+     *
+     * @param foodDirectory  food courts, stalls and menus to browse
+     * @param ratingsManager where ratings made while browsing are added
+     */
+    public MenuNavigator(FoodDirectory foodDirectory, RatingsManager ratingsManager) {
         assert foodDirectory != null : "Food directory should not be null";
+        assert ratingsManager != null : "Ratings manager should not be null";
         this.foodDirectory = foodDirectory;
+        this.ratingsManager = ratingsManager;
     }
 
     public boolean isActive() {
         return stage != Stage.INACTIVE;
+    }
+
+    /**
+     * Returns true if the input is a step in the current navigation, so it should be handled by
+     * {@link #handleInput(String)} instead of being parsed as a command. That is {@code back},
+     * or a number: a list choice while browsing, or a score while rating a dish.
+     * Other input, e.g. {@code list-ratings}, still runs as a normal command while browsing.
+     *
+     * @param input trimmed user input
+     * @return whether the navigator should handle the input
+     */
+    public boolean isNavigationInput(String input) {
+        if (!isActive()) {
+            return false;
+        }
+        if (input.equalsIgnoreCase("back")) {
+            return true;
+        }
+        if (stage == Stage.RATING_ITEM) {
+            return input.matches(SCORE_LIKE_REGEX);
+        }
+        return input.matches("\\d+");
     }
 
     /**
@@ -41,6 +87,7 @@ public class MenuNavigator {
         stage = Stage.SELECTING_LOCATION;
         selectedFoodCourt = null;
         selectedStall = null;
+        selectedItem = null;
 
         return showFoodCourts();
     }
@@ -59,6 +106,11 @@ public class MenuNavigator {
             return goBack();
         }
 
+        // While rating, the input is a score rather than a list number.
+        if (stage == Stage.RATING_ITEM) {
+            return rateSelectedItem(trimmedInput);
+        }
+
         Integer index = parseIndex(trimmedInput);
 
         if (index == null) {
@@ -68,8 +120,9 @@ public class MenuNavigator {
         return switch (stage) {
         case SELECTING_LOCATION -> selectFoodCourt(index);
         case SELECTING_STALL -> selectStall(index);
-        case SHOWING_MENU -> "Enter 'back' to return to the stall list.";
+        case SHOWING_MENU -> selectItem(index);
         case INACTIVE -> "Please enter 'location' first.";
+        case RATING_ITEM -> throw new AssertionError("Rating input is handled above");
         };
     }
 
@@ -116,8 +169,51 @@ public class MenuNavigator {
         return showMenu();
     }
 
+    /**
+     * Picks a dish from the menu shown and asks the user to score it.
+     */
+    private String selectItem(int index) {
+        assert selectedStall != null : "A stall must be selected first";
+
+        if (index < 1 || index > selectedStall.menu().size()) {
+            return "Invalid food number.";
+        }
+
+        selectedItem = selectedStall.menu().get(index - 1);
+        stage = Stage.RATING_ITEM;
+
+        return "Rate " + selectedItem.name() + " - $" + selectedItem.price()
+                + " (" + selectedStall.name() + ", " + selectedFoodCourt.name() + ")\n"
+                + MESSAGE_SCORE_PROMPT;
+    }
+
+    /**
+     * Adds a rating for the selected dish, then shows the stall's menu again so that
+     * the user can rate another dish. If the score is invalid, the user is asked again.
+     */
+    private String rateSelectedItem(String scoreText) {
+        assert selectedItem != null : "A food item must be selected before rating it";
+
+        try {
+            float score = RatingArguments.parseScore(scoreText);
+            Rating rating = new Rating(selectedFoodCourt.name(), selectedStall.name(), selectedItem.name(), score);
+            Rating replacedRating = ratingsManager.addOrReplaceRating(rating);
+
+            selectedItem = null;
+            stage = Stage.SHOWING_MENU;
+            return RateCommand.describeRating(rating, replacedRating) + "\n\n" + showMenu();
+        } catch (BudgetBiteException e) {
+            return e.getMessage() + "\n" + MESSAGE_SCORE_PROMPT;
+        }
+    }
+
     private String goBack() {
         return switch (stage) {
+        case RATING_ITEM -> {
+            selectedItem = null;
+            stage = Stage.SHOWING_MENU;
+            yield "Rating cancelled.\n\n" + showMenu();
+        }
         case SHOWING_MENU -> {
             selectedStall = null;
             stage = Stage.SELECTING_STALL;
@@ -178,13 +274,19 @@ public class MenuNavigator {
         StringBuilder output =
                 new StringBuilder("Menu for " + selectedStall.name() + ":");
 
-        for (FoodItem item : selectedStall.menu()) {
+        for (int index = 0;
+             index < selectedStall.menu().size();
+             index++) {
+            FoodItem item = selectedStall.menu().get(index);
             output.append("\n")
+                    .append(index + 1)
+                    .append(". ")
                     .append(item.name())
                     .append(" - $")
                     .append(item.price());
         }
 
+        output.append("\nEnter a food number to rate it, or 'back' to see the stalls.");
         return output.toString();
     }
 
@@ -199,7 +301,7 @@ public class MenuNavigator {
      */
     public boolean isDirectNavigation(String input) {
         String[] path = splitPath(input);
-        return path.length >= 2 && findFoodCourt(path[0]) != null;
+        return path.length >= 2 && foodDirectory.findFoodCourt(path[0]) != null;
     }
 
     /**
@@ -216,12 +318,12 @@ public class MenuNavigator {
             return "Invalid Format\nValid Format: FOOD_COURT / STALL" ;
         }
 
-        FoodCourt foodCourt = findFoodCourt(path[0]);
+        FoodCourt foodCourt = foodDirectory.findFoodCourt(path[0]);
         if (foodCourt == null) {
             return "Unknown food court: " + path[0];
         }
 
-        FoodStall stall = findStall(foodCourt, path[1]);
+        FoodStall stall = foodCourt.findStall(path[1]);
         if (stall == null) {
             return "Unknown stall in " + foodCourt.name() + ": " + path[1]
                     + "\nPlease check the stall name and try again.";
@@ -229,6 +331,7 @@ public class MenuNavigator {
 
         selectedFoodCourt = foodCourt;
         selectedStall = stall;
+        selectedItem = null;
         stage = Stage.SHOWING_MENU;
 
         return showMenu();
@@ -259,32 +362,6 @@ public class MenuNavigator {
     }
 
     /**
-     * Finds a food court by name, ignoring letter case.
-     */
-    private FoodCourt findFoodCourt(String name) {
-        for (FoodCourt foodCourt : foodDirectory.getLocations()) {
-            if (foodCourt.name().equalsIgnoreCase(name.trim())) {
-                return foodCourt;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Finds a stall inside a food court by name, ignoring letter case.
-     */
-    private FoodStall findStall(FoodCourt foodCourt, String name) {
-        for (FoodStall stall : foodCourt.stalls()) {
-            if (stall.name().equalsIgnoreCase(name.trim())) {
-                return stall;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Returns the user to the main menu from any navigation stage.
      *
      * @return confirmation message
@@ -293,6 +370,7 @@ public class MenuNavigator {
         stage = Stage.INACTIVE;
         selectedFoodCourt = null;
         selectedStall = null;
+        selectedItem = null;
 
         return "Returned to the main menu.";
     }

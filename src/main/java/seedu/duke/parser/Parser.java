@@ -11,6 +11,7 @@ import seedu.duke.commands.RateCommand;
 import seedu.duke.commands.SetBudgetCommand;
 import seedu.duke.commands.UnknownCommand;
 import seedu.duke.expenses.ExpensesManager;
+import seedu.duke.food.FoodDirectory;
 import seedu.duke.ratings.RatingsManager;
 import seedu.duke.commands.DeleteExpenseCommand;
 import seedu.duke.commands.DeleteRatingCommand;
@@ -22,6 +23,7 @@ public class Parser {
     private final RatingsManager ratingsManager;
     private final ExpensesManager expensesManager;
     private final BudgetManager budgetManager;
+    private final FoodDirectory foodDirectory;
 
     /**
      * Creates a parser whose commands work on the given data.
@@ -29,11 +31,14 @@ public class Parser {
      * @param ratingsManager  Ratings used by the rating commands.
      * @param expensesManager Expenses used by the expense and budget commands.
      * @param budgetManager   Budget used by the budget commands and {@code log-expense}.
+     * @param foodDirectory   Food catalogue that {@code rate} checks names against.
      */
-    public Parser(RatingsManager ratingsManager, ExpensesManager expensesManager, BudgetManager budgetManager) {
+    public Parser(RatingsManager ratingsManager, ExpensesManager expensesManager, BudgetManager budgetManager,
+                  FoodDirectory foodDirectory) {
         this.ratingsManager = ratingsManager;
         this.expensesManager = expensesManager;
         this.budgetManager = budgetManager;
+        this.foodDirectory = foodDirectory;
     }
 
     public Command parseCommand(String userCommandText) {
@@ -48,8 +53,8 @@ public class Parser {
             return new HelpCommand();
         case "bye":
             return new ByeCommand();
-        case "rate":
-            return new RateCommand(arguments, ratingsManager);
+        case RateCommand.COMMAND_WORD:
+            return new RateCommand(arguments, ratingsManager, foodDirectory);
         case ListRatingsCommand.COMMAND_WORD:
             return new ListRatingsCommand(ratingsManager);
         case EditRatingsCommand.COMMAND_WORD:

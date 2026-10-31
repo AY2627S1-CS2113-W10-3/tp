@@ -1,6 +1,7 @@
 package seedu.duke.ratings;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,10 +16,10 @@ public class RatingsManagerTest {
     private RatingsManager ratingsManager;
 
     @BeforeEach
-    public void setUp() {
+    public void setUp() throws BudgetBiteException {
         ratingsManager = new RatingsManager();
-        ratingsManager.addRating(new Rating("Vietnamese", "Beef Pho", 8));
-        ratingsManager.addRating(new Rating("Indian", "Plain Dosai", 6.5f));
+        ratingsManager.addRating(new Rating("PGPR", "Vietnamese", "Beef Pho", 8));
+        ratingsManager.addRating(new Rating("YIH", "Indian", "Plain Dosai", 6.5f));
     }
 
     @Test
@@ -66,9 +67,44 @@ public class RatingsManagerTest {
     }
 
     @Test
+    public void addOrReplaceRating_newDish_addedAtEnd() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("PGPR", "Vietnamese", "Spring Roll", 7));
+
+        assertNull(replaced);
+        assertEquals(3, ratingsManager.getSize());
+        assertEquals("Spring Roll", ratingsManager.getRating(3).getFood());
+    }
+
+    @Test
+    public void addOrReplaceRating_sameDish_replacedInPlace() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("PGPR", "Vietnamese", "Beef Pho", 3));
+
+        assertEquals(8, replaced.getScore(), DELTA);
+        assertEquals(2, ratingsManager.getSize());
+        assertEquals("Beef Pho", ratingsManager.getRating(1).getFood());
+        assertEquals(3, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
+    public void addOrReplaceRating_sameDishDifferentCase_replaced() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("pgpr", "VIETNAMESE", "beef pho", 3));
+
+        assertEquals(8, replaced.getScore(), DELTA);
+        assertEquals(2, ratingsManager.getSize());
+    }
+
+    @Test
+    public void addOrReplaceRating_sameStallAndFoodInOtherLocation_added() throws BudgetBiteException {
+        Rating replaced = ratingsManager.addOrReplaceRating(new Rating("YIH", "Vietnamese", "Beef Pho", 3));
+
+        assertNull(replaced);
+        assertEquals(3, ratingsManager.getSize());
+    }
+
+    @Test
     public void toString_twoRatings_numberedList() {
-        String expected = "\n1. Stall: Vietnamese, Food: Beef Pho, Score: 8.0"
-                + "\n2. Stall: Indian, Food: Plain Dosai, Score: 6.5";
+        String expected = "\n1. Beef Pho (Vietnamese, PGPR) - 8.0/10"
+                + "\n2. Plain Dosai (Indian, YIH) - 6.5/10";
         assertEquals(expected, ratingsManager.toString());
     }
 }

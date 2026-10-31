@@ -1,5 +1,6 @@
 package seedu.duke.ui;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7,14 +8,30 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import seedu.duke.food.FoodDirectory;
+import seedu.duke.ratings.Rating;
+import seedu.duke.ratings.RatingsManager;
 
 public class MenuNavigatorTest {
 
+    private static final float DELTA = 0.001f;
+
     private MenuNavigator navigator;
+    private RatingsManager ratingsManager;
 
     @BeforeEach
     public void setUp() {
-        navigator = new MenuNavigator(new FoodDirectory());
+        ratingsManager = new RatingsManager();
+        navigator = new MenuNavigator(new FoodDirectory(), ratingsManager);
+    }
+
+    /**
+     * Browses to PGPR, then the Chicken Rice stall, whose menu is
+     * 1. Char Siew Rice, 2. Roast Chicken Rice, 3. Toufu Vegetable Rice Set.
+     */
+    private void openChickenRiceMenu() {
+        navigator.start();
+        navigator.handleInput("1");
+        navigator.handleInput("2");
     }
 
     @Test
@@ -199,5 +216,130 @@ public class MenuNavigatorTest {
 
         assertTrue(response.contains("Menu for Bistro Box:"));
         assertTrue(response.contains("Double Chicken Burger - $9.30"));
+    }
+
+    @Test
+    public void menu_itemsAreNumberedWithHint() {
+        String response = navigator.navigateDirectly("PGPR / Chicken Rice");
+
+        assertTrue(response.contains("1. Char Siew Rice - $3.30"));
+        assertTrue(response.contains("2. Roast Chicken Rice - $3.30"));
+        assertTrue(response.contains("Enter a food number to rate it"));
+    }
+
+    @Test
+    public void selectItem_asksForScore() {
+        openChickenRiceMenu();
+
+        String response = navigator.handleInput("2");
+
+        assertTrue(response.contains("Rate Roast Chicken Rice - $3.30 (Chicken Rice, PGPR)"));
+        assertTrue(response.contains("Enter a score from 0 to 10"));
+    }
+
+    @Test
+    public void selectItem_invalidNumber_returnsError() {
+        openChickenRiceMenu();
+
+        String response = navigator.handleInput("99");
+
+        assertTrue(response.contains("Invalid food number."));
+    }
+
+    @Test
+    public void rateItem_validScore_ratingAddedAndMenuShownAgain() throws Exception {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+
+        String response = navigator.handleInput("7.5");
+
+        assertTrue(response.contains("Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 7.5/10"));
+        assertTrue(response.contains("Menu for Chicken Rice:"));
+        assertEquals(1, ratingsManager.getSize());
+        Rating rating = ratingsManager.getRating(1);
+        assertEquals("PGPR", rating.getLocation());
+        assertEquals(7.5f, rating.getScore(), DELTA);
+
+        // Back on the menu, so a number picks a dish again.
+        assertTrue(navigator.handleInput("1").contains("Rate Char Siew Rice"));
+    }
+
+    @Test
+    public void rateItem_sameDishTwice_ratingUpdated() throws Exception {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+        navigator.handleInput("6");
+        navigator.handleInput("2");
+
+        String response = navigator.handleInput("9");
+
+        assertTrue(response.contains("Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10 (was 6.0/10)"));
+        assertEquals(1, ratingsManager.getSize());
+        assertEquals(9f, ratingsManager.getRating(1).getScore(), DELTA);
+    }
+
+    @Test
+    public void rateItem_invalidScore_askedAgainAndNothingAdded() {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+
+        String response = navigator.handleInput("11");
+
+        assertTrue(response.contains("Score must be between 0 and 10."));
+        assertTrue(response.contains("Enter a score from 0 to 10"));
+        assertTrue(ratingsManager.isEmpty());
+
+        // Still waiting for a score for the same dish.
+        assertTrue(navigator.handleInput("8").contains("Rated: Roast Chicken Rice"));
+    }
+
+    @Test
+    public void rateItem_back_cancelledAndMenuShown() {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+
+        String response = navigator.handleInput("back");
+
+        assertTrue(response.contains("Rating cancelled."));
+        assertTrue(response.contains("Menu for Chicken Rice:"));
+        assertTrue(ratingsManager.isEmpty());
+    }
+
+    @Test
+    public void rateItem_afterDirectNavigation_ratingAdded() {
+        navigator.navigateDirectly("TECHNO EDGE / Bistro Box");
+        navigator.handleInput("1");
+
+        String response = navigator.handleInput("9");
+
+        assertTrue(response.contains("Rated:"));
+        assertTrue(response.contains("(Bistro Box, TECHNO EDGE)"));
+    }
+
+    @Test
+    public void isNavigationInput_dependsOnStage() {
+        assertFalse(navigator.isNavigationInput("1"));
+
+        openChickenRiceMenu();
+        assertTrue(navigator.isNavigationInput("2"));
+        assertTrue(navigator.isNavigationInput("back"));
+        assertFalse(navigator.isNavigationInput("7.5"));
+        assertFalse(navigator.isNavigationInput("list-ratings"));
+
+        navigator.handleInput("2");
+        assertTrue(navigator.isNavigationInput("7.5"));
+        assertTrue(navigator.isNavigationInput("-1"));
+        assertFalse(navigator.isNavigationInput("list-ratings"));
+    }
+
+    @Test
+    public void home_whileRating_clearsRating() {
+        openChickenRiceMenu();
+        navigator.handleInput("2");
+
+        navigator.goHome();
+
+        assertFalse(navigator.isActive());
+        assertFalse(navigator.isNavigationInput("8"));
     }
 }

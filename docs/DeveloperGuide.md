@@ -1,5 +1,17 @@
 # Developer Guide
 
+## Acknowledgements
+
+* The project template, and the structure of this Developer Guide and the User Guide, are adapted from
+  [AddressBook-Level3](https://se-education.org/addressbook-level3/) by the [SE-EDU initiative](https://se-education.org/).
+* The design of `TextUi`, `StorageFile`, `Encoder` and `Decoder` is adapted from the SE-EDU AddressBook-Level2 template
+  provided for this course.
+* Third-party tools: [JUnit 5](https://junit.org/junit5/) for testing, [Gradle](https://gradle.org/) with the
+  [Shadow plugin](https://gradleup.com/shadow/) for building, [Checkstyle](https://checkstyle.org/) for code style, and
+  [PlantUML](https://plantuml.com/) for the diagrams.
+* AI use: team members used AI assistants (such as Claude and Codex) to help draft parts of the code, tests and
+  documentation. All AI-generated content was reviewed, tested and edited by the team.
+
 ## Design & implementation
 
 ### Parser and Command component
@@ -66,6 +78,8 @@ user's data.
 
 ![Model Class Diagram](images/ModelClassDiagram.png)
 
+*Figure: Classes that hold the user's ratings, expenses and budget while the app runs.*
+
 The model holds all user data in memory while the app runs:
 
 * `RatingsManager` holds a list of `Rating`s (stall, food and a score from 0 to 10).
@@ -75,26 +89,29 @@ The model holds all user data in memory while the app runs:
   works out how much of the budget has been spent by asking `ExpensesManager`
   for totals.
 * `Money` is the single place for the rules about amounts of money (positive, at
-  most 2 decimal places, a maximum) and for formatting amounts as `$4.50`.
+  most 2 decimal places, a maximum) and for formatting amounts as `$4.50`. Its
+  methods are static (shown underlined), as it holds no data of its own.
 
 Indexes in the public methods of the managers start from 1, matching the
 numbers the user sees in `list-ratings` and `list-expenses`. Each manager checks
 the index and throws a `BudgetBiteException` with a helpful message if it is
 out of range.
 
-### Expense tracking
+### Logging an expense
 
 #### Implementation
 
-The expense feature lets users log, list, edit and delete food expenses
-(`log-expense`, `list-expenses`, `edit-expense`, `delete-expense`). Each
-`Expense` holds a food name, a cost and a date, and all expenses are kept in an
-`ExpensesManager`.
+Users log what they spend on food with `log-expense FOOD_NAME /cost AMOUNT
+[/date YYYY-MM-DD]`. Each `Expense` holds a food name, a cost and a date, and all
+expenses are kept in an `ExpensesManager`. The related commands `list-expenses`,
+`edit-expense` and `delete-expense` work on the same list.
 
 The sequence diagram below shows how `log-expense Laksa /cost 12` is executed
 when a budget is set.
 
 ![Log Expense Sequence Diagram](images/LogExpenseSequenceDiagram.png)
+
+*Figure: Executing `log-expense Laksa /cost 12`. `<<class>>` marks calls to static methods of `ExpenseArguments`.*
 
 1. `LogExpenseCommand` uses `ExpenseArguments#splitAtDate` to split off an
    optional `/date`, then `ExpenseArguments#splitAtCost` to separate the food
@@ -107,7 +124,7 @@ when a budget is set.
    date is used.
 4. The new `Expense` is added to `ExpensesManager`.
 5. `BudgetManager#getStatusAfterSpending` adds a line about the budget to the
-   response (see [Budget tracking](#budget-tracking)).
+   response (see [Checking spending against a budget](#checking-spending-against-a-budget)).
 
 `Expense` objects cannot be changed after creation. `edit-expense` creates a
 copy with the new cost (`Expense#withCost`), which keeps the original date, and
@@ -149,7 +166,7 @@ the format `FOOD_NAME|COST|DATE`.
     * Cons: Tests of dates and budgets would pass or fail depending on the day
       they are run.
 
-### Budget tracking
+### Checking spending against a budget
 
 #### Implementation
 
@@ -168,6 +185,16 @@ current period: today for `DAILY`, this Monday for `WEEKLY`
 `MONTHLY`. `BudgetManager#getSpent` then calls
 `ExpensesManager#getTotalCostBetween(startDate, today)`, which adds up the
 expenses dated in that range.
+
+The object diagram below shows the objects after `set-budget weekly 50` and three
+logged expenses, when today is Wednesday 2026-10-28. The week started on Monday
+2026-10-26, so `BudgetManager` asks `ExpensesManager` for the total from
+2026-10-26 to 2026-10-28. Only `e2` and `e3` are in that range, so $16.50 of the
+$50.00 budget is used.
+
+![Budget Object Diagram](images/BudgetObjectDiagram.png)
+
+*Figure: Objects for a weekly budget. Only expenses dated in the current week count towards it.*
 
 **Warnings.** After each `log-expense`, `BudgetManager#getStatusAfterSpending`
 returns:
@@ -665,10 +692,6 @@ The food-navigation feature includes:
 
 The feature does not include live menu updates, stall opening hours, food
 ordering, payment, delivery, GPS directions, or real-time stock availability.
-
-### Value proposition
-
-{Describe the value proposition: what problem does it solve?}
 
 ## User Stories
 

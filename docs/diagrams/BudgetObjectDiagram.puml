@@ -1,0 +1,44 @@
+@startuml
+' Objects after "set-budget weekly 50" and three logged expenses, on Wednesday 2026-10-28.
+skinparam shadowing false
+skinparam defaultFontSize 14
+skinparam nodesep 40
+skinparam ranksep 60
+
+object "<u>:BudgetManager</u>" as bm
+object "<u>:Budget</u>" as b {
+    amount = 50.0
+}
+object "<u>WEEKLY:BudgetPeriod</u>" as p
+
+object "<u>:ExpensesManager</u>" as em
+object "<u>e1:Expense</u>" as e1 {
+    foodName = "Mala"
+    cost = 9.0
+    date = 2026-10-23
+}
+object "<u>e2:Expense</u>" as e2 {
+    foodName = "Chicken Rice"
+    cost = 4.5
+    date = 2026-10-26
+}
+object "<u>e3:Expense</u>" as e3 {
+    foodName = "Laksa"
+    cost = 12.0
+    date = 2026-10-28
+}
+
+bm -- b : budget
+b -- p : period
+em -- e1
+em -- e2
+em -- e3
+
+note bottom of e1
+  Before this Monday,
+  so not counted.
+end note
+note "Counted this week:\n$4.50 + $12.00 = $16.50" as N
+e2 .. N
+e3 .. N
+@enduml

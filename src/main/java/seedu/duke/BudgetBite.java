@@ -1,5 +1,6 @@
 package seedu.duke;
 
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,7 +32,19 @@ public class BudgetBite {
     private MenuNavigator menuNavigator;
 
     public static void main(String... launchArgs) {
+        hideLogsFromConsole();
         new BudgetBite().run(launchArgs);
+    }
+
+    /**
+     * Stops log messages below {@code SEVERE} from being printed to the console, where they would
+     * look like errors to the user. Problems the user needs to know about are shown through
+     * {@code TextUi} instead.
+     */
+    private static void hideLogsFromConsole() {
+        for (Handler handler : Logger.getLogger("").getHandlers()) {
+            handler.setLevel(Level.SEVERE);
+        }
     }
 
 
@@ -61,6 +74,9 @@ public class BudgetBite {
             this.menuNavigator = new MenuNavigator(foodDirectory, ratings);
 
             ui.showWelcomeMessage(VERSION);
+            for (String warning : storage.getLoadWarnings()) {
+                ui.showToUser(warning);
+            }
 
         } catch (BudgetBiteException e) {
             ui.showInitFailedMessage();

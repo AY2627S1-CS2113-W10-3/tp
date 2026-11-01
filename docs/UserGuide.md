@@ -1,6 +1,4 @@
-# User Guide
-
-# BudgetBite
+# BudgetBite User Guide
 
 BudgetBite is a command-line application that helps students decide where to
 eat and manage their food-related spending.
@@ -45,6 +43,33 @@ bye
 ```
 
 ## Features
+
+**Notes about the command format:**
+
+* Words in `UPPER_CASE` are parameters you supply. For example, in
+  `log-expense FOOD_NAME /cost AMOUNT`, `FOOD_NAME` can be `Chicken Rice`.
+* Parameters in square brackets are optional, e.g. `[/date YYYY-MM-DD]`.
+* `INDEX` is the number shown next to an item by `list-ratings` or
+  `list-expenses`. It must be a positive whole number: 1, 2, 3, ...
+* Command words are not case-sensitive: `LOG-EXPENSE` works the same as
+  `log-expense`. Spaces at the start and end of a command are ignored.
+* For `rate`, the parameters can be in any order. For `log-expense`, `/cost`
+  must come after the food name, and `/date` (if given) must come last.
+* Extra words after commands that take no parameters (`help`, `list-ratings`,
+  `list-expenses`, `budget` and `bye`) are ignored. For example, `help 123` is
+  treated as `help`.
+* Every line BudgetBite prints starts with `||`. The expected outputs in this
+  guide leave that out.
+
+### Viewing help: `help`
+
+Shows all the commands and their formats.
+
+Format:
+
+```text
+help
+```
 
 ### Food Navigation
 
@@ -572,11 +597,78 @@ Remaining this week: $5.00
 If no budget is set, BudgetBite shows
 `No budget set yet. Try: set-budget weekly 50`.
 
+### Exiting the program: `bye`
+
+Exits the program.
+
+Format:
+
+```text
+bye
+```
+
+Expected output:
+
+```text
+Bye bye baby
+I hope you will eat well. Bye!
+```
+
+### Saving the data
+
+BudgetBite saves your ratings, expenses and budget automatically after every
+command, including ratings made while browsing a menu. You do not need to save
+manually, and nothing is lost if you close the window without typing `bye`.
+
+The data is saved in a `data` folder inside the folder you run BudgetBite from.
+The folder is created the first time something is saved.
+
+### Editing the data files
+
+Advanced users can edit the data files directly. Each file has one item per
+line:
+
+| File | Format of each line | Example |
+|---|---|---|
+| `data/ratings.txt` | `LOCATION\|STALL\|FOOD\|SCORE` | `PGPR\|Chicken Rice\|Roast Chicken Rice\|8.0` |
+| `data/expenses.txt` | `FOOD_NAME\|COST\|DATE` | `Chicken Rice\|4.50\|2026-10-26` |
+| `data/budget.txt` | `PERIOD\|AMOUNT` (at most one line) | `weekly\|50.00` |
+
+**Caution:** If a line cannot be read, for example because a cost is not a
+number, BudgetBite skips that line when it starts and shows a note telling you
+how many lines were skipped. Because the skipped lines will not be written back
+when the data is next saved, BudgetBite first copies the original file to a
+backup with `.bak` added to its name, e.g. `data/expenses.txt.bak`. You can open
+the backup to fix the line and copy it back.
+
+## FAQ
+
+**Q**: How do I move my data to another computer?
+
+**A**: Copy the `data` folder into the folder where you run `BudgetBite.jar` on
+the other computer.
+
+**Q**: Do I need to type `bye` for my data to be saved?
+
+**A**: No. Your data is saved after every command.
+
+**Q**: I logged an expense with the wrong date. How do I fix it?
+
+**A**: `edit-expense` only changes the cost. Delete the expense with
+`delete-expense INDEX`, then log it again with the correct `/date`.
+
+**Q**: Why does my data seem to be gone?
+
+**A**: BudgetBite looks for the `data` folder in the folder you run it from.
+Make sure you run `java -jar BudgetBite.jar` from the same folder each time.
+
 ## Known issues
 
 * **Ratings saved by older versions of BudgetBite** are shown with
   `Unknown location`, and any repeated ratings among them are kept. Use
   `delete-rating` to remove the ones you no longer want.
+* **Names in other languages,** such as Chinese or Japanese food names, are saved
+  correctly but may show as `?` in some Windows terminals.
 
 ## Command Summary
 
@@ -591,7 +683,7 @@ If no budget is set, BudgetBite shows
 | `list-ratings` | `list-ratings` | Display all ratings |
 | `edit-rating` | `edit-rating INDEX /score SCORE` | Edit a rating |
 | `delete-rating` | `delete-rating INDEX` | Delete a rating |
-| `log-expense` | `log-expense FOOD_NAME /cost AMOUNT` | Record an expense |
+| `log-expense` | `log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]` | Record an expense |
 | `list-expenses` | `list-expenses` | Display all expenses |
 | `edit-expense` | `edit-expense INDEX /cost AMOUNT` | Edit an expense |
 | `delete-expense` | `delete-expense INDEX` | Delete an expense |

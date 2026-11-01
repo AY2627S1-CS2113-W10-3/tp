@@ -18,3 +18,5 @@ _temp/
 
 /text-ui-test/ACTUAL.TXT
 text-ui-test/EXPECTED-UNIX.TXT
+# App data created when running BudgetBite (only the top-level data folder)
+/data/

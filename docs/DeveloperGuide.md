@@ -12,7 +12,67 @@
 * AI use: team members used AI assistants (such as Claude and Codex) to help draft parts of the code, tests and
   documentation. All AI-generated content was reviewed, tested and edited by the team.
 
-## Design & implementation
+## Setting up, getting started
+
+1. Fork and clone the repo, then open it in IntelliJ IDEA as a Gradle project.
+2. Make sure the project uses JDK 25 (File > Project Structure > Project SDK).
+3. Run `seedu.duke.BudgetBite#main` to launch the app, or run `.\gradlew run`.
+4. Run `.\gradlew check` to run the tests and Checkstyle, and
+   `.\gradlew shadowJar` to build `build/libs/BudgetBite.jar`.
+
+## Design
+
+<div markdown="span" class="alert alert-primary">
+:bulb: **Tip:** The `.puml` files used to draw the diagrams in this guide are in the `docs/diagrams` folder.
+</div>
+
+### Architecture
+
+![Architecture Diagram](images/ArchitectureDiagram.png)
+
+*Figure: The main parts of BudgetBite and how they depend on each other.*
+
+The ***Architecture Diagram*** above shows the high-level design of BudgetBite.
+
+`BudgetBite` (the main class) is in charge of launching the app, running the
+command loop and shutting down:
+
+* At launch, it loads the saved data through `StorageFile`, and creates the
+  `TextUi`, `MenuNavigator` and `Parser`.
+* For each line the user types, it decides who handles it: navigation input
+  (such as `location`, `back`, a number while browsing, or `FOOD_COURT / STALL`)
+  goes to `MenuNavigator`, and everything else goes to `Parser`.
+* After every input, it saves all data through `StorageFile`, then shows the
+  response through `TextUi`.
+
+The rest of the app consists of these components:
+
+* **UI** (`TextUi`): reads input from, and writes output to, the console.
+* [**Parser and Command**](#parser-and-command-component): turns a line of input
+  into a `Command` and runs it.
+* [**Model**](#model-component): holds the user's data in memory: ratings,
+  expenses and the budget.
+* [**Navigation**](#navigation-component): lets the user browse food courts,
+  stalls and menus, which `FoodDirectory` loads from `food.txt` inside the JAR.
+* [**Storage**](#storage-component): reads the data files in the `data` folder at
+  launch and writes them after every input.
+
+**How the components interact with each other**
+
+The sequence diagram below shows how the components work together when the user
+enters `delete-expense 1`.
+
+![Architecture Sequence Diagram](images/ArchitectureSequenceDiagram.png)
+
+*Figure: The components working together for `delete-expense 1`.*
+
+1. `BudgetBite` asks `TextUi` for the next command, and gets `delete-expense 1`.
+2. It is not navigation input, so `BudgetBite` passes it to
+   `Parser#parseCommand`, which creates a `DeleteExpenseCommand`.
+3. `BudgetBite` calls `execute()` on the command, which deletes the expense
+   through `ExpensesManager` and returns a message.
+4. `BudgetBite` saves all data through `StorageFile` (in `saveData`), then shows
+   the message through `TextUi`.
 
 ### Parser and Command component
 
@@ -20,8 +80,12 @@
 
 ![Command Class Diagram](images/CommandClassDiagram.png)
 
+*Figure: `Parser` creates one `Command` subclass for each command word; `BudgetBite` then executes it.*
+
 The `Parser` turns what the user typed into a `Command` object, and each
-`Command` does the actual work when it is executed.
+`Command` does the actual work when it is executed. Every command is a
+subclass of `Command` and overrides `execute()`. The managers a command works
+on are passed in when it is created, as described below.
 
 1. `BudgetBite` reads a line of input. Navigation input (`home`, `location`,
    `FOOD_COURT / STALL`, and, while browsing, `back` or a number, as decided by
@@ -96,6 +160,53 @@ Indexes in the public methods of the managers start from 1, matching the
 numbers the user sees in `list-ratings` and `list-expenses`. Each manager checks
 the index and throws a `BudgetBiteException` with a helpful message if it is
 out of range.
+
+### Navigation component
+
+**API:** `MenuNavigator.java`, `FoodDirectory.java`, `FoodDataLoader.java`
+
+The navigation component allows users to browse food courts, food stalls, and
+menu items.
+
+`FoodDirectory` loads the food catalogue from `src/main/resources/food.txt` using
+`FoodDataLoader`. Each non-blank line has the format
+FOOD_COURT|STALL|FOOD_ITEM|PRICE. The loader groups these rows into
+`FoodCourt`, `FoodStall`, and `FoodItem` objects. The resulting food data is
+read-only during execution.
+
+`MenuNavigator` controls the user's current browsing position. It stores the
+current navigation stage, the selected food court, the selected stall and the
+selected dish. It also holds the `RatingsManager`, so that a dish can be rated
+from its menu. The food data is read-only during execution.
+
+The navigator is used by `BudgetBite`. When the user enters `location`, the
+application starts the navigation flow. While navigation is active,
+`MenuNavigator#isNavigationInput` decides which input it handles: `back`, and
+whole numbers, or anything that looks like a score while a dish is being rated.
+Other input, such as `list-ratings`, still runs as a normal command. The `home`
+command returns the user to the main menu from any navigation stage.
+
+### Storage component
+
+**API:** `StorageFile.java`
+
+![Storage Class Diagram](images/StorageClassDiagram.png)
+
+*Figure: `StorageFile` saves and loads the data, using `Encoder` and `Decoder`.*
+
+* `StorageFile` saves and loads the three data files: `data/expenses.txt`,
+  `data/ratings.txt` and `data/budget.txt`. The `data` folder is next to wherever
+  the app is run from, e.g. next to the JAR, and is created on the first save.
+* `Encoder` turns ratings and expenses into lines of text, and `Decoder` turns
+  lines back into objects. Their methods are static (shown underlined), as they
+  hold no data. Each `Expense`, `Rating` and `Budget` knows its own line format
+  (`toStorageString()` and `fromStorageString()`).
+* Loading never stops the app: a missing file gives an empty list, and a line in
+  the wrong format is skipped and logged as a warning.
+
+## Implementation
+
+This section describes how some of the features are implemented.
 
 ### Logging an expense
 
@@ -251,6 +362,8 @@ is executed.
 
 ![Rate Sequence Diagram](images/RateSequenceDiagram.png)
 
+*Figure: Executing a `rate` command. The stall and food are then checked with `FoodCourt#findStall` and `FoodStall#findItem`.*
+
 1. `Parser` sees the command word `rate` and creates a `RateCommand` with the
    rest of the line, the `RatingsManager` and the `FoodDirectory`.
 2. `RateCommand#parseFields` splits the arguments into words. A word starting
@@ -362,31 +475,6 @@ Invalid lines are skipped when the file is loaded.
     * Cons: The score check must be repeated in the setter, and any code holding
       a `Rating` could change it.
 
-### Navigation component
-
-**API:** `MenuNavigator.java`, `FoodDirectory.java`, `FoodDataLoader.java`
-
-The navigation component allows users to browse food courts, food stalls, and
-menu items.
-
-`FoodDirectory` loads the food catalogue from `src/main/resources/food.txt` using
-`FoodDataLoader`. Each non-blank line has the format
-FOOD_COURT|STALL|FOOD_ITEM|PRICE. The loader groups these rows into
-`FoodCourt`, `FoodStall`, and `FoodItem` objects. The resulting food data is
-read-only during execution.
-
-`MenuNavigator` controls the user's current browsing position. It stores the
-current navigation stage, the selected food court, the selected stall and the
-selected dish. It also holds the `RatingsManager`, so that a dish can be rated
-from its menu. The food data is read-only during execution.
-
-The navigator is used by `BudgetBite`. When the user enters `location`, the
-application starts the navigation flow. While navigation is active,
-`MenuNavigator#isNavigationInput` decides which input it handles: `back`, and
-whole numbers, or anything that looks like a score while a dish is being rated.
-Other input, such as `list-ratings`, still runs as a normal command. The `home`
-command returns the user to the main menu from any navigation stage.
-
 ### Food navigation
 
 #### Implementation
@@ -400,6 +488,8 @@ command returns the user to the main menu from any navigation stage.
 * `RATING_ITEM`: The user chose a dish from the menu and is asked for its score.
 
 ![Navigation State Diagram](images/NavigationStateDiagram.png)
+
+*Figure: The stages of `MenuNavigator` and the input that moves between them.*
 
 The normal browsing flow is as follows:
 
@@ -494,6 +584,104 @@ navigation using `FOOD_COURT / STALL`.
     * Pros: Every mistake gets a score-specific error.
     * Cons: The user is stuck in the prompt, and commands such as `bye` would
       need special handling.
+
+### Saving data after every command
+
+#### Implementation
+
+`BudgetBite` saves all data after **every** input, including navigation input,
+since a dish can be rated from a menu. So no data is lost if the user closes the
+window without typing `bye`.
+
+![Save Sequence Diagram](images/SaveSequenceDiagram.png)
+
+*Figure: Saving the three data files after an input.*
+
+1. `BudgetBite#saveData` calls `StorageFile#save` with the ratings, expenses and
+   budget.
+2. For each data file, `StorageFile` turns the data into lines (with `Encoder`,
+   or `encodeBudget` for the budget) and calls `writeLines`.
+3. `writeLines` first calls `Files.createDirectories`, which creates the `data`
+   folder if it does not exist yet (it does nothing otherwise), then writes the
+   lines with `Files.write`.
+4. If writing fails, e.g. because the folder is read-only, `writeLines` throws a
+   `BudgetBiteException`. `BudgetBite` adds a warning to the response instead of
+   stopping the app.
+
+#### Design considerations
+
+**Aspect: When to save**
+
+* **Alternative 1 (current choice):** Save all three files after every input.
+    * Pros: Simple and safe. Nothing is lost if the app is closed suddenly.
+    * Cons: Rewrites files even after inputs that change nothing. The files are
+      small, so this takes very little time.
+* **Alternative 2:** Save only when the user enters `bye`.
+    * Pros: Fewest writes.
+    * Cons: All changes are lost if the window is closed or the computer crashes.
+
+## Product scope
+
+### Target user profile
+
+BudgetBite is designed for students who eat at campus food courts and want to
+make quick food-related decisions.
+
+The target users:
+
+* are familiar with basic command-line applications;
+* want to browse available food courts and stalls;
+* want to view menu items and prices before choosing a meal;
+* may want to record food ratings and expenses; and
+* may want to manage their food spending with a budget.
+
+### Value proposition
+
+BudgetBite brings campus food navigation, menu prices, food ratings, expense
+tracking, and budget tracking into one command-line application.
+
+For the food-navigation feature, users can browse food courts and stalls,
+inspect available menu items and prices, or jump directly to a stall using its
+name. This helps students decide where and what to eat without manually
+searching through separate menus or websites.
+
+### Food-navigation scope
+
+The food-navigation feature includes:
+
+* browsing the available food courts;
+* browsing the stalls inside a selected food court;
+* viewing menu items and their prices;
+* navigating backwards through the browsing levels;
+* returning to the main menu with `home`; and
+* directly opening a stall menu using `FOOD_COURT / STALL`.
+
+The feature does not include live menu updates, stall opening hours, food
+ordering, payment, delivery, GPS directions, or real-time stock availability.
+
+## User Stories
+
+|Version| As a ... | I want to ... | So that I can ...|
+|--------|----------|---------------|------------------|
+|v1.0|new user|see usage instructions|refer to them when I forget how to use the application|
+| v1.0 | student looking for food | browse the food courts and stalls on campus | decide where to eat |
+| v1.0 | student looking for food | view the dishes and prices at a stall | choose a dish within my budget |
+| v1.0 | frequent user | jump directly to a stall's menu by name | skip the step-by-step browsing process |
+| v1.0 | student | rate a dish I ate from 0 to 10 | remember how much I liked it |
+| v1.0 | student deciding what to eat | see all my ratings | pick a dish I enjoyed before |
+| v2.0 | student who changed their mind | edit the score of a rating | keep my ratings up to date |
+| v2.0 | user who makes mistakes | delete a rating | remove wrong or unwanted ratings |
+| v1.0 | student | log what I spend on food | know where my money goes |
+| v1.0 | student | see all my expenses and the total | know how much I have spent |
+| v1.0 | user who makes mistakes | edit or delete an expense | fix wrong entries |
+| v2.0 | student on a budget | set a daily, weekly or monthly food budget | control my spending |
+| v2.0 | student on a budget | see how much of my budget is left | decide how much I can spend on my next meal |
+| v2.0 | student on a budget | be warned when I am close to or over my budget | cut back before I overspend |
+| v2.0 | student who forgets to log | log an expense with an earlier date | keep my records and budget accurate |
+
+## Use cases
+
+(For all use cases below, the **System** is `BudgetBite` and the **Actor** is the user, unless specified otherwise.)
 
 ### Use case: UC01 - Browse food menus
 
@@ -653,65 +841,6 @@ navigation using `FOOD_COURT / STALL`.
     * 4b1. BudgetBite cancels the rating and shows the menu again.
 
       Use case ends.
-
-## Product scope
-
-### Target user profile
-
-BudgetBite is designed for students who eat at campus food courts and want to
-make quick food-related decisions.
-
-The target users:
-
-* are familiar with basic command-line applications;
-* want to browse available food courts and stalls;
-* want to view menu items and prices before choosing a meal;
-* may want to record food ratings and expenses; and
-* may want to manage their food spending with a budget.
-
-### Value proposition
-
-BudgetBite brings campus food navigation, menu prices, food ratings, expense
-tracking, and budget tracking into one command-line application.
-
-For the food-navigation feature, users can browse food courts and stalls,
-inspect available menu items and prices, or jump directly to a stall using its
-name. This helps students decide where and what to eat without manually
-searching through separate menus or websites.
-
-### Food-navigation scope
-
-The food-navigation feature includes:
-
-* browsing the available food courts;
-* browsing the stalls inside a selected food court;
-* viewing menu items and their prices;
-* navigating backwards through the browsing levels;
-* returning to the main menu with `home`; and
-* directly opening a stall menu using `FOOD_COURT / STALL`.
-
-The feature does not include live menu updates, stall opening hours, food
-ordering, payment, delivery, GPS directions, or real-time stock availability.
-
-## User Stories
-
-|Version| As a ... | I want to ... | So that I can ...|
-|--------|----------|---------------|------------------|
-|v1.0|new user|see usage instructions|refer to them when I forget how to use the application|
-| v1.0 | student looking for food | browse the food courts and stalls on campus | decide where to eat |
-| v1.0 | student looking for food | view the dishes and prices at a stall | choose a dish within my budget |
-| v1.0 | frequent user | jump directly to a stall's menu by name | skip the step-by-step browsing process |
-| v1.0 | student | rate a dish I ate from 0 to 10 | remember how much I liked it |
-| v1.0 | student deciding what to eat | see all my ratings | pick a dish I enjoyed before |
-| v2.0 | student who changed their mind | edit the score of a rating | keep my ratings up to date |
-| v2.0 | user who makes mistakes | delete a rating | remove wrong or unwanted ratings |
-| v1.0 | student | log what I spend on food | know where my money goes |
-| v1.0 | student | see all my expenses and the total | know how much I have spent |
-| v1.0 | user who makes mistakes | edit or delete an expense | fix wrong entries |
-| v2.0 | student on a budget | set a daily, weekly or monthly food budget | control my spending |
-| v2.0 | student on a budget | see how much of my budget is left | decide how much I can spend on my next meal |
-| v2.0 | student on a budget | be warned when I am close to or over my budget | cut back before I overspend |
-| v2.0 | student who forgets to log | log an expense with an earlier date | keep my records and budget accurate |
 
 ## Non-Functional Requirements
 

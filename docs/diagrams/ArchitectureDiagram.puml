@@ -1,50 +1,48 @@
 @startuml
-!pragma layout smetana
+' Architecture: the main parts of BudgetBite and how they depend on each other.
 skinparam shadowing false
+skinparam defaultFontSize 14
 skinparam componentStyle rectangle
+skinparam nodesep 50
+skinparam ranksep 70
 
-component "BudgetBite\n(Main)" as Main
+component "BudgetBite\n(main)" as Main
 
-package "UI" {
-    [TextUi]
+package "UI" as UiPkg {
+    component TextUi
 }
-
-package "Navigation" {
-    [MenuNavigator]
-    [FoodDirectory]
+package "Parser and Command" as CmdPkg {
+    component Parser
+    component Command
 }
-
-package "Parser and Command" {
-    [Parser]
-    [Command]
+package "Navigation" as NavPkg {
+    component MenuNavigator
+    component FoodDirectory
 }
-
-package "Model" {
-    [ExpensesManager]
-    [RatingsManager]
-    [BudgetManager]
+package "Storage" as StoPkg {
+    component StorageFile
 }
-
-package "Storage" {
-    [StorageFile]
+package "Model" as Model {
+    component RatingsManager
+    component ExpensesManager
+    component BudgetManager
 }
+database "data/*.txt" as Data
 
-database "data/*.txt" as Files
+RatingsManager -[hidden]right- ExpensesManager
+ExpensesManager -[hidden]right- BudgetManager
 
-Main -down-> [TextUi] : reads input,\nshows output
-Main -down-> [MenuNavigator] : navigation input
-Main -down-> [Parser] : parseCommand
-Main -down-> [Command] : execute
-Main -down-> [StorageFile] : load at start,\nsave after each command
+Main --> TextUi : reads input,\nshows responses
+Main --> Parser : parses commands
+Main --> Command : executes
+Main --> MenuNavigator : navigation input
+Main --> StorageFile : loads at start,\nsaves after each input
 
-[Parser] .right.> [Command] : creates
-[Command] -down-> [ExpensesManager]
-[Command] -down-> [RatingsManager]
-[Command] -down-> [BudgetManager]
-[MenuNavigator] -right-> [FoodDirectory]
-
-[StorageFile] .up.> [ExpensesManager] : encodes/decodes
-[StorageFile] .up.> [RatingsManager] : encodes/decodes
-[StorageFile] .up.> [BudgetManager] : encodes/decodes
-[StorageFile] -down-> Files : reads/writes
+Parser .right.> Command : creates
+MenuNavigator -right-> FoodDirectory
+Command --> Model : reads and\nchanges data
+Command --> FoodDirectory : checks names
+MenuNavigator --> Model : adds ratings
+StorageFile ..> Model : saves and loads
+StorageFile --> Data : reads/writes
 @enduml

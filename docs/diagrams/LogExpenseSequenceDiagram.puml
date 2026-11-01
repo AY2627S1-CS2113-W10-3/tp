@@ -1,31 +1,56 @@
 @startuml
+' log-expense Laksa /cost 12 when a weekly budget is set.
+skinparam shadowing false
+skinparam defaultFontSize 14
 hide footbox
+
 participant ":LogExpenseCommand" as L
-participant "ExpenseArguments" as A <<class>>
+participant "<<class>>\nExpenseArguments" as A
 participant ":ExpensesManager" as E
 participant ":BudgetManager" as B
 
 [-> L : execute()
 activate L
+
 L -> A : splitAtDate("Laksa /cost 12")
+activate A
 A --> L : ["Laksa /cost 12", null]
+deactivate A
+
 L -> A : splitAtCost("Laksa /cost 12")
+activate A
 A --> L : ["Laksa", "12"]
+deactivate A
+
 opt a date was given
-  L -> A : parseDate(dateText, today)
-  A --> L : date
+    L -> A : parseDate(dateText, today)
+    activate A
+    A --> L : date
+    deactivate A
 end
+
 create ":Expense" as X
 L -> X : new Expense("Laksa", 12.0, date)
+activate X
+X --> L : expense
+deactivate X
+
 L -> E : addExpense(expense)
+activate E
+E --> L
+deactivate E
+
 L -> B : getStatusAfterSpending(expensesManager, today)
 activate B
 opt a budget is set
-  B -> E : getTotalCostBetween(periodStart, today)
-  E --> B : spent
+    B -> E : getTotalCostBetween(periodStart, today)
+    activate E
+    E --> B : spent
+    deactivate E
 end
 B --> L : status line
 deactivate B
-[<-- L : "Logged: ... Total spent: ... Remaining this week: ..."
+
+[<-- L : "Logged: ...\nRemaining this week: ..."
 deactivate L
 @enduml

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -107,6 +108,61 @@ public class StorageFileTest {
         Files.write(storage.getBudgetPath(), java.util.List.of("yearly|abc"));
 
         assertTrue(!storage.loadBudget().hasBudget());
+    }
+
+    @Test
+    public void load_unreadableExpenseLines_skippedWithNoteAndBackup() throws Exception {
+        Path dataFolder = Files.createTempDirectory("budgetbite-test").resolve("data");
+        StorageFile storage = makeStorage(dataFolder);
+        Files.createDirectories(dataFolder);
+        List<String> originalLines = List.of("Teh|1.20|2026-10-30", "garbage", "", "Kopi|abc|2026-10-30");
+        Files.write(storage.getExpensesPath(), originalLines);
+
+        ExpensesManager expenses = storage.loadExpenses();
+
+        assertEquals(1, expenses.getSize());
+        assertEquals(1, storage.getLoadWarnings().size());
+        assertTrue(storage.getLoadWarnings().get(0).contains("2 lines"));
+        Path backupPath = dataFolder.resolve("expenses.txt.bak");
+        assertEquals(originalLines, Files.readAllLines(backupPath));
+    }
+
+    @Test
+    public void load_oneUnreadableRatingLine_singularNote() throws Exception {
+        Path dataFolder = Files.createTempDirectory("budgetbite-test").resolve("data");
+        StorageFile storage = makeStorage(dataFolder);
+        Files.createDirectories(dataFolder);
+        Files.write(storage.getRatingsPath(), List.of("PGPR|Chicken Rice|Char Siew Rice|7.0", "not a rating"));
+
+        assertEquals(1, storage.loadRatings().getSize());
+        assertTrue(storage.getLoadWarnings().get(0).contains("1 line"));
+        assertTrue(storage.getLoadWarnings().get(0).contains("was skipped"));
+    }
+
+    @Test
+    public void load_validFiles_noNotes() throws Exception {
+        StorageFile storage = makeStorage(Files.createTempDirectory("budgetbite-test").resolve("data"));
+        ExpensesManager expenses = new ExpensesManager();
+        expenses.addExpense(new Expense("Teh", 1.20));
+        storage.save(new RatingsManager(), expenses, new BudgetManager(new Budget(BudgetPeriod.WEEKLY, 50)));
+
+        storage.loadExpenses();
+        storage.loadRatings();
+        storage.loadBudget();
+
+        assertTrue(storage.getLoadWarnings().isEmpty());
+        assertTrue(!Files.exists(storage.getExpensesPath().resolveSibling("expenses.txt.bak")));
+    }
+
+    @Test
+    public void loadBudget_unreadableLine_noteAdded() throws Exception {
+        Path dataFolder = Files.createTempDirectory("budgetbite-test").resolve("data");
+        StorageFile storage = makeStorage(dataFolder);
+        Files.createDirectories(dataFolder);
+        Files.write(storage.getBudgetPath(), List.of("yearly|abc"));
+
+        assertTrue(!storage.loadBudget().hasBudget());
+        assertEquals(1, storage.getLoadWarnings().size());
     }
 
     private StorageFile makeStorage(Path dataFolder) throws BudgetBiteException {

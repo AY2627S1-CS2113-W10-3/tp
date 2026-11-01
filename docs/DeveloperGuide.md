@@ -202,7 +202,12 @@ command returns the user to the main menu from any navigation stage.
   hold no data. Each `Expense`, `Rating` and `Budget` knows its own line format
   (`toStorageString()` and `fromStorageString()`).
 * Loading never stops the app: a missing file gives an empty list, and a line in
-  the wrong format is skipped and logged as a warning.
+  the wrong format is skipped. `StorageFile` counts the skipped lines of each
+  file, copies that file to a backup (e.g. `data/expenses.txt.bak`) because the
+  skipped lines will not be written back on the next save, and keeps a note that
+  `BudgetBite` shows after the welcome message.
+* Log messages below `SEVERE` are kept off the console (`BudgetBite#hideLogsFromConsole`),
+  so users only see messages meant for them.
 
 ## Implementation
 

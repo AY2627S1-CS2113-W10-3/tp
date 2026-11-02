@@ -432,7 +432,8 @@ log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]
 
 * `AMOUNT` must be more than 0 and at most 1000, with at most 2 decimal places.
 * `/date` is optional. Without it, the expense is dated today. The date cannot
-  be in the future, and `/date` must come after `/cost`.
+  be in the future or before 2000-01-01, and `/date` must come after `/cost`.
+* `/cost` and `/date` can each be given only once.
 * `FOOD_NAME` cannot be empty and cannot contain the `|` character.
 
 Example:

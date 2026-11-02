@@ -120,6 +120,17 @@ public class Expense {
     }
 
     /**
+     * Returns a copy of this expense with its date replaced by the given date. The cost stays the same.
+     *
+     * @param newDate New date of the expense.
+     * @return The updated expense.
+     * @throws BudgetBiteException If the expense cannot be created.
+     */
+    public Expense withDate(LocalDate newDate) throws BudgetBiteException {
+        return new Expense(foodName, cost, newDate);
+    }
+
+    /**
      * Returns this expense in the format used by the storage file.
      *
      * @return The expense as {@code FOOD_NAME|COST|DATE}, e.g. {@code Chicken Rice|4.50|2026-10-26}.

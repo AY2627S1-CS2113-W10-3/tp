@@ -243,8 +243,10 @@ when a budget is set.
    response (see [Checking spending against a budget](#checking-spending-against-a-budget)).
 
 `Expense` objects cannot be changed after creation. `edit-expense` creates a
-copy with the new cost (`Expense#withCost`), which keeps the original date, and
-puts it in place of the old one. Expenses are saved to `data/expenses.txt` in
+copy with the new cost (`Expense#withCost`), the new date (`Expense#withDate`),
+or both, through `ExpensesManager#editExpense`, and puts it in place of the old
+one. Because the budget is always worked out from the expense dates, moving an
+expense to another day updates the budget straight away. Expenses are saved to `data/expenses.txt` in
 the format `FOOD_NAME|COST|DATE`.
 
 #### Design considerations
@@ -1008,9 +1010,10 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 
    Expected: Both expenses are listed with their dates, and the total is $5.70.
 
-2. Enter `edit-expense 1 /cost 5`, then `delete-expense 2`.
+2. Enter `edit-expense 1 /cost 5`, then `edit-expense 1 /date 2026-10-20`, then
+   `delete-expense 2`.
 
-   Expected: Expense 1 now costs $5.00 and keeps its date; expense 2 is deleted.
+   Expected: Expense 1 now costs $5.00 and is dated 2026-10-20; expense 2 is deleted.
 
 3. Test invalid inputs by entering:
 

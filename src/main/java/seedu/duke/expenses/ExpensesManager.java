@@ -157,6 +157,25 @@ public class ExpensesManager {
         return expenses;
     }
 
+    /**
+     * Lists the expenses made between two dates, including both of them. Each keeps its index in the full
+     * list, so the numbers shown can still be used with {@code edit-expense} and {@code delete-expense}.
+     *
+     * @param startDate First day to include.
+     * @param endDate   Last day to include.
+     * @return One line per matching expense, each starting with a new line, or an empty string if none match.
+     */
+    public String toStringBetween(LocalDate startDate, LocalDate endDate) {
+        StringBuilder expensesText = new StringBuilder();
+        for (int i = 0; i < expenses.size(); i++) {
+            Expense expense = expenses.get(i);
+            if (expense.isBetween(startDate, endDate)) {
+                expensesText.append("\n").append(i + 1).append(". ").append(expense);
+            }
+        }
+        return expensesText.toString();
+    }
+
     @Override
     public String toString() {
         StringBuilder expensesText = new StringBuilder();

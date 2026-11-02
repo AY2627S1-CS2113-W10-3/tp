@@ -56,8 +56,7 @@ bye
 * For `rate`, the parameters can be in any order. For `log-expense`, `/cost`
   must come after the food name, and `/date` (if given) must come last.
 * Extra words after commands that take no parameters (`help`, `list-ratings`,
-  `list-expenses`, `budget` and `bye`) are ignored. For example, `help 123` is
-  treated as `help`.
+  `budget` and `bye`) are ignored. For example, `help 123` is treated as `help`.
 * Every line BudgetBite prints starts with `||`. The expected outputs in this
   guide leave that out.
 
@@ -455,11 +454,23 @@ To log a meal from an earlier day:
 log-expense Teh /cost 1.20 /date 2026-10-20
 ```
 
-#### List all expenses: `list-expenses`
+#### List expenses: `list-expenses`
 
-Shows all your expenses, numbered, with their dates and the total spent.
+Shows your expenses, numbered, with their dates and the total spent. Add a
+period to see only today's, this week's or this month's expenses.
 
 Format:
+
+```text
+list-expenses [PERIOD]
+```
+
+* `PERIOD` is `daily`, `weekly` or `monthly` (not case-sensitive). Weeks start
+  on Monday, and months on the 1st, the same as for `set-budget`.
+* With a period, each expense keeps its number from the full list, so you can
+  still use that number with `edit-expense` and `delete-expense`.
+
+Example:
 
 ```text
 list-expenses
@@ -472,6 +483,20 @@ Your expenses:
 1. Chicken Rice - $4.50 (2026-10-27)
 2. Teh - $1.20 (2026-10-20)
 Total spent: $5.70
+```
+
+Example, on 2026-10-27:
+
+```text
+list-expenses weekly
+```
+
+Expected output:
+
+```text
+Your expenses this week:
+1. Chicken Rice - $4.50 (2026-10-27)
+Total spent this week: $4.50
 ```
 
 #### Edit an expense: `edit-expense`
@@ -697,7 +722,7 @@ Make sure you run `java -jar BudgetBite.jar` from the same folder each time.
 | `edit-rating` | `edit-rating INDEX /score SCORE` | Edit a rating |
 | `delete-rating` | `delete-rating INDEX` | Delete a rating |
 | `log-expense` | `log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]` | Record an expense |
-| `list-expenses` | `list-expenses` | Display all expenses |
+| `list-expenses` | `list-expenses [PERIOD]` | Display all expenses, or only today's, this week's or this month's |
 | `edit-expense` | `edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]` | Edit the cost or date of an expense |
 | `delete-expense` | `delete-expense INDEX` | Delete an expense |
 | `set-budget` | `set-budget PERIOD AMOUNT` | Set a food budget |

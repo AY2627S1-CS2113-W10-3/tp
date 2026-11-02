@@ -64,7 +64,7 @@ public class Parser {
         case LogExpenseCommand.COMMAND_WORD:
             return new LogExpenseCommand(arguments, expensesManager, budgetManager);
         case ListExpensesCommand.COMMAND_WORD:
-            return new ListExpensesCommand(expensesManager);
+            return new ListExpensesCommand(arguments, expensesManager);
         case EditExpenseCommand.COMMAND_WORD:
             return new EditExpenseCommand(arguments, expensesManager);
         case DeleteExpenseCommand.COMMAND_WORD:

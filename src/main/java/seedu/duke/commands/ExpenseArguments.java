@@ -13,10 +13,10 @@ public final class ExpenseArguments {
     public static final String COST_PREFIX = "/cost";
     public static final String DATE_PREFIX = "/date";
 
-    private static final String WHOLE_NUMBER_REGEX = "\\d+";
-
     /** Earliest date an expense can have, to catch typing mistakes such as 1026 instead of 2026. */
     public static final LocalDate EARLIEST_DATE = LocalDate.of(2000, 1, 1);
+
+    private static final String WHOLE_NUMBER_REGEX = "\\d+";
 
     private ExpenseArguments() {
         // Utility class; not meant to be instantiated.

@@ -1,46 +1,55 @@
 @startuml
+' How the main parts work together when the user enters "delete-expense 1".
 skinparam shadowing false
+skinparam defaultFontSize 14
 hide footbox
 
 actor User
 participant ":TextUi" as Ui
-participant ":BudgetBite" as BB
-participant ":Parser" as Parser
-participant "command:AddExpenseCommand" as Cmd
-participant ":ExpensesManager" as Exp
-participant ":StorageFile" as Storage
+participant ":BudgetBite" as Main
+participant ":Parser" as P
+participant ":ExpensesManager" as E
+participant ":StorageFile" as S
 
-User -> Ui : types "add expense ..."
+activate Main
+Main -> Ui : getUserCommand()
 activate Ui
-Ui --> BB : userInput
+User -> Ui : types "delete-expense 1"
+Ui --> Main : "delete-expense 1"
 deactivate Ui
-activate BB
 
-BB -> Parser : parseCommand(trimmedInput)
-activate Parser
-create Cmd
-Parser -> Cmd
-Parser --> BB : command
-deactivate Parser
+Main -> P : parseCommand("delete-expense 1")
+activate P
+create "c:DeleteExpenseCommand" as C
+P -> C : new DeleteExpenseCommand("1", expensesManager)
+activate C
+C --> P
+deactivate C
+P --> Main : c
+deactivate P
 
-BB -> Cmd : execute()
-activate Cmd
-Cmd -> Exp : add expense
-activate Exp
-Exp --> Cmd
-deactivate Exp
-Cmd --> BB : response
-deactivate Cmd
+Main -> C : execute()
+activate C
+C -> E : deleteExpense(1)
+activate E
+E --> C : deleted expense
+deactivate E
+C --> Main : "Deleted: ..."
+deactivate C
 
-BB -> BB : saveData(response)
-BB -> Storage : save(ratings, expenses, budget)
-activate Storage
-Storage --> BB
-deactivate Storage
+Main -> Main : saveData(response)
+activate Main
+Main -> S : save(ratings, expenses, budget)
+activate S
+S --> Main
+deactivate S
+Main --> Main : response
+deactivate Main
 
-BB -> Ui : showResponseToUser(response)
+Main -> Ui : showResponseToUser(response)
 activate Ui
-Ui --> User : show response
+Ui --> User : "Deleted: ..."
+Ui --> Main
 deactivate Ui
-deactivate BB
+deactivate Main
 @enduml

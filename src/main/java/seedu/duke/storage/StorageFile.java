@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -39,6 +40,9 @@ public class StorageFile {
     private final Path expensesPath;
     private final Path ratingsPath;
     private final Path budgetPath;
+
+    /** Notes for the user about data lines that could not be read while loading. */
+    private final List<String> loadWarnings = new ArrayList<>();
 
     /**
      * Creates storage that uses the default file paths inside the {@code data} folder.
@@ -105,7 +109,10 @@ public class StorageFile {
             LOGGER.log(Level.FINE, "No ratings file at " + ratingsPath + ", starting with no ratings");
             return new RatingsManager();
         }
-        return Decoder.decodeRatings(readLines(ratingsPath));
+        List<String> lines = readLines(ratingsPath);
+        RatingsManager ratings = Decoder.decodeRatings(lines);
+        reportSkippedLines(ratingsPath, countDataLines(lines) - ratings.getSize());
+        return ratings;
     }
 
     /**
@@ -119,7 +126,10 @@ public class StorageFile {
             LOGGER.log(Level.FINE, "No expenses file at " + expensesPath + ", starting with no expenses");
             return new ExpensesManager();
         }
-        return Decoder.decodeExpenses(readLines(expensesPath));
+        List<String> lines = readLines(expensesPath);
+        ExpensesManager expenses = Decoder.decodeExpenses(lines);
+        reportSkippedLines(expensesPath, countDataLines(lines) - expenses.getSize());
+        return expenses;
     }
 
     /**
@@ -134,17 +144,32 @@ public class StorageFile {
             LOGGER.log(Level.FINE, "No budget file at " + budgetPath + ", starting with no budget");
             return new BudgetManager();
         }
+        int skippedLines = 0;
         for (String line : readLines(budgetPath)) {
             if (line.isBlank()) {
                 continue;
             }
             try {
-                return new BudgetManager(Budget.fromStorageString(line.strip()));
+                BudgetManager loadedBudget = new BudgetManager(Budget.fromStorageString(line.strip()));
+                reportSkippedLines(budgetPath, skippedLines);
+                return loadedBudget;
             } catch (BudgetBiteException e) {
+                skippedLines++;
                 LOGGER.log(Level.WARNING, "Skipped invalid budget line: " + line);
             }
         }
+        reportSkippedLines(budgetPath, skippedLines);
         return new BudgetManager();
+    }
+
+    /**
+     * Returns notes for the user about data lines that could not be read while loading,
+     * e.g. after the user edited a data file by hand. Empty if every line was read.
+     *
+     * @return The notes, one per data file with unreadable lines.
+     */
+    public List<String> getLoadWarnings() {
+        return List.copyOf(loadWarnings);
     }
 
     public Path getExpensesPath() {
@@ -157,6 +182,39 @@ public class StorageFile {
 
     public Path getBudgetPath() {
         return budgetPath;
+    }
+
+    /**
+     * Counts the lines that hold data, i.e. the lines that are not blank.
+     */
+    private static int countDataLines(List<String> lines) {
+        return (int) lines.stream().filter(line -> !line.isBlank()).count();
+    }
+
+    /**
+     * Tells the user that some lines of a data file could not be read, and keeps a copy of the
+     * original file, since the unreadable lines will not be written back when the data is next saved.
+     *
+     * @param filePath     The data file that was read.
+     * @param skippedLines How many of its lines could not be read.
+     */
+    private void reportSkippedLines(Path filePath, int skippedLines) {
+        assert skippedLines >= 0 : "Number of skipped lines should not be negative";
+        if (skippedLines == 0) {
+            return;
+        }
+        String lineCount = skippedLines == 1 ? "1 line" : skippedLines + " lines";
+        Path backupPath = filePath.resolveSibling(filePath.getFileName() + ".bak");
+        try {
+            Files.copy(filePath, backupPath, StandardCopyOption.REPLACE_EXISTING);
+            loadWarnings.add("Note: " + lineCount + " in " + filePath + " could not be read and "
+                    + (skippedLines == 1 ? "was" : "were") + " skipped. The original file was copied to "
+                    + backupPath + ".");
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Could not back up " + filePath, e);
+            loadWarnings.add("Note: " + lineCount + " in " + filePath + " could not be read and "
+                    + (skippedLines == 1 ? "was" : "were") + " skipped.");
+        }
     }
 
     /**

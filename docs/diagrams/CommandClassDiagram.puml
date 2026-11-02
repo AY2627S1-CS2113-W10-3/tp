@@ -1,70 +1,26 @@
 @startuml
-!pragma layout smetana
-hide circle
-skinparam classAttributeIconSize 0
+' Parser creates one Command subclass per command word; BudgetBite then executes it.
 skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam defaultFontSize 14
+skinparam groupInheritance 2
+skinparam nodesep 12
+skinparam ranksep 60
+hide circle
 hide empty members
+left to right direction
 
 class BudgetBite
 class Parser {
-  +parseCommand(userCommandText: String): Command
+    +parseCommand(input: String): Command
 }
 class Command {
-  +execute(): String
-}
-
-package "Rating commands" {
-  class RateCommand {
-    -arguments: String
     +execute(): String
-    -parseFields(): Map<String, String>
-  }
-  class ListRatingsCommand {
-    +execute(): String
-  }
-  class EditRatingsCommand {
-    -arguments: String
-    +execute(): String
-  }
-  class DeleteRatingCommand {
-    -arguments: String
-    +execute(): String
-  }
 }
 
-package "Expense and budget commands" {
-  class LogExpenseCommand
-  class ListExpensesCommand
-  class EditExpenseCommand
-  class DeleteExpenseCommand
-  class SetBudgetCommand
-  class BudgetCommand
-}
-
-package "General commands" {
-  class HelpCommand
-  class ByeCommand
-  class UnknownCommand
-}
-
-class RatingArguments <<utility>> {
-  +splitAtScore(arguments: String): String[]
-  +parseScore(scoreText: String): float
-}
-class ExpenseArguments <<utility>> {
-  +parseIndex(indexText: String): int
-}
-
-class RatingsManager
-class ExpensesManager
-class BudgetManager
-
-BudgetBite --> "1" Parser
-BudgetBite ..> Command : executes >
-Parser ..> Command : creates >
-Parser --> "1" RatingsManager
-Parser --> "1" ExpensesManager
-Parser --> "1" BudgetManager
+BudgetBite ..> Parser : asks to\nparse input
+Parser ..> Command : creates
+BudgetBite ..> Command : executes
 
 Command <|-- RateCommand
 Command <|-- ListRatingsCommand
@@ -79,13 +35,4 @@ Command <|-- BudgetCommand
 Command <|-- HelpCommand
 Command <|-- ByeCommand
 Command <|-- UnknownCommand
-
-RateCommand --> "1" RatingsManager
-ListRatingsCommand --> "1" RatingsManager
-EditRatingsCommand --> "1" RatingsManager
-DeleteRatingCommand --> "1" RatingsManager
-
-EditRatingsCommand ..> RatingArguments
-EditRatingsCommand ..> ExpenseArguments
-DeleteRatingCommand ..> ExpenseArguments
 @enduml

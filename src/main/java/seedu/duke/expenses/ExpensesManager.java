@@ -69,7 +69,27 @@ public class ExpensesManager {
      * @throws BudgetBiteException If the index is out of range or the cost is invalid.
      */
     public Expense editExpenseCost(int index, double newCost) throws BudgetBiteException {
-        Expense updatedExpense = getExpense(index).withCost(newCost);
+        return editExpense(index, newCost, null);
+    }
+
+    /**
+     * Changes the cost, the date, or both, of the expense at the given index.
+     *
+     * @param index   Index of the expense, starting from 1.
+     * @param newCost New cost, or {@code null} to keep the current cost.
+     * @param newDate New date, or {@code null} to keep the current date.
+     * @return The updated expense.
+     * @throws BudgetBiteException If the index is out of range or the new cost is invalid.
+     */
+    public Expense editExpense(int index, Double newCost, LocalDate newDate) throws BudgetBiteException {
+        assert newCost != null || newDate != null : "At least one of the cost and the date should change";
+        Expense updatedExpense = getExpense(index);
+        if (newCost != null) {
+            updatedExpense = updatedExpense.withCost(newCost);
+        }
+        if (newDate != null) {
+            updatedExpense = updatedExpense.withDate(newDate);
+        }
         expenses.set(toZeroBased(index), updatedExpense);
         LOGGER.log(Level.FINE, "Edited expense " + index + " to: " + updatedExpense);
         return updatedExpense;
@@ -135,6 +155,25 @@ public class ExpensesManager {
 
     public ArrayList<Expense> getExpenses() {
         return expenses;
+    }
+
+    /**
+     * Lists the expenses made between two dates, including both of them. Each keeps its index in the full
+     * list, so the numbers shown can still be used with {@code edit-expense} and {@code delete-expense}.
+     *
+     * @param startDate First day to include.
+     * @param endDate   Last day to include.
+     * @return One line per matching expense, each starting with a new line, or an empty string if none match.
+     */
+    public String toStringBetween(LocalDate startDate, LocalDate endDate) {
+        StringBuilder expensesText = new StringBuilder();
+        for (int i = 0; i < expenses.size(); i++) {
+            Expense expense = expenses.get(i);
+            if (expense.isBetween(startDate, endDate)) {
+                expensesText.append("\n").append(i + 1).append(". ").append(expense);
+            }
+        }
+        return expensesText.toString();
     }
 
     @Override

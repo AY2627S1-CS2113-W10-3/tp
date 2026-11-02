@@ -3,6 +3,8 @@ package seedu.duke.expenses;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,10 +40,10 @@ public class EditDeleteExpenseCommandTest {
     }
 
     @Test
-    public void editExpense_missingCost_errorShown() {
+    public void editExpense_nothingToChange_errorShown() {
         String response = new EditExpenseCommand("1", expensesManager).execute();
 
-        assertTrue(response.contains("Missing /cost."));
+        assertTrue(response.contains("Give a new /cost, a new /date, or both."));
     }
 
     @Test
@@ -66,5 +68,35 @@ public class EditDeleteExpenseCommandTest {
         String response = new DeleteExpenseCommand("1", new ExpensesManager()).execute();
 
         assertTrue(response.contains("You have no expenses yet."));
+    }
+
+    @Test
+    public void editExpense_dateOnly_dateChangedCostKept() throws Exception {
+        LocalDate today = LocalDate.of(2026, 10, 26);
+        String response = new EditExpenseCommand("1 /date 2026-10-20", expensesManager, today).execute();
+
+        assertEquals(LocalDate.of(2026, 10, 20), expensesManager.getExpense(1).getDate());
+        assertEquals(4.50, expensesManager.getExpense(1).getCost(), 0.001);
+        assertTrue(response.contains("Updated expense 1: Chicken Rice - $4.50 (2026-10-20)"));
+    }
+
+    @Test
+    public void editExpense_costAndDate_bothChanged() throws Exception {
+        LocalDate today = LocalDate.of(2026, 10, 26);
+        new EditExpenseCommand("1 /cost 6 /date 2026-10-21", expensesManager, today).execute();
+
+        assertEquals(6.00, expensesManager.getExpense(1).getCost(), 0.001);
+        assertEquals(LocalDate.of(2026, 10, 21), expensesManager.getExpense(1).getDate());
+    }
+
+    @Test
+    public void editExpense_futureDate_errorShownAndUnchanged() throws Exception {
+        LocalDate today = LocalDate.of(2026, 10, 26);
+        LocalDate oldDate = expensesManager.getExpense(1).getDate();
+
+        String response = new EditExpenseCommand("1 /date 2026-10-27", expensesManager, today).execute();
+
+        assertTrue(response.contains("Date cannot be in the future."));
+        assertEquals(oldDate, expensesManager.getExpense(1).getDate());
     }
 }

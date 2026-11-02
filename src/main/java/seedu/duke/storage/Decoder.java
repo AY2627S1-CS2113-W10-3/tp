@@ -14,7 +14,10 @@ import seedu.duke.ratings.Rating;
 public class Decoder {
     private static final Logger LOGGER = Logger.getLogger(Decoder.class.getName());
 
-    // TODO: make <T> for Rating and Expenses function
+    /**
+     * Decodes the lines of the ratings storage file into a {@code RatingsManager}.
+     * Blank lines and lines that are not valid ratings are skipped.
+     */
     public static RatingsManager decodeRatings(List<String> encodedRatings) {
         final ArrayList<Rating> decodedRatings = new ArrayList<>();
         for (String encodedRating : encodedRatings) {
@@ -22,29 +25,12 @@ public class Decoder {
                 continue;
             }
             try {
-                decodedRatings.add(decodeRatingFromString(encodedRating));
-            } catch (IllegalArgumentException e) {
+                decodedRatings.add(Rating.fromStorageString(encodedRating.strip()));
+            } catch (BudgetBiteException e) {
                 LOGGER.log(Level.WARNING, "Skipped invalid rating line: " + encodedRating);
             }
         }
         return new RatingsManager(decodedRatings);
-    }
-
-    private static Rating decodeRatingFromString(String encodedRating) {
-        String[] fields = encodedRating.strip().split("\\|", -1);
-        if (fields.length != 3) {
-            throw new IllegalArgumentException(
-                    "Invalid rating format. Expected: stall|food|score");
-        }
-
-        float score;
-        try {
-            score = Float.parseFloat(fields[2].strip());
-        } catch (NumberFormatException exception) {
-            throw new IllegalArgumentException("Rating score must be a number.", exception);
-        }
-
-        return new Rating(fields[0].strip(), fields[1].strip(), score);
     }
 
     /**

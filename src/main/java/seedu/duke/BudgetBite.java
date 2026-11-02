@@ -1,5 +1,6 @@
 package seedu.duke;
 
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,11 +27,24 @@ public class BudgetBite {
     private RatingsManager ratings;
     private ExpensesManager expenses;
     private BudgetManager budget;
+    private FoodDirectory foodDirectory;
 
     private MenuNavigator menuNavigator;
 
     public static void main(String... launchArgs) {
+        hideLogsFromConsole();
         new BudgetBite().run(launchArgs);
+    }
+
+    /**
+     * Stops log messages below {@code SEVERE} from being printed to the console, where they would
+     * look like errors to the user. Problems the user needs to know about are shown through
+     * {@code TextUi} instead.
+     */
+    private static void hideLogsFromConsole() {
+        for (Handler handler : Logger.getLogger("").getHandlers()) {
+            handler.setLevel(Level.SEVERE);
+        }
     }
 
 
@@ -56,10 +70,13 @@ public class BudgetBite {
             this.expenses = storage.loadExpenses();
             this.budget = storage.loadBudget();
 
-            FoodDirectory foodDirectory = new FoodDirectory();
-            this.menuNavigator = new MenuNavigator(foodDirectory);
+            this.foodDirectory = new FoodDirectory();
+            this.menuNavigator = new MenuNavigator(foodDirectory, ratings);
 
             ui.showWelcomeMessage(VERSION);
+            for (String warning : storage.getLoadWarnings()) {
+                ui.showToUser(warning);
+            }
 
         } catch (BudgetBiteException e) {
             ui.showInitFailedMessage();
@@ -82,56 +99,52 @@ public class BudgetBite {
      */
     private void runCommandLoopUntilExitCommand() {
 
-        Parser parser = new Parser(ratings, expenses, budget);
+        Parser parser = new Parser(ratings, expenses, budget, foodDirectory);
         boolean isExiting = false;
 
         while (!isExiting) {
-            String userInput = ui.getUserCommand();
-            String trimmedInput = userInput.trim();
+            String trimmedInput = ui.getUserCommand().trim();
             String response;
 
-            /*
-             * The home command always returns to the main menu.
-             */
-            if (trimmedInput.equalsIgnoreCase("home")) {
-                response = menuNavigator.goHome();
-            }
-
-            /*
-             * The location command always starts or restarts food navigation.
-             */
-            else if (trimmedInput.equalsIgnoreCase("location")) {
-                response = menuNavigator.start();
-            }
-
-            /*
-             * A direct path jumps straight to a stall menu or menu item.
-             */
-            else if (menuNavigator.isDirectNavigation(trimmedInput)) {
-                response = menuNavigator.navigateDirectly(trimmedInput);
-            }
-            /*
-             * While the navigator is active, only numeric selections and
-             * back are handled as navigation input.
-             */
-            else if (menuNavigator.isActive()
-                    && (trimmedInput.equalsIgnoreCase("back")
-                    || trimmedInput.matches("\\d+"))) {
-                response = menuNavigator.handleInput(trimmedInput);
-            }
-
-            /*
-             * Normal commands such as help and bye are handled here.
-             */
-            else {
+            if (isNavigationInput(trimmedInput)) {
+                response = navigate(trimmedInput);
+            } else {
+                // Normal commands such as help and bye are handled here.
                 Command command = parser.parseCommand(trimmedInput);
                 response = executeCommand(command);
                 isExiting = command instanceof ByeCommand;
-                response = saveData(response);
             }
 
-            ui.showResponseToUser(response);
+            // Saved after navigation too, since a rating can be added while browsing the menus.
+            ui.showResponseToUser(saveData(response));
         }
+    }
+
+    /**
+     * Returns true if the input should be handled by the menu navigator rather than the parser.
+     */
+    private boolean isNavigationInput(String input) {
+        return input.equalsIgnoreCase("home")
+                || input.equalsIgnoreCase("location")
+                || menuNavigator.isDirectNavigation(input)
+                || menuNavigator.isNavigationInput(input);
+    }
+
+    /**
+     * Passes navigation input to the menu navigator and returns its response.
+     */
+    private String navigate(String input) {
+        if (input.equalsIgnoreCase("home")) {
+            // home always returns to the main menu.
+            return menuNavigator.goHome();
+        } else if (input.equalsIgnoreCase("location")) {
+            // location always starts or restarts food navigation.
+            return menuNavigator.start();
+        } else if (menuNavigator.isDirectNavigation(input)) {
+            // A direct path jumps straight to a stall menu.
+            return menuNavigator.navigateDirectly(input);
+        }
+        return menuNavigator.handleInput(input);
     }
 
 
@@ -154,7 +167,7 @@ public class BudgetBite {
 
     /**
      * Saves ratings, expenses and the budget so that no data is lost if the app is closed suddenly.
-     * Called after every command, as the User Guide promises.
+     * Called after every input, as the User Guide promises.
      *
      * @param response Response of the command that was just run.
      * @return The same response, with a warning added if saving failed.

@@ -20,6 +20,7 @@ import seedu.duke.commands.RateCommand;
 import seedu.duke.commands.SetBudgetCommand;
 import seedu.duke.commands.UnknownCommand;
 import seedu.duke.expenses.ExpensesManager;
+import seedu.duke.food.FoodDirectory;
 import seedu.duke.ratings.RatingsManager;
 
 /**
@@ -30,7 +31,7 @@ public class ParserTest {
 
     @BeforeEach
     public void setUp() {
-        parser = new Parser(new RatingsManager(), new ExpensesManager(), new BudgetManager());
+        parser = new Parser(new RatingsManager(), new ExpensesManager(), new BudgetManager(), new FoodDirectory());
     }
 
     @Test

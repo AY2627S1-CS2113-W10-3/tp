@@ -48,6 +48,28 @@ public class RatingsManager {
     }
 
     /**
+     * Adds a rating, or, if the same dish was already rated, replaces that rating with the new one.
+     * The replaced rating keeps its place in the list, so its index does not change.
+     * This is what the user's rating commands use; {@link #addRating(Rating)} always adds.
+     *
+     * @param rating Rating to add.
+     * @return The rating that was replaced, or {@code null} if the dish had not been rated before.
+     */
+    public Rating addOrReplaceRating(Rating rating) {
+        assert rating != null : "Rating should not be null";
+        for (int i = 0; i < ratings.size(); i++) {
+            Rating existingRating = ratings.get(i);
+            if (existingRating.isSameDish(rating)) {
+                ratings.set(i, rating);
+                LOGGER.log(Level.FINE, "Replaced rating " + existingRating + " with " + rating);
+                return existingRating;
+            }
+        }
+        addRating(rating);
+        return null;
+    }
+
+    /**
      * Returns the rating at the given index.
      *
      * @param index Index of the rating, starting from 1.
@@ -62,7 +84,7 @@ public class RatingsManager {
     /**
      * Changes the score of the rating at the given index.
      * Since {@code Rating} is immutable, the old rating is replaced by a new one
-     * with the same stall and food but the new score.
+     * with the same location, stall and food but the new score.
      *
      * @param index    Index of the rating, starting from 1.
      * @param newScore New score, between 0 and 10.
@@ -70,14 +92,7 @@ public class RatingsManager {
      * @throws BudgetBiteException If the index is out of range or the score is invalid.
      */
     public Rating editRating(int index, float newScore) throws BudgetBiteException {
-        Rating oldRating = getRating(index);
-        Rating updatedRating;
-        try {
-            updatedRating = new Rating(oldRating.getStall(), oldRating.getFood(), newScore);
-        } catch (IllegalArgumentException e) {
-            throw new BudgetBiteException(e.getMessage());
-        }
-
+        Rating updatedRating = getRating(index).withScore(newScore);
         ratings.set(toZeroBased(index), updatedRating);
         LOGGER.log(Level.FINE, "Edited rating " + index + " to: " + updatedRating);
         return updatedRating;

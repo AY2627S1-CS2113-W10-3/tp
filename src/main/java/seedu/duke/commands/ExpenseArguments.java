@@ -13,6 +13,9 @@ public final class ExpenseArguments {
     public static final String COST_PREFIX = "/cost";
     public static final String DATE_PREFIX = "/date";
 
+    /** Earliest date an expense can have, to catch typing mistakes such as 1026 instead of 2026. */
+    public static final LocalDate EARLIEST_DATE = LocalDate.of(2000, 1, 1);
+
     private static final String WHOLE_NUMBER_REGEX = "\\d+";
 
     private ExpenseArguments() {
@@ -32,6 +35,7 @@ public final class ExpenseArguments {
         if (prefixPosition < 0) {
             throw new BudgetBiteException("Missing " + COST_PREFIX + ".");
         }
+        checkPrefixUse(arguments, COST_PREFIX, prefixPosition);
 
         String beforeCost = arguments.substring(0, prefixPosition).trim();
         String costText = arguments.substring(prefixPosition + COST_PREFIX.length()).trim();
@@ -80,6 +84,7 @@ public final class ExpenseArguments {
         if (prefixPosition < 0) {
             return new String[] {arguments.trim(), null};
         }
+        checkPrefixUse(arguments, DATE_PREFIX, prefixPosition);
 
         String beforeDate = arguments.substring(0, prefixPosition).trim();
         String dateText = arguments.substring(prefixPosition + DATE_PREFIX.length()).trim();
@@ -111,6 +116,30 @@ public final class ExpenseArguments {
         if (date.isAfter(today)) {
             throw new BudgetBiteException("Date cannot be in the future.");
         }
+        if (date.isBefore(EARLIEST_DATE)) {
+            throw new BudgetBiteException("Date cannot be before " + EARLIEST_DATE + ".");
+        }
         return date;
+    }
+
+    /**
+     * Checks that a prefix such as {@code /cost} is used correctly: given only once, and not joined to a
+     * word, as in {@code /costs 3}. Without this check, such input gives a misleading error about the amount.
+     *
+     * @param arguments      Arguments typed after the command word.
+     * @param prefix         The prefix to check.
+     * @param prefixPosition Where the prefix first appears in the arguments.
+     * @throws BudgetBiteException If the prefix is repeated or joined to a word.
+     */
+    private static void checkPrefixUse(String arguments, String prefix, int prefixPosition)
+            throws BudgetBiteException {
+        int afterPrefix = prefixPosition + prefix.length();
+        if (arguments.indexOf(prefix, afterPrefix) >= 0) {
+            throw new BudgetBiteException(prefix + " can only be given once.");
+        }
+        if (afterPrefix < arguments.length() && Character.isLetter(arguments.charAt(afterPrefix))) {
+            String typedWord = arguments.substring(prefixPosition).split("\\s+")[0];
+            throw new BudgetBiteException("Unknown parameter " + typedWord + ". Did you mean " + prefix + "?");
+        }
     }
 }

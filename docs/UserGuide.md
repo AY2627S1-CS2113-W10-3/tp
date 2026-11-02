@@ -1,6 +1,4 @@
-# User Guide
-
-# BudgetBite
+# BudgetBite User Guide
 
 BudgetBite is a command-line application that helps students decide where to
 eat and manage their food-related spending.
@@ -45,6 +43,32 @@ bye
 ```
 
 ## Features
+
+**Notes about the command format:**
+
+* Words in `UPPER_CASE` are parameters you supply. For example, in
+  `log-expense FOOD_NAME /cost AMOUNT`, `FOOD_NAME` can be `Chicken Rice`.
+* Parameters in square brackets are optional, e.g. `[/date YYYY-MM-DD]`.
+* `INDEX` is the number shown next to an item by `list-ratings` or
+  `list-expenses`. It must be a positive whole number: 1, 2, 3, ...
+* Command words are not case-sensitive: `LOG-EXPENSE` works the same as
+  `log-expense`. Spaces at the start and end of a command are ignored.
+* For `rate`, the parameters can be in any order. For `log-expense`, `/cost`
+  must come after the food name, and `/date` (if given) must come last.
+* Extra words after commands that take no parameters (`help`, `list-ratings`,
+  `budget` and `bye`) are ignored. For example, `help 123` is treated as `help`.
+* Every line BudgetBite prints starts with `||`. The expected outputs in this
+  guide leave that out.
+
+### Viewing help: `help`
+
+Shows all the commands and their formats.
+
+Format:
+
+```text
+help
+```
 
 ### Food Navigation
 
@@ -108,13 +132,61 @@ Expected output:
 
 ```text
 Menu for Vietnamese:
-Beef Pho - $5.50
-Spring Roll - $2.50
+1. Beef Pho - $5.50
+2. Spring Roll - $2.50
+Enter a food number to rate it, or 'back' to see the stalls.
 ```
+
+#### Rate a dish while browsing
+
+While a stall's menu is shown, enter the number of a dish to rate it.
+BudgetBite then asks for a score from 0 to 10, with at most 1 decimal place.
+After you rate it, the menu is shown again so you can rate another dish.
+
+For example, after opening the Vietnamese menu above:
+
+```text
+1
+```
+
+Expected output:
+
+```text
+Rate Beef Pho - $5.50 (Vietnamese, PGPR)
+Enter a score from 0 to 10, or 'back' to cancel:
+```
+
+Then enter the score:
+
+```text
+8
+```
+
+Expected output:
+
+```text
+Rated: Beef Pho (Vietnamese, PGPR) - 8.0/10
+
+Menu for Vietnamese:
+1. Beef Pho - $5.50
+2. Spring Roll - $2.50
+Enter a food number to rate it, or 'back' to see the stalls.
+```
+
+* If the score is invalid, BudgetBite shows an error and asks again.
+* If you have already rated the dish, its rating is updated, and BudgetBite
+  shows `Updated: ...` with the old score.
+* Enter `back` to cancel without rating, or `home` to leave browsing.
+* Other commands, such as `list-ratings`, still work while you are asked for a
+  score.
+
+This gives the same result as the `rate` command, without typing the names.
 
 ### Return to the previous level: `back`
 
 The `back` command returns to the previous browsing level.
+
+When asked for a score, `back` cancels the rating and shows the stall menu again.
 
 When viewing a stall menu, `back` returns to the list of stalls.
 
@@ -169,10 +241,15 @@ Expected output:
 
 ```text
 Menu for Chicken Rice:
-Char Siew Rice - $3.30
-Roast Chicken Rice - $3.30
-Toufu Vegetable Rice Set - $2.80
+1. Char Siew Rice - $3.30
+2. Roast Chicken Rice - $3.30
+3. Toufu Vegetable Rice Set - $2.80
+Enter a food number to rate it, or 'back' to see the stalls.
 ```
+
+You can then rate a dish by its number, as in
+[Rate a dish while browsing](#rate-a-dish-while-browsing).
+
 If the food court exists but the stall does not, BudgetBite shows:
 
 ```text
@@ -196,30 +273,74 @@ Inputs with missing parts or additional path sections are rejected.
 #### Rate a food item: `rate`
 
 Gives a score from 0 to 10 to a food item from a stall, so you remember what
-you liked.
+you liked. If you don't know the exact names, browse with `location` and
+[rate the dish from its menu](#rate-a-dish-while-browsing) instead.
 
 Format:
 
 ```text
-rate /stall STALL /food FOOD /score SCORE
+rate /location LOCATION /stall STALL /food FOOD /score SCORE
 ```
 
-* All three fields are needed, and each can be given only once. They can be in
+* All four fields are needed, and each can be given only once. They can be in
   any order.
-* `STALL` and `FOOD` can contain spaces.
-* `SCORE` must be a number from 0 to 10. Decimals are allowed, e.g. `7.5`.
-  Scores are shown and saved to 1 decimal place.
+* `LOCATION`, `STALL` and `FOOD` must be a food court, a stall in that food
+  court, and a dish on that stall's menu, as shown by `location`. You cannot
+  rate places that are not in BudgetBite. Letter case does not matter, e.g.
+  `pgpr` works for `PGPR`.
+* If a name is not found, BudgetBite lists the valid names so you can try
+  again.
+* `SCORE` must be a number from 0 to 10 with at most 1 decimal place, e.g. `7.5`.
+* If you have already rated that dish, its rating is updated instead of a
+  second one being added, e.g.
+  `Updated: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10 (was 8.0/10)`.
+  This also applies when rating from a menu.
 
 Example:
 
 ```text
-rate /stall Chicken Rice /food Roast Chicken Rice /score 8
+rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8
 ```
 
 Expected output:
 
 ```text
-Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
+Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10
+```
+
+**Not sure of a name?** End the command with `?`, or press `Tab`, and then
+press Enter. BudgetBite lists what you can type for the field you are on,
+keeping only names that contain what you have typed so far. Nothing is rated;
+type the full command afterwards.
+
+```text
+rate /location ?
+Locations: PGPR, YIH, TECHNO EDGE, THE TERRACE, THE DECK, FRONTIER, FLAVOURS, FINE FOOD
+
+rate /location PGPR /stall ch ?
+Stalls in PGPR matching 'ch': Chicken Rice, Chef Wok
+
+rate /location PGPR /stall Chicken Rice /food ?
+Menu of Chicken Rice: Char Siew Rice, Roast Chicken Rice, Toufu Vegetable Rice Set
+```
+
+Unlike a terminal, `Tab` does not fill in the name for you; you still need to
+press Enter to see the list.
+
+Example of a name that is not found:
+
+```text
+rate /location YIH /stall Chicken Rice /food Roast Chicken Rice /score 8
+```
+
+Expected output:
+
+```text
+Unknown stall in YIH: Chicken Rice
+Stalls in YIH: Tempu Ramen, Indian, Wok Express, Mini Wok
+Format: rate /location LOCATION /stall STALL /food FOOD /score SCORE
+Example: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8
+Tip: end with ? (or press Tab) and Enter to see the options, e.g. rate /location PGPR /stall ?
 ```
 
 #### List all ratings: `list-ratings`
@@ -236,16 +357,19 @@ Expected output:
 
 ```text
 Your ratings:
-1. Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 8.0
-2. Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+1. Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10
+2. Beef Pho (Vietnamese, PGPR) - 7.5/10
 ```
 
 If you have no ratings yet, BudgetBite shows
-`No ratings yet. Try: rate /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+`No ratings yet. Try: rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8`.
+
+Ratings saved by older versions of BudgetBite did not record the food court.
+They are kept, and shown with `Unknown location`.
 
 #### Edit a rating: `edit-rating`
 
-Changes the score of a rating. Its stall and food stay the same.
+Changes the score of a rating. Its location, stall and food stay the same.
 
 Format:
 
@@ -266,7 +390,7 @@ edit-rating 1 /score 9
 Expected output:
 
 ```text
-Updated rating 1: Stall: Chicken Rice, Food: Roast Chicken Rice, Score: 9.0
+Updated rating 1: Roast Chicken Rice (Chicken Rice, PGPR) - 9.0/10
 ```
 
 #### Delete a rating: `delete-rating`
@@ -288,7 +412,7 @@ delete-rating 2
 Expected output:
 
 ```text
-Deleted: Stall: Vietnamese, Food: Beef Pho, Score: 7.5
+Deleted: Beef Pho (Vietnamese, PGPR) - 7.5/10
 Ratings left: 1
 ```
 
@@ -307,7 +431,8 @@ log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]
 
 * `AMOUNT` must be more than 0 and at most 1000, with at most 2 decimal places.
 * `/date` is optional. Without it, the expense is dated today. The date cannot
-  be in the future, and `/date` must come after `/cost`.
+  be in the future or before 2000-01-01, and `/date` must come after `/cost`.
+* `/cost` and `/date` can each be given only once.
 * `FOOD_NAME` cannot be empty and cannot contain the `|` character.
 
 Example:
@@ -329,11 +454,23 @@ To log a meal from an earlier day:
 log-expense Teh /cost 1.20 /date 2026-10-20
 ```
 
-#### List all expenses: `list-expenses`
+#### List expenses: `list-expenses`
 
-Shows all your expenses, numbered, with their dates and the total spent.
+Shows your expenses, numbered, with their dates and the total spent. Add a
+period to see only today's, this week's or this month's expenses.
 
 Format:
+
+```text
+list-expenses [PERIOD]
+```
+
+* `PERIOD` is `daily`, `weekly` or `monthly` (not case-sensitive). Weeks start
+  on Monday, and months on the 1st, the same as for `set-budget`.
+* With a period, each expense keeps its number from the full list, so you can
+  still use that number with `edit-expense` and `delete-expense`.
+
+Example:
 
 ```text
 list-expenses
@@ -348,21 +485,38 @@ Your expenses:
 Total spent: $5.70
 ```
 
+Example, on 2026-10-27:
+
+```text
+list-expenses weekly
+```
+
+Expected output:
+
+```text
+Your expenses this week:
+1. Chicken Rice - $4.50 (2026-10-27)
+Total spent this week: $4.50
+```
+
 #### Edit an expense: `edit-expense`
 
-Changes the cost of an expense. Its food name and date stay the same.
+Changes the cost, the date, or both, of an expense. Its food name stays the
+same.
 
 Format:
 
 ```text
-edit-expense INDEX /cost AMOUNT
+edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]
 ```
 
 * `INDEX` is the number shown by `list-expenses`. It must be a positive whole
   number.
-* `AMOUNT` follows the same rules as in `log-expense`.
+* Give at least one of `/cost` and `/date`. If you give both, `/date` must come
+  last.
+* `AMOUNT` and the date follow the same rules as in `log-expense`.
 
-Example:
+Examples:
 
 ```text
 edit-expense 1 /cost 5
@@ -372,6 +526,16 @@ Expected output:
 
 ```text
 Updated expense 1: Chicken Rice - $5.00 (2026-10-27)
+```
+
+```text
+edit-expense 1 /date 2026-10-20
+```
+
+Expected output:
+
+```text
+Updated expense 1: Chicken Rice - $5.00 (2026-10-20)
 ```
 
 #### Delete an expense: `delete-expense`
@@ -472,13 +636,77 @@ Remaining this week: $5.00
 If no budget is set, BudgetBite shows
 `No budget set yet. Try: set-budget weekly 50`.
 
+### Exiting the program: `bye`
+
+Exits the program.
+
+Format:
+
+```text
+bye
+```
+
+Expected output:
+
+```text
+Bye bye baby
+I hope you will eat well. Bye!
+```
+
+### Saving the data
+
+BudgetBite saves your ratings, expenses and budget automatically after every
+command, including ratings made while browsing a menu. You do not need to save
+manually, and nothing is lost if you close the window without typing `bye`.
+
+The data is saved in a `data` folder inside the folder you run BudgetBite from.
+The folder is created the first time something is saved.
+
+### Editing the data files
+
+Advanced users can edit the data files directly. Each file has one item per
+line:
+
+| File | Format of each line | Example |
+|---|---|---|
+| `data/ratings.txt` | `LOCATION\|STALL\|FOOD\|SCORE` | `PGPR\|Chicken Rice\|Roast Chicken Rice\|8.0` |
+| `data/expenses.txt` | `FOOD_NAME\|COST\|DATE` | `Chicken Rice\|4.50\|2026-10-26` |
+| `data/budget.txt` | `PERIOD\|AMOUNT` (at most one line) | `weekly\|50.00` |
+
+**Caution:** If a line cannot be read, for example because a cost is not a
+number, BudgetBite skips that line when it starts and shows a note telling you
+how many lines were skipped. Because the skipped lines will not be written back
+when the data is next saved, BudgetBite first copies the original file to a
+backup with `.bak` added to its name, e.g. `data/expenses.txt.bak`. You can open
+the backup to fix the line and copy it back.
+
+## FAQ
+
+**Q**: How do I move my data to another computer?
+
+**A**: Copy the `data` folder into the folder where you run `BudgetBite.jar` on
+the other computer.
+
+**Q**: Do I need to type `bye` for my data to be saved?
+
+**A**: No. Your data is saved after every command.
+
+**Q**: I logged an expense with the wrong date. How do I fix it?
+
+**A**: Use `edit-expense INDEX /date YYYY-MM-DD`, e.g. `edit-expense 2 /date 2026-10-20`.
+
+**Q**: Why does my data seem to be gone?
+
+**A**: BudgetBite looks for the `data` folder in the folder you run it from.
+Make sure you run `java -jar BudgetBite.jar` from the same folder each time.
+
 ## Known issues
 
-* **Ratings are not checked against the food menus.** `rate` accepts any stall
-  and food name, even ones that are not in BudgetBite's food courts, e.g.
-  `rate /stall Unknown Stall /food Anything /score 5`. Rating the same food
-  twice also adds a second rating instead of replacing the first. To fix a
-  wrong rating, use `edit-rating` or `delete-rating`.
+* **Ratings saved by older versions of BudgetBite** are shown with
+  `Unknown location`, and any repeated ratings among them are kept. Use
+  `delete-rating` to remove the ones you no longer want.
+* **Names in other languages,** such as Chinese or Japanese food names, are saved
+  correctly but may show as `?` in some Windows terminals.
 
 ## Command Summary
 
@@ -489,13 +717,13 @@ If no budget is set, BudgetBite shows
 | Direct navigation | `FOOD_COURT / STALL` | Open a stall menu directly |
 | `back` | `back` | Return to the previous navigation level |
 | `home` | `home` | Return to the main menu |
-| `rate` | `rate /stall STALL /food FOOD /score SCORE` | Add a food rating |
+| `rate` | `rate /location LOCATION /stall STALL /food FOOD /score SCORE` | Add a food rating (end with `?` or Tab to see the options) |
 | `list-ratings` | `list-ratings` | Display all ratings |
 | `edit-rating` | `edit-rating INDEX /score SCORE` | Edit a rating |
 | `delete-rating` | `delete-rating INDEX` | Delete a rating |
-| `log-expense` | `log-expense FOOD_NAME /cost AMOUNT` | Record an expense |
-| `list-expenses` | `list-expenses` | Display all expenses |
-| `edit-expense` | `edit-expense INDEX /cost AMOUNT` | Edit an expense |
+| `log-expense` | `log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]` | Record an expense |
+| `list-expenses` | `list-expenses [PERIOD]` | Display all expenses, or only today's, this week's or this month's |
+| `edit-expense` | `edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]` | Edit the cost or date of an expense |
 | `delete-expense` | `delete-expense INDEX` | Delete an expense |
 | `set-budget` | `set-budget PERIOD AMOUNT` | Set a food budget |
 | `budget` | `budget` | Display the current budget status |

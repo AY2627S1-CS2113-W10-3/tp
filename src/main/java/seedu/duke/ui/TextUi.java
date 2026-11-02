@@ -3,6 +3,8 @@ package seedu.duke.ui;
 import java.io.PrintStream;
 import java.util.Scanner;
 
+import seedu.duke.commands.RateCommand;
+
 /**
  * Text UI of the application.
  */
@@ -21,6 +23,18 @@ public class TextUi {
     private static final String MESSAGE_INIT_FAILED = "BudgetBite could not be launched";
     private static final String MESSAGE_WELCOME = "Welcome to the best NUS campus guide";
 
+    /** A line that is a rate command, e.g. "rate /location PGPR", in any letter case. */
+    private static final String RATE_COMMAND_REGEX = "(?i)\\s*" + RateCommand.COMMAND_WORD + "(\\s.*)?";
+    /** Tabs, possibly followed by spaces, at the end of a line. */
+    private static final String TRAILING_TAB_REGEX = "\t+\\s*$";
+    /**
+     * What a Tab at the end of a rate command is turned into. The terminal only sends the line after Enter,
+     * so a Tab cannot complete a name on the spot; instead, Tab then Enter asks for suggestions,
+     * the same as ending a {@code rate} command with {@code ?}. Other commands are left alone,
+     * so a stray Tab after e.g. a cost is still ignored as before.
+     */
+    private static final String TAB_REPLACEMENT = " ?";
+
     private final Scanner in;
     private final PrintStream out;
 
@@ -38,6 +52,9 @@ public class TextUi {
             fullInputLine = readLineOrBye();
         }
 
+        if (fullInputLine.matches(RATE_COMMAND_REGEX)) {
+            return fullInputLine.replaceAll(TRAILING_TAB_REGEX, TAB_REPLACEMENT);
+        }
         return fullInputLine;
     }
 

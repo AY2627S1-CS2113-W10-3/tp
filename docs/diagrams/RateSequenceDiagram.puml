@@ -1,38 +1,64 @@
 @startuml
+' rate /location PGPR /stall Chicken Rice /food Roast Chicken Rice /score 8
+skinparam shadowing false
+skinparam defaultFontSize 14
 hide footbox
+
 participant ":BudgetBite" as B
 participant ":Parser" as P
-participant ":RateCommand" as C
+participant ":FoodDirectory" as D
+participant "<<class>>\nRatingArguments" as A
 participant ":RatingsManager" as M
 
-[-> B : "rate /stall Ah Hock /food Laksa /score 8"
+[-> B : "rate /location PGPR /stall Chicken Rice\n/food Roast Chicken Rice /score 8"
 activate B
-B -> P : parseCommand("rate /stall Ah Hock /food Laksa /score 8")
+B -> P : parseCommand(input)
 activate P
-create C
-P -> C : new RateCommand("/stall Ah Hock /food Laksa /score 8", ratingsManager)
-P --> B : rateCommand
+create ":RateCommand" as C
+P -> C : new RateCommand(arguments, ratingsManager, foodDirectory)
+activate C
+C --> P
+deactivate C
+P --> B : command
 deactivate P
 
 B -> C : execute()
 activate C
 C -> C : parseFields()
 activate C
-C --> C : {stall: "Ah Hock", food: "Laksa", score: "8"}
+C --> C : location, stall, food, score
 deactivate C
 
-alt a field is missing, repeated or the score is not between 0 and 10
-  C --> B : error message
+C -> D : findFoodCourt("PGPR")
+activate D
+D --> C : foodCourt
+deactivate D
+note right of C
+  then foodCourt.findStall("Chicken Rice")
+  and stall.findItem("Roast Chicken Rice")
+end note
+
+C -> A : parseScore("8")
+activate A
+A --> C : 8.0
+deactivate A
+
+alt a field is missing, a name is not in the menus, or the score is invalid
+    C --> B : error message and the correct format
 else all fields are valid
-  create ":Rating" as R
-  C -> R : new Rating("Ah Hock", "Laksa", 8.0)
-  C -> M : addRating(rating)
-  activate M
-  M --> C
-  deactivate M
-  C --> B : "Stall: Ah Hock, Food: Laksa, Score: 8.0"
+    create ":Rating" as R
+    C -> R : new Rating("PGPR", "Chicken Rice", "Roast Chicken Rice", 8.0)
+    activate R
+    R --> C : rating
+    deactivate R
+    C -> M : addOrReplaceRating(rating)
+    activate M
+    M --> C : replaced rating, or null
+    deactivate M
+    C --> B : "Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10"
 end
 deactivate C
-[<-- B : show response
+
+[<-- B : response
 deactivate B
 @enduml

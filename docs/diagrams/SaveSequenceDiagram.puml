@@ -1,45 +1,75 @@
 @startuml
-!pragma layout smetana
+' StorageFile#save writes the three data files, creating the data folder first if needed.
 skinparam shadowing false
+skinparam defaultFontSize 14
 hide footbox
 
-participant ":BudgetBite" as BB
-participant ":StorageFile" as SF
-participant "Encoder" as Enc <<static>>
-participant "Files" as Files <<java.nio>>
+participant ":BudgetBite" as Main
+participant ":StorageFile" as S
+participant "<<class>>\nEncoder" as En
+participant "<<class>>\nFiles" as F
 
-BB -> SF : save(ratings, expenses, budget)
-activate SF
+activate Main
+Main -> S : save(ratings, expenses, budget)
+activate S
 
-SF -> Enc : encodeExpenses(expenses)
-activate Enc
-Enc --> SF : expense lines
-deactivate Enc
-SF -> SF : writeLines(expensesPath, lines)
-activate SF
-SF -> Files : createDirectories(data folder)
-SF -> Files : write(expensesPath, lines)
-deactivate SF
+S -> En : encodeExpenses(expenses)
+activate En
+En --> S : lines
+deactivate En
+S -> S : writeLines(expensesPath, lines)
+activate S
+S -> F : createDirectories(dataFolder)
+activate F
+F --> S
+deactivate F
+S -> F : write(expensesPath, lines)
+activate F
+F --> S
+deactivate F
+S --> S
+deactivate S
 
-SF -> Enc : encodeRatings(ratings)
-activate Enc
-Enc --> SF : rating lines
-deactivate Enc
-SF -> SF : writeLines(ratingsPath, lines)
-activate SF
-SF -> Files : write(ratingsPath, lines)
-deactivate SF
+S -> En : encodeRatings(ratings)
+activate En
+En --> S : lines
+deactivate En
+S -> S : writeLines(ratingsPath, lines)
+activate S
+S -> F : createDirectories(dataFolder)
+activate F
+F --> S
+deactivate F
+S -> F : write(ratingsPath, lines)
+activate F
+F --> S
+deactivate F
+S --> S
+deactivate S
 
-SF -> SF : encodeBudget(budget)
-note right
-  one line if a budget is set,
-  otherwise an empty list
+S -> S : encodeBudget(budget)
+activate S
+S --> S : lines
+deactivate S
+S -> S : writeLines(budgetPath, lines)
+activate S
+S -> F : createDirectories(dataFolder)
+activate F
+F --> S
+deactivate F
+S -> F : write(budgetPath, lines)
+activate F
+F --> S
+deactivate F
+S --> S
+deactivate S
+
+S --> Main
+deactivate S
+deactivate Main
+
+note over Main, F
+  If a write fails, writeLines throws a BudgetBiteException.
+  BudgetBite then adds a warning to the response instead of stopping.
 end note
-SF -> SF : writeLines(budgetPath, lines)
-activate SF
-SF -> Files : write(budgetPath, lines)
-deactivate SF
-
-SF --> BB
-deactivate SF
 @enduml

@@ -26,6 +26,15 @@ stalls, menus, and prices.
   following stages:
   `INACTIVE`, `SELECTING_LOCATION`, `SELECTING_STALL`, and `SHOWING_MENU`.
 
+  This system was later integrated with the rating system to add a new `RATING_ITEM` stage
+  that handles rating a selected dish and validating the user's score.
+
+* **Food data loading:** Implemented `FoodDataLoader` to load food-court, stall,
+  menu-item, and price data from `src/main/resources/food.txt`. Added validation
+  for malformed records, blank fields, invalid prices, and negative prices.
+
+  the data was previously hardcoded into the code, but a text file was used to accommodate a larger data set
+
 * **Food data model:** Added the food-navigation classes:
   `FoodDirectory`, `FoodCourt`, `FoodStall`, and `FoodItem`.
 
@@ -34,20 +43,30 @@ stalls, menus, and prices.
   Invalid navigation input displays an error message without terminating the
   application.
 
-* **Tests:** included JUnit tests of the food navigation flow, as well as relevant assertions
+* **Testing:** Added and updated JUnit tests for `FoodDataLoader`,
+  `FoodDirectory`, and `MenuNavigator`, covering data loading, validation, and
+  the food-navigation flow.
 
 ### Documentation
 
 * **User Guide:**
-    * Wrote the introduction and Quick Start sections.
+    * Wrote the introduction, prerequisites and Quick Start sections.
     * Documented the food-navigation commands: `location`,
-    `FOOD_COURT / STALL`, `back`, and `home`.
+      `FOOD_COURT / STALL`, `back`, and `home`.
     * Added examples, expected outputs, as well as the command summary.
 
-* **Developer Guide:** 
+* **Developer Guide:**
     * Wrote the Navigation component and Food navigation sections
-    * Documented the food-navigation design decisions and navigation states (illustrated through the `NavigationStateDiagram`).
+    * Documented `FoodDataLoader`, the `food.txt` format, navigation states,
+      transitions, input validation, and food-navigation design decisions.
+    * Added the `NavigationStateDiagram`.
     * Added the food-navigation use case, user stories, and manual-testing steps.
+
+### Other Contributions
+
+* **Discussions/suggestions:** 
+    * Discussed the overall system structure with the team and suggested changes where needed
+    * Recommended changes to the rating system to improve user experience as it links closely to the food-navigation system
 
 ### Tools
 

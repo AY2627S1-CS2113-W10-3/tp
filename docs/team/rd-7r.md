@@ -62,6 +62,12 @@ stalls, menus, and prices.
     * Added the `NavigationStateDiagram`.
     * Added the food-navigation use case, user stories, and manual-testing steps.
 
+### Other Contributions
+
+* **Discussions/suggestions:** 
+    * Discussed the overall system structure with the team and suggested changes where needed
+    * Recommended changes to the rating system to improve user experience as it links closely to the food-navigation system
+
 ### Tools
 
 * Used IntelliJ IDEA and PlantUML to create and render the navigation diagram.

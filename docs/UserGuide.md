@@ -476,19 +476,22 @@ Total spent: $5.70
 
 #### Edit an expense: `edit-expense`
 
-Changes the cost of an expense. Its food name and date stay the same.
+Changes the cost, the date, or both, of an expense. Its food name stays the
+same.
 
 Format:
 
 ```text
-edit-expense INDEX /cost AMOUNT
+edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]
 ```
 
 * `INDEX` is the number shown by `list-expenses`. It must be a positive whole
   number.
-* `AMOUNT` follows the same rules as in `log-expense`.
+* Give at least one of `/cost` and `/date`. If you give both, `/date` must come
+  last.
+* `AMOUNT` and the date follow the same rules as in `log-expense`.
 
-Example:
+Examples:
 
 ```text
 edit-expense 1 /cost 5
@@ -498,6 +501,16 @@ Expected output:
 
 ```text
 Updated expense 1: Chicken Rice - $5.00 (2026-10-27)
+```
+
+```text
+edit-expense 1 /date 2026-10-20
+```
+
+Expected output:
+
+```text
+Updated expense 1: Chicken Rice - $5.00 (2026-10-20)
 ```
 
 #### Delete an expense: `delete-expense`
@@ -655,8 +668,7 @@ the other computer.
 
 **Q**: I logged an expense with the wrong date. How do I fix it?
 
-**A**: `edit-expense` only changes the cost. Delete the expense with
-`delete-expense INDEX`, then log it again with the correct `/date`.
+**A**: Use `edit-expense INDEX /date YYYY-MM-DD`, e.g. `edit-expense 2 /date 2026-10-20`.
 
 **Q**: Why does my data seem to be gone?
 
@@ -686,7 +698,7 @@ Make sure you run `java -jar BudgetBite.jar` from the same folder each time.
 | `delete-rating` | `delete-rating INDEX` | Delete a rating |
 | `log-expense` | `log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]` | Record an expense |
 | `list-expenses` | `list-expenses` | Display all expenses |
-| `edit-expense` | `edit-expense INDEX /cost AMOUNT` | Edit an expense |
+| `edit-expense` | `edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]` | Edit the cost or date of an expense |
 | `delete-expense` | `delete-expense INDEX` | Delete an expense |
 | `set-budget` | `set-budget PERIOD AMOUNT` | Set a food budget |
 | `budget` | `budget` | Display the current budget status |

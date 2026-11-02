@@ -69,7 +69,27 @@ public class ExpensesManager {
      * @throws BudgetBiteException If the index is out of range or the cost is invalid.
      */
     public Expense editExpenseCost(int index, double newCost) throws BudgetBiteException {
-        Expense updatedExpense = getExpense(index).withCost(newCost);
+        return editExpense(index, newCost, null);
+    }
+
+    /**
+     * Changes the cost, the date, or both, of the expense at the given index.
+     *
+     * @param index   Index of the expense, starting from 1.
+     * @param newCost New cost, or {@code null} to keep the current cost.
+     * @param newDate New date, or {@code null} to keep the current date.
+     * @return The updated expense.
+     * @throws BudgetBiteException If the index is out of range or the new cost is invalid.
+     */
+    public Expense editExpense(int index, Double newCost, LocalDate newDate) throws BudgetBiteException {
+        assert newCost != null || newDate != null : "At least one of the cost and the date should change";
+        Expense updatedExpense = getExpense(index);
+        if (newCost != null) {
+            updatedExpense = updatedExpense.withCost(newCost);
+        }
+        if (newDate != null) {
+            updatedExpense = updatedExpense.withDate(newDate);
+        }
         expenses.set(toZeroBased(index), updatedExpense);
         LOGGER.log(Level.FINE, "Edited expense " + index + " to: " + updatedExpense);
         return updatedExpense;

@@ -65,4 +65,46 @@ public class ExpenseArgumentsTest {
     public void splitAtDate_dateBeforeCost_exceptionThrown() {
         assertThrows(BudgetBiteException.class, () -> ExpenseArguments.splitAtDate("Teh /date 2026-10-20 /cost 2"));
     }
+
+    @Test
+    public void splitAtCost_repeatedCost_exceptionThrown() {
+        BudgetBiteException e = assertThrows(BudgetBiteException.class,
+                () -> ExpenseArguments.splitAtCost("Kopi /cost 3 /cost 4"));
+        assertEquals("/cost can only be given once.", e.getMessage());
+    }
+
+    @Test
+    public void splitAtCost_misspeltPrefix_exceptionThrown() {
+        BudgetBiteException e = assertThrows(BudgetBiteException.class,
+                () -> ExpenseArguments.splitAtCost("Kopi /costs 3"));
+        assertEquals("Unknown parameter /costs. Did you mean /cost?", e.getMessage());
+    }
+
+    @Test
+    public void splitAtCost_noSpaceBeforeAmount_accepted() throws BudgetBiteException {
+        assertArrayEquals(new String[] {"Kopi", "3"}, ExpenseArguments.splitAtCost("Kopi /cost3"));
+    }
+
+    @Test
+    public void splitAtDate_repeatedDate_exceptionThrown() {
+        assertThrows(BudgetBiteException.class,
+                () -> ExpenseArguments.splitAtDate("Teh /cost 1 /date 2026-10-20 /date 2026-10-21"));
+    }
+
+    @Test
+    public void parseDate_beforeYear2000_exceptionThrown() {
+        LocalDate today = LocalDate.of(2026, 10, 26);
+        BudgetBiteException e = assertThrows(BudgetBiteException.class,
+                () -> ExpenseArguments.parseDate("1999-12-31", today));
+        assertEquals("Date cannot be before 2000-01-01.", e.getMessage());
+        assertEquals(LocalDate.of(2000, 1, 1), assertDoesNotThrowDate("2000-01-01", today));
+    }
+
+    private LocalDate assertDoesNotThrowDate(String text, LocalDate today) {
+        try {
+            return ExpenseArguments.parseDate(text, today);
+        } catch (BudgetBiteException e) {
+            throw new AssertionError("Date should be accepted: " + text);
+        }
+    }
 }

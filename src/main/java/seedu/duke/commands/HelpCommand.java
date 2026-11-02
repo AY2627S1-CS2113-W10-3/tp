@@ -20,7 +20,7 @@ public class HelpCommand extends Command {
                 + "edit-rating INDEX /score SCORE\n"
                 + "delete-rating INDEX\n"
                 + "log-expense FOOD_NAME /cost AMOUNT [/date YYYY-MM-DD]\n"
-                + "list-expenses\n"
+                + "list-expenses [PERIOD] (PERIOD is daily, weekly or monthly)\n"
                 + "edit-expense INDEX [/cost AMOUNT] [/date YYYY-MM-DD]\n"
                 + "delete-expense INDEX\n"
                 + "set-budget PERIOD AMOUNT (PERIOD is daily, weekly or monthly)\n"

@@ -220,7 +220,10 @@ This section describes how some of the features are implemented.
 Users log what they spend on food with `log-expense FOOD_NAME /cost AMOUNT
 [/date YYYY-MM-DD]`. Each `Expense` holds a food name, a cost and a date, and all
 expenses are kept in an `ExpensesManager`. The related commands `list-expenses`,
-`edit-expense` and `delete-expense` work on the same list.
+`edit-expense` and `delete-expense` work on the same list. `list-expenses` can
+also take a period (`daily`, `weekly` or `monthly`); it then reuses
+`BudgetPeriod#getStartDate`, so "this week" means the same as for the budget, and
+`ExpensesManager#toStringBetween` keeps each expense's index from the full list.
 
 The sequence diagram below shows how `log-expense Laksa /cost 12` is executed
 when a budget is set.
@@ -1015,7 +1018,12 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
 
    Expected: Expense 1 now costs $5.00 and is dated 2026-10-20; expense 2 is deleted.
 
-3. Test invalid inputs by entering:
+3. Log an expense without a date, then enter `list-expenses weekly`.
+
+   Expected: Only expenses from this Monday to today are listed, with their
+   numbers from the full list and this week's total.
+
+4. Test invalid inputs by entering:
 
     * `log-expense Kopi /cost 0.0001`
     * `log-expense Kopi /cost 1001`
@@ -1026,8 +1034,13 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
     * `log-expense Kopi /cost 2 /date 2099-01-01`
     * `log-expense Kopi /cost 2 /date 2026-02-30`
     * `log-expense Kopi /date 2026-10-20 /cost 2`
+    * `log-expense Kopi /cost 3 /cost 4`
+    * `log-expense Kopi /costs 3`
+    * `log-expense Kopi /cost 2 /date 1999-12-31`
     * `edit-expense 99 /cost 2`
+    * `edit-expense 1`
     * `delete-expense 0`
+    * `list-expenses yearly`
 
    Expected: An error message with the correct format is shown for each, and no
    expense is added or changed.

@@ -22,6 +22,7 @@ import seedu.duke.commands.UnknownCommand;
 import seedu.duke.expenses.ExpensesManager;
 import seedu.duke.food.FoodDirectory;
 import seedu.duke.ratings.RatingsManager;
+import seedu.duke.ui.MenuNavigator;
 
 /**
  * Checks that every command word reaches the right command.
@@ -31,7 +32,10 @@ public class ParserTest {
 
     @BeforeEach
     public void setUp() {
-        parser = new Parser(new RatingsManager(), new ExpensesManager(), new BudgetManager(), new FoodDirectory());
+        RatingsManager ratingsManager = new RatingsManager();
+        FoodDirectory foodDirectory = new FoodDirectory();
+        parser = new Parser(ratingsManager, new ExpensesManager(), new BudgetManager(), foodDirectory,
+                new MenuNavigator(foodDirectory, ratingsManager));
     }
 
     @Test

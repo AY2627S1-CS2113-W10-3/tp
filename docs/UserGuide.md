@@ -309,23 +309,22 @@ Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10
 ```
 
 **Not sure of a name?** End the command with `?`, or press `Tab`, and then
-press Enter. BudgetBite lists what you can type for the field you are on,
-keeping only names that contain what you have typed so far. Nothing is rated;
-type the full command afterwards.
+press Enter. BudgetBite shows the numbered options for the field you are on,
+and you carry on by number instead of retyping the command. If you have typed
+part of a name, only the matching options are shown, with their usual numbers.
 
 ```text
-rate /location ?
-Locations: PGPR, YIH, TECHNO EDGE, THE TERRACE, THE DECK, FRONTIER, FLAVOURS, FINE FOOD
-
 rate /location PGPR /stall ch ?
-Stalls in PGPR matching 'ch': Chicken Rice, Chef Wok
-
-rate /location PGPR /stall Chicken Rice /food ?
-Menu of Chicken Rice: Char Siew Rice, Roast Chicken Rice, Toufu Vegetable Rice Set
+Stalls in PGPR:
+2. Chicken Rice
+4. Chef Wok
+Enter a number to continue, or 'back'.
 ```
 
-Unlike a terminal, `Tab` does not fill in the name for you; you still need to
-press Enter to see the list.
+Entering `2` then shows the Chicken Rice menu, and from there it works like
+[rating a dish while browsing](#rate-a-dish-while-browsing). `rate ?` starts
+from the list of locations, `/food ?` from the stall's menu, and `/score ?` asks
+for the score straight away.
 
 Example of a name that is not found:
 

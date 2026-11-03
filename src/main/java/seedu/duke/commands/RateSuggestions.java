@@ -10,9 +10,10 @@ import seedu.duke.food.FoodCourt;
 import seedu.duke.food.FoodDirectory;
 import seedu.duke.food.FoodItem;
 import seedu.duke.food.FoodStall;
+import seedu.duke.ui.MenuNavigator;
 
 /**
- * Lists the valid names for the field being typed in a {@code rate} command,
+ * Shows the valid options for the field being typed in a {@code rate} command,
  * similar to pressing Tab in a terminal. The user ends the command with {@code ?}
  * (a Tab at the end of the line is turned into {@code ?} by {@code TextUi}), e.g.
  * <ul>
@@ -20,8 +21,9 @@ import seedu.duke.food.FoodStall;
  *     <li>{@code rate /location PGPR /stall ch?} lists the stalls in PGPR whose names contain "ch",</li>
  *     <li>{@code rate /location PGPR /stall Chicken Rice /food ?} lists that stall's menu.</li>
  * </ul>
- * The field being typed is the last one in the command. Nothing is rated; the user then
- * types the full command.
+ * The field being typed is the last one in the command. The options are shown as the numbered
+ * browsing lists of {@link MenuNavigator}, so the user can carry on by number instead of retyping
+ * the command: choose a stall, then a dish, then enter the score.
  */
 final class RateSuggestions {
     /** Ending a {@code rate} command with this asks for suggestions instead of rating. */
@@ -44,16 +46,18 @@ final class RateSuggestions {
     }
 
     /**
-     * Lists the valid names for the field being typed, keeping only those that contain
+     * Opens the numbered list for the field being typed, keeping only names that contain
      * the text typed so far, ignoring letter case.
      *
      * @param arguments     Text after the command word, ending with {@link #MARKER}.
      * @param foodDirectory Catalogue the names come from.
-     * @return The suggestions to show.
+     * @param navigator     Navigator the user continues in by number.
+     * @return The list or prompt to show.
      * @throws BudgetBiteException If an earlier field is missing or not in the catalogue,
      *                             e.g. a stall is asked for before a valid location is given.
      */
-    static String suggest(String arguments, FoodDirectory foodDirectory) throws BudgetBiteException {
+    static String suggest(String arguments, FoodDirectory foodDirectory, MenuNavigator navigator)
+            throws BudgetBiteException {
         assert isRequest(arguments) : "Only suggestion requests should be passed in";
         String typedSoFar = arguments.replaceAll(TRAILING_MARKERS_REGEX, "");
 
@@ -69,29 +73,29 @@ final class RateSuggestions {
 
         LinkedHashMap<String, String> fields = RateCommand.splitIntoFields(typedSoFar);
         if (fields.isEmpty()) {
-            return "Start with /location.\n"
-                    + listMatches("Locations", foodDirectory.getLocations(), FoodCourt::name, "");
+            return navigator.openLocations("");
         }
 
         Map.Entry<String, String> currentField = fields.lastEntry();
         String typedValue = currentField.getValue();
         return switch (currentField.getKey()) {
-        case "location" -> listMatches("Locations", foodDirectory.getLocations(), FoodCourt::name, typedValue);
-        case "stall" -> {
-            FoodCourt foodCourt = getEarlierFoodCourt(fields, foodDirectory);
-            yield listMatches("Stalls in " + foodCourt.name(), foodCourt.stalls(), FoodStall::name, typedValue);
-        }
+        case "location" -> navigator.openLocations(typedValue);
+        case "stall" -> navigator.openStalls(getEarlierFoodCourt(fields, foodDirectory), typedValue);
         case "food" -> {
-            FoodStall stall = getEarlierStall(fields, foodDirectory);
-            yield listMatches("Menu of " + stall.name(), stall.menu(), FoodItem::name, typedValue);
+            FoodCourt foodCourt = getEarlierFoodCourt(fields, foodDirectory);
+            yield navigator.openMenu(foodCourt, getEarlierStall(fields, foodCourt), typedValue);
         }
-        case "score" -> "Score: a number from 0 to 10 with at most 1 decimal place, e.g. 7.5";
+        case "score" -> {
+            FoodCourt foodCourt = getEarlierFoodCourt(fields, foodDirectory);
+            FoodStall stall = getEarlierStall(fields, foodCourt);
+            yield navigator.openRatingPrompt(foodCourt, stall, getEarlierItem(fields, stall));
+        }
         default -> throw new AssertionError("Unknown fields are rejected by splitIntoFields");
         };
     }
 
     /**
-     * Returns the food court given earlier in the command, which the stall and food suggestions need.
+     * Returns the food court given earlier in the command, which the later fields need.
      */
     private static FoodCourt getEarlierFoodCourt(Map<String, String> fields, FoodDirectory foodDirectory)
             throws BudgetBiteException {
@@ -103,17 +107,29 @@ final class RateSuggestions {
     }
 
     /**
-     * Returns the stall given earlier in the command, which the food suggestions need.
+     * Returns the stall given earlier in the command, which the food and score fields need.
      */
-    private static FoodStall getEarlierStall(Map<String, String> fields, FoodDirectory foodDirectory)
+    private static FoodStall getEarlierStall(Map<String, String> fields, FoodCourt foodCourt)
             throws BudgetBiteException {
-        FoodCourt foodCourt = getEarlierFoodCourt(fields, foodDirectory);
         String stall = fields.get("stall");
         if (stall == null || stall.isEmpty()) {
             throw new BudgetBiteException("Give /stall first, e.g. rate /location "
                     + foodCourt.name() + " /stall ?");
         }
         return RateCommand.findStall(foodCourt, stall);
+    }
+
+    /**
+     * Returns the dish given earlier in the command, which the score field needs.
+     */
+    private static FoodItem getEarlierItem(Map<String, String> fields, FoodStall stall)
+            throws BudgetBiteException {
+        String food = fields.get("food");
+        if (food == null || food.isEmpty()) {
+            throw new BudgetBiteException("Give /food first, e.g. rate /location ... /stall "
+                    + stall.name() + " /food ?");
+        }
+        return RateCommand.findItem(stall, food);
     }
 
     /**

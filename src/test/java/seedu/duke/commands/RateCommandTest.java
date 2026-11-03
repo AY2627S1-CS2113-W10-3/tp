@@ -1,6 +1,7 @@
 package seedu.duke.commands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import seedu.duke.food.FoodDirectory;
 import seedu.duke.ratings.Rating;
 import seedu.duke.ratings.RatingsManager;
+import seedu.duke.ui.MenuNavigator;
 
 /**
  * Tests the home-page {@code rate} command, which only accepts dishes from the food catalogue.
@@ -19,15 +21,17 @@ public class RateCommandTest {
 
     private RatingsManager ratingsManager;
     private FoodDirectory foodDirectory;
+    private MenuNavigator navigator;
 
     @BeforeEach
     public void setUp() {
         ratingsManager = new RatingsManager();
         foodDirectory = new FoodDirectory();
+        navigator = new MenuNavigator(foodDirectory, ratingsManager);
     }
 
     private String rate(String arguments) {
-        return new RateCommand(arguments, ratingsManager, foodDirectory).execute();
+        return new RateCommand(arguments, ratingsManager, foodDirectory, navigator).execute();
     }
 
     @Test
@@ -140,44 +144,57 @@ public class RateCommandTest {
         assertTrue(response.contains("Please provide /location, /stall, /food and /score."));
     }
 
-    // Suggestions: ending with ? lists the options for the field being typed, and rates nothing.
+    // Suggestions: ending with ? opens the numbered list for the field being typed, and rates nothing yet.
 
     @Test
-    public void suggest_nothingTyped_locationsListed() {
+    public void suggest_nothingTyped_numberedLocationsOpened() {
         String response = rate("?");
 
-        assertTrue(response.contains("Start with /location."));
-        assertTrue(response.contains("Locations: PGPR, YIH, TECHNO EDGE"));
+        assertTrue(response.contains("Available locations:\n1. PGPR\n2. YIH"));
+        assertTrue(response.contains("Enter a number to continue"));
+        assertTrue(navigator.isActive());
         assertTrue(ratingsManager.isEmpty());
     }
 
     @Test
     public void suggest_emptyLocation_allLocationsListed() {
-        assertTrue(rate("/location ?").startsWith("Locations: PGPR, YIH"));
+        assertTrue(rate("/location ?").contains("1. PGPR\n2. YIH"));
         // Also without a space before ?
-        assertTrue(rate("/location?").startsWith("Locations: PGPR, YIH"));
+        assertTrue(rate("/location?").contains("1. PGPR\n2. YIH"));
     }
 
     @Test
-    public void suggest_partOfStallName_matchingStallsListed() {
+    public void suggest_partOfStallName_matchesKeepTheirNumbers() {
         String response = rate("/location pgpr /stall ch ?");
 
-        assertEquals("Stalls in PGPR matching 'ch': Chicken Rice, Chef Wok", response);
+        assertEquals("Stalls in PGPR:\n2. Chicken Rice\n4. Chef Wok\nEnter a number to continue, or 'back'.",
+                response);
     }
 
     @Test
-    public void suggest_food_menuOfStallListed() {
+    public void suggest_stall_continueByNumberUntilRated() throws Exception {
+        rate("/location PGPR /stall ?");
+
+        assertTrue(navigator.handleInput("2").contains("Menu for Chicken Rice:"));
+        assertTrue(navigator.handleInput("2").contains("Rate Roast Chicken Rice"));
+        assertTrue(navigator.handleInput("8").contains("Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10"));
+        assertEquals(1, ratingsManager.getSize());
+    }
+
+    @Test
+    public void suggest_food_menuOpened() {
         String response = rate("/location PGPR /stall Chicken Rice /food ?");
 
-        assertEquals("Menu of Chicken Rice: Char Siew Rice, Roast Chicken Rice, Toufu Vegetable Rice Set",
-                response);
+        assertTrue(response.contains("Menu for Chicken Rice:\n1. Char Siew Rice - $3.30\n2. Roast Chicken Rice"));
+        assertTrue(navigator.isNavigationInput("2"));
     }
 
     @Test
     public void suggest_foodWordInMiddleOfName_found() {
         String response = rate("/location PGPR /stall Chicken Rice /food roast ?");
 
-        assertEquals("Menu of Chicken Rice matching 'roast': Roast Chicken Rice", response);
+        assertTrue(response.contains("2. Roast Chicken Rice - $3.30"));
+        assertFalse(response.contains("Char Siew Rice"));
     }
 
     @Test
@@ -185,7 +202,7 @@ public class RateCommandTest {
         String response = rate("/location PGPR /stall pizza ?");
 
         assertTrue(response.contains("No match for 'pizza'."));
-        assertTrue(response.contains("Stalls in PGPR: Vietnamese, Chicken Rice, PGP Western, Chef Wok"));
+        assertTrue(response.contains("1. Vietnamese\n2. Chicken Rice\n3. PGP Western\n4. Chef Wok"));
     }
 
     @Test
@@ -193,6 +210,7 @@ public class RateCommandTest {
         String response = rate("/stall ?");
 
         assertTrue(response.contains("Give /location first"));
+        assertFalse(navigator.isActive());
     }
 
     @Test
@@ -216,10 +234,11 @@ public class RateCommandTest {
     }
 
     @Test
-    public void suggest_score_rulesShown() {
+    public void suggest_scoreForKnownDish_promptOpenedAndRated() {
         String response = rate("/location PGPR /stall Vietnamese /food Beef Pho /score ?");
 
-        assertTrue(response.contains("Score: a number from 0 to 10"));
+        assertTrue(response.contains("Rate Beef Pho - $5.50 (Vietnamese, PGPR)"));
         assertTrue(ratingsManager.isEmpty());
+        assertTrue(navigator.handleInput("9").contains("Rated: Beef Pho (Vietnamese, PGPR) - 9.0/10"));
     }
 }

@@ -1,5 +1,8 @@
 package seedu.duke.ui;
 
+import java.util.List;
+import java.util.function.Function;
+
 import seedu.duke.commands.RateCommand;
 import seedu.duke.commands.RatingArguments;
 import seedu.duke.exceptions.BudgetBiteException;
@@ -18,6 +21,7 @@ import seedu.duke.ratings.RatingsManager;
 public class MenuNavigator {
 
     private static final String MESSAGE_SCORE_PROMPT = "Enter a score from 0 to 10, or 'back' to cancel:";
+    private static final String MESSAGE_CONTINUE = "\nEnter a number to continue, or 'back'.";
     /**
      * Input that looks like a score, e.g. 8, 7.5, -1 or 7.25. Invalid ones such as -1 are still
      * sent to the navigator, so the user gets a score error instead of "Unknown command".
@@ -182,9 +186,75 @@ public class MenuNavigator {
         selectedItem = selectedStall.menu().get(index - 1);
         stage = Stage.RATING_ITEM;
 
+        return showRatingPrompt();
+    }
+
+    private String showRatingPrompt() {
+        assert selectedItem != null : "A food item must be selected before asking for its score";
         return "Rate " + selectedItem.name() + " - $" + selectedItem.price()
                 + " (" + selectedStall.name() + ", " + selectedFoodCourt.name() + ")\n"
                 + MESSAGE_SCORE_PROMPT;
+    }
+
+    /**
+     * Opens the food court list, so the user can continue by number. Used by {@code rate ?}.
+     *
+     * @param filter text the names must contain, ignoring case, or an empty string for all
+     * @return the numbered food courts
+     */
+    public String openLocations(String filter) {
+        stage = Stage.SELECTING_LOCATION;
+        selectedFoodCourt = null;
+        selectedStall = null;
+        selectedItem = null;
+        return showFoodCourts(filter) + MESSAGE_CONTINUE;
+    }
+
+    /**
+     * Opens the stall list of a food court, e.g. for {@code rate /location PGPR /stall ?}.
+     *
+     * @param foodCourt food court whose stalls are listed
+     * @param filter    text the names must contain, ignoring case, or an empty string for all
+     * @return the numbered stalls
+     */
+    public String openStalls(FoodCourt foodCourt, String filter) {
+        assert foodCourt != null : "Food court should not be null";
+        stage = Stage.SELECTING_STALL;
+        selectedFoodCourt = foodCourt;
+        selectedStall = null;
+        selectedItem = null;
+        return showStalls(filter) + MESSAGE_CONTINUE;
+    }
+
+    /**
+     * Opens a stall's menu, e.g. for {@code rate /location PGPR /stall Chicken Rice /food ?}.
+     *
+     * @param foodCourt food court the stall is in
+     * @param stall     stall whose menu is listed
+     * @param filter    text the dish names must contain, ignoring case, or an empty string for all
+     * @return the numbered menu
+     */
+    public String openMenu(FoodCourt foodCourt, FoodStall stall, String filter) {
+        assert foodCourt != null && stall != null : "Food court and stall should not be null";
+        stage = Stage.SHOWING_MENU;
+        selectedFoodCourt = foodCourt;
+        selectedStall = stall;
+        selectedItem = null;
+        return showMenu(filter);
+    }
+
+    /**
+     * Asks for the score of a dish, e.g. for {@code rate /location PGPR /stall ... /food ... /score ?}.
+     *
+     * @return the prompt for the score
+     */
+    public String openRatingPrompt(FoodCourt foodCourt, FoodStall stall, FoodItem item) {
+        assert foodCourt != null && stall != null && item != null : "Dish to rate should not be null";
+        stage = Stage.RATING_ITEM;
+        selectedFoodCourt = foodCourt;
+        selectedStall = stall;
+        selectedItem = item;
+        return showRatingPrompt();
     }
 
     /**
@@ -238,55 +308,64 @@ public class MenuNavigator {
     }
 
     private String showFoodCourts() {
-        StringBuilder output = new StringBuilder("Available locations:");
+        return showFoodCourts("");
+    }
 
-        for (int index = 0;
-             index < foodDirectory.getLocations().size();
-             index++) {
-            output.append("\n")
-                    .append(index + 1)
-                    .append(". ")
-                    .append(foodDirectory.getLocations().get(index).name());
-        }
-
-        return output.toString();
+    private String showFoodCourts(String filter) {
+        return numberedList("Available locations:", foodDirectory.getLocations(),
+                FoodCourt::name, FoodCourt::name, filter);
     }
 
     private String showStalls() {
+        return showStalls("");
+    }
+
+    private String showStalls(String filter) {
         assert selectedFoodCourt != null : "A food court must be selected before showing stalls";
-        StringBuilder output =
-                new StringBuilder("Stalls in " + selectedFoodCourt.name() + ":");
-
-        for (int index = 0;
-             index < selectedFoodCourt.stalls().size();
-             index++) {
-            output.append("\n")
-                    .append(index + 1)
-                    .append(". ")
-                    .append(selectedFoodCourt.stalls().get(index).name());
-        }
-
-        return output.toString();
+        return numberedList("Stalls in " + selectedFoodCourt.name() + ":", selectedFoodCourt.stalls(),
+                FoodStall::name, FoodStall::name, filter);
     }
 
     private String showMenu() {
+        return showMenu("");
+    }
+
+    private String showMenu(String filter) {
         assert selectedStall != null : "A stall must be selected before showing its menu";
-        StringBuilder output =
-                new StringBuilder("Menu for " + selectedStall.name() + ":");
+        return numberedList("Menu for " + selectedStall.name() + ":", selectedStall.menu(),
+                FoodItem::name, item -> item.name() + " - $" + item.price(), filter)
+                + "\nEnter a food number to rate it, or 'back' to see the stalls.";
+    }
 
-        for (int index = 0;
-             index < selectedStall.menu().size();
-             index++) {
-            FoodItem item = selectedStall.menu().get(index);
-            output.append("\n")
-                    .append(index + 1)
-                    .append(". ")
-                    .append(item.name())
-                    .append(" - $")
-                    .append(item.price());
+    /**
+     * Lists the entries numbered from 1. If a filter is given, only entries whose names contain it,
+     * ignoring case, are listed, but they keep their original numbers so they can still be chosen.
+     * If nothing matches, every entry is listed after a "No match" line.
+     *
+     * @param title    first line, e.g. {@code "Stalls in PGPR:"}
+     * @param entries  food courts, stalls or dishes
+     * @param getName  gets the name the filter is matched against
+     * @param getLabel gets the text shown for an entry, e.g. a dish with its price
+     * @param filter   text typed by the user, or an empty string for all
+     */
+    private static <T> String numberedList(String title, List<T> entries, Function<T, String> getName,
+                                           Function<T, String> getLabel, String filter) {
+        String lowerCaseFilter = filter.trim().toLowerCase();
+        boolean hasMatch = entries.stream()
+                .anyMatch(entry -> getName.apply(entry).toLowerCase().contains(lowerCaseFilter));
+
+        StringBuilder output = new StringBuilder();
+        if (!hasMatch) {
+            output.append("No match for '").append(filter.trim()).append("'.\n");
         }
-
-        output.append("\nEnter a food number to rate it, or 'back' to see the stalls.");
+        output.append(title);
+        for (int index = 0; index < entries.size(); index++) {
+            T entry = entries.get(index);
+            boolean isShown = !hasMatch || getName.apply(entry).toLowerCase().contains(lowerCaseFilter);
+            if (isShown) {
+                output.append("\n").append(index + 1).append(". ").append(getLabel.apply(entry));
+            }
+        }
         return output.toString();
     }
 

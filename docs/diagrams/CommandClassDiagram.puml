@@ -35,4 +35,9 @@ Command <|-- BudgetCommand
 Command <|-- HelpCommand
 Command <|-- ByeCommand
 Command <|-- UnknownCommand
+
+class RateSuggestions <<utility>>
+RateCommand ..> FoodDirectory : checks names in
+RateCommand ..> RateSuggestions : ends with ?
+RateSuggestions ..> MenuNavigator : opens numbered list
 @enduml

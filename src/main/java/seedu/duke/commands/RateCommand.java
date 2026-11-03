@@ -12,6 +12,7 @@ import seedu.duke.food.FoodItem;
 import seedu.duke.food.FoodStall;
 import seedu.duke.ratings.Rating;
 import seedu.duke.ratings.RatingsManager;
+import seedu.duke.ui.MenuNavigator;
 
 /**
  * Rates a dish from the food catalogue, e.g.
@@ -20,9 +21,9 @@ import seedu.duke.ratings.RatingsManager;
  * a place BudgetBite does not know about. Names are matched ignoring letter case,
  * and the rating is saved with the names as they appear in the catalogue.
  *
- * <p>If the arguments end with {@code ?} (or Tab), the valid names for the field being typed
- * are shown instead, e.g. {@code rate /location PGPR /stall ?} lists the stalls in PGPR.
- * See {@link RateSuggestions}.</p>
+ * <p>If the arguments end with {@code ?} (or Tab), the numbered options for the field being typed
+ * are shown instead, e.g. {@code rate /location PGPR /stall ?} lists the stalls in PGPR, and the
+ * user continues by number. See {@link RateSuggestions}.</p>
  */
 public class RateCommand extends Command {
     public static final String COMMAND_WORD = "rate";
@@ -38,6 +39,7 @@ public class RateCommand extends Command {
     private final String arguments;
     private final RatingsManager ratingsManager;
     private final FoodDirectory foodDirectory;
+    private final MenuNavigator menuNavigator;
 
     /**
      * Creates the command with the text typed after {@code rate}.
@@ -45,20 +47,24 @@ public class RateCommand extends Command {
      * @param arguments      Text after the command word.
      * @param ratingsManager Manager the rating is added to.
      * @param foodDirectory  Catalogue the location, stall and food are checked against.
+     * @param menuNavigator  Navigator that {@code ?} opens, so the user can continue by number.
      */
-    public RateCommand(String arguments, RatingsManager ratingsManager, FoodDirectory foodDirectory) {
+    public RateCommand(String arguments, RatingsManager ratingsManager, FoodDirectory foodDirectory,
+                       MenuNavigator menuNavigator) {
         assert ratingsManager != null : "Ratings manager should not be null";
         assert foodDirectory != null : "Food directory should not be null";
+        assert menuNavigator != null : "Menu navigator should not be null";
         this.arguments = arguments == null ? "" : arguments.trim();
         this.ratingsManager = ratingsManager;
         this.foodDirectory = foodDirectory;
+        this.menuNavigator = menuNavigator;
     }
 
     @Override
     public String execute() {
         try {
             if (RateSuggestions.isRequest(arguments)) {
-                return RateSuggestions.suggest(arguments, foodDirectory);
+                return RateSuggestions.suggest(arguments, foodDirectory, menuNavigator);
             }
 
             Map<String, String> fields = parseFields();

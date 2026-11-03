@@ -15,7 +15,7 @@ activate B
 B -> P : parseCommand(input)
 activate P
 create ":RateCommand" as C
-P -> C : new RateCommand(arguments, ratingsManager, foodDirectory)
+P -> C : new RateCommand(arguments, ratingsManager, foodDirectory, menuNavigator)
 activate C
 C --> P
 deactivate C

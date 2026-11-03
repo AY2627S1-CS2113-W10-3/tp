@@ -405,16 +405,18 @@ is executed.
    loading the data file.
 
 If the arguments end with `?`, `RateCommand` passes them to `RateSuggestions`
-instead of rating. `TextUi#getUserCommand` turns a Tab at the end of a line into
-` ?`, so pressing Tab then Enter does the same. `RateSuggestions#suggest` splits
-the arguments with the same `RateCommand#splitIntoFields`, takes the last field
-typed as the one being completed, and lists the catalogue names at that level
-that contain the text typed so far, ignoring letter case. For example,
-`rate /location PGPR /stall ch ?` lists `Chicken Rice, Chef Wok`. Stall and food
-suggestions need the earlier fields, so they are looked up with the same
-`findFoodCourt` and `findStall` methods as a real rating, and give the same
-errors. If the last word is a partly typed field name, such as `/st`, the
-matching field names are listed instead.
+instead of rating. `TextUi#getUserCommand` turns a Tab at the end of a `rate`
+line into ` ?`, so pressing Tab then Enter does the same. `RateSuggestions#suggest`
+splits the arguments with the same `RateCommand#splitIntoFields`, takes the last
+field typed as the one being completed, and opens `MenuNavigator` at that step:
+`openLocations`, `openStalls`, `openMenu` or `openRatingPrompt`. The user then
+continues by number, exactly as when browsing, so the command never has to be
+retyped. Text typed so far is passed as a filter: only names containing it are
+listed, but they keep their original numbers, so the navigator's number handling
+needs no change. The earlier fields are looked up with the same `findFoodCourt`,
+`findStall` and `findItem` methods as a real rating, and give the same errors. If
+the last word is a partly typed field name, such as `/st`, the matching field
+names are listed instead.
 
 `edit-rating INDEX /score SCORE` uses `RatingArguments#splitAtScore` and
 `RatingArguments#parseScore` to read the new score, and
@@ -465,7 +467,8 @@ Invalid lines are skipped when the file is loaded.
   press Enter, to list the options.
     * Pros: Works with the plain `Scanner` input, the same on every operating
       system, in IDE consoles and in automated tests. No third-party library.
-    * Cons: Names are not filled in on the spot; the user retypes the command.
+    * Cons: Names are not filled in on the spot; instead the numbered list opens
+      so the user continues by number.
 * **Alternative 2:** Real Tab completion using a library such as JLine.
     * Pros: Works like a shell; Tab fills in the name immediately.
     * Cons: Java only receives a line after Enter unless the terminal is put in
@@ -1000,11 +1003,12 @@ ordering, payment, delivery, GPS directions, or real-time stock availability.
    Expected: An error message is shown for each, and no rating is added or
    changed.
 
-7. Enter `rate /location ?`, then `rate /location pgpr /stall ch` followed by
-   Tab and Enter, then `rate /location PGPR /stall Chicken Rice /food ?`.
+7. Enter `rate /location pgpr /stall ch` followed by Tab and Enter, then `2`,
+   then `2`, then `8`.
 
-   Expected: The food courts, then `Chicken Rice, Chef Wok`, then the Chicken
-   Rice menu are listed. No rating is added.
+   Expected: Only `2. Chicken Rice` and `4. Chef Wok` are listed, then the
+   Chicken Rice menu, then a request for a score, then
+   `Rated: Roast Chicken Rice (Chicken Rice, PGPR) - 8.0/10`.
 
 ### Tracking expenses
 

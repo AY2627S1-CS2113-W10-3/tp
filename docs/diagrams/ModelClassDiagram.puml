@@ -19,6 +19,7 @@ class Rating {
     -stall: String
     -food: String
     -score: float
+    +isSameDish(other: Rating): boolean
 }
 
 class ExpensesManager {

@@ -42,6 +42,7 @@ Parser .right.> Command : creates
 MenuNavigator -right-> FoodDirectory
 Command --> Model : reads and\nchanges data
 Command --> FoodDirectory : checks names
+Command ..> MenuNavigator : rate ? opens
 MenuNavigator --> Model : adds ratings
 StorageFile ..> Model : saves and loads
 StorageFile --> Data : reads/writes
